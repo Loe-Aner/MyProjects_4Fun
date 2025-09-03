@@ -1,13 +1,13 @@
 # Cześć, Dzień dobry :)
 
 To repo to moja przestrzeń do **dodatkowej praktyki, nauki i eksperymentów** — od wizualizacji, przez odpowiedzi na nurtujące mnie pytania, po rozwijanie umiejętności programistycznych.  
-Pracuję jako **Analityk Danych** i mega lubię się rozwijać: Python, SQL, DAX, Power BI, modelowanie danych.
+Pracuję jako **Analityk Danych** i mega lubię się rozwijać: Python, SQL, DAX, Power BI, modelowanie i wizualizowaniu danych.
 
 > **Cel:** pokazywać, jak myślę o problemach, uczyć się nowych narzędzi i metod, a przy okazji budować z czasem solidne portfolio zadań i mini-projektów.
 
 ---
 
-## 🔍 Zawartość repo
+## 🔍 Zawartość repozytorium
 
 - **Dashboards/**
   - **Fundusze Inwestycyjne** – analiza rentowności i ryzyka, integracja danych z plików oraz PDF; wizualizacje w Power BI.  
@@ -16,19 +16,19 @@ Pracuję jako **Analityk Danych** i mega lubię się rozwijać: Python, SQL, DAX
     `dashboards/premier-league-stats/`
 
 - **Code Challenges/**
-  - **Python** – krótkie zadania/ćwiczenia, EDA, algorytmy, utility funkcje.  
+  - **Python** – krótkie zadania/ćwiczenia, algorytmy, utility funkcje.  
     `code-challenges/python/`
-  - **SQL** – analizy i zapytania (window functions, CTE, agregacje, jakościowe porządki pod BI).  
+  - **SQL** – analizy i zapytania (okienka, CTE, agregacje, jakościowe porządki pod BI).  
     `code-challenges/sql/`
 
-- **DAX/** – przykładowe miary wykorzystywane w dashboardach znajdziesz je w każdym dashboardzie, w folderze o nazwie:
-  `Przykładowe miary w DAX/`
+- **DAX/** – przykładowe miary wykorzystywane w dashboardach (znajdziesz je w każdym raporcie, w folderze o nazwie:
+  `x. Przykładowe miary w DAX/`)
 
 ---
 
 ## 🧰 Technologie
 
-**Języki**: Python, SQL + DuckDB, DAX  
+**Języki**: Python, SQL + DuckDB (bardzo podobny do PostgreSQL), DAX  
 **BI & Wizualizacja**: Power BI  
 **Obsługa danych**: pandas (wkrótce polars!), CSV/XLSX, czasem PDF (parsowanie)  
 **Kontrola wersji**: Git + GitHub
