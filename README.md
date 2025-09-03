@@ -3,6 +3,17 @@
 To repo to moja przestrzeń do **dodatkowej praktyki, nauki i eksperymentów** — od wizualizacji, przez odpowiedzi na nurtujące mnie pytania, po rozwijanie umiejętności programistycznych.  
 Pracuję jako **Analityk Danych** i mega lubię się rozwijać: Python, SQL, DAX, Power BI, modelowanie i wizualizowaniu danych.
 
+---
+
+## ❗ WAŻNE
+
+To **nie są projekty prowadzone „za rękę”**, jak można spotkać na platformach typu DataCamp (zrób to, sprawdź to, itp.).  
+Dane **wyszukuję i zrzucam samodzielnie** (np. Kaggle, pliki źródłowe, PDF-y, API).  
+Po zapoznaniu się z nimi przechodzę do analizy i wizualizacji.  
+**Problemy i pytania badawcze wymyślam sam** – dzięki temu każdy projekt jest unikalny.
+
+---
+
 > **Cel:** pokazywać, jak myślę o problemach, uczyć się nowych narzędzi i metod, a przy okazji budować z czasem solidne portfolio zadań i mini-projektów.
 
 ---
@@ -28,10 +39,10 @@ Pracuję jako **Analityk Danych** i mega lubię się rozwijać: Python, SQL, DAX
 
 ## 🧰 Technologie
 
-**Języki**: Python, SQL + DuckDB (bardzo podobny do PostgreSQL), DAX  
-**BI & Wizualizacja**: Power BI  
-**Obsługa danych**: pandas (wkrótce polars!), CSV/XLSX, czasem PDF (parsowanie)  
-**Kontrola wersji**: Git + GitHub
+**Języki**: 🐍 Python, 🗃️ SQL + DuckDB (podobny do PostgreSQL)  
+**BI & Wizualizacja**: 📊 Power BI + DAX + PowerQuery (M)  
+**Obsługa danych**: 🐼 pandas (wkrótce ⚡ polars!), CSV/XLSX, czasem PDF (parsowanie)  
+**Kontrola wersji**: 🌿 Git + GitHub
 
 ---
 
