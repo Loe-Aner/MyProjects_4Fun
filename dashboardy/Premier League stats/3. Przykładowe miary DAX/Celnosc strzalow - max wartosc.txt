@@ -1,0 +1,10 @@
+CelnoscStrzalow_max_wartosc = 
+VAR maks_sezon = MAX( DimSezon[season] )
+VAR tbl = 
+FILTER(
+    ALL( DimSezon ),
+    DimSezon[season] <= maks_sezon &&
+    DimSezon[season] >= maks_sezon - 6
+)
+RETURN
+MAXX( tbl, CALCULATE( MAX ( pozostale_statystyki[celnosc_strzalow] ) ) )

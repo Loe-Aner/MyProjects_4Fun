@@ -1,0 +1,22 @@
+WITH tbl AS (
+SELECT
+  EXTRACT(MONTH from event_date) AS month,
+  user_id
+FROM user_actions),
+
+tbl_f AS (
+SELECT
+  t1.month,
+  t2.user_id AS u1,
+  t1.user_id AS u2
+FROM tbl AS t1
+INNER JOIN tbl AS t2
+  ON t1.month - 1 = t2.month
+ AND t1.user_id = t2.user_id)
+ 
+SELECT
+  month,
+  COUNT(DISTINCT u2) AS monthly_active_users
+FROM tbl_f
+WHERE month = 7
+GROUP BY month;

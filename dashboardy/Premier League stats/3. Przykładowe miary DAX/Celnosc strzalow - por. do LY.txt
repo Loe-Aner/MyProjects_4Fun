@@ -1,0 +1,18 @@
+CelnoscStrzalow_vs_LY_Season_Summary = 
+VAR maks_season = MAX ( DimSezon[season] )
+
+VAR latest_season =
+CALCULATE (
+    SUM ( pozostale_statystyki[celnosc_strzalow] ),
+    DimSezon[season] = maks_season
+)
+
+VAR prev_season =
+CALCULATE (
+    SUM ( pozostale_statystyki[celnosc_strzalow] ),
+    DimSezon[season] = maks_season - 1
+)
+
+VAR diff = latest_season - prev_season
+RETURN
+"🔄 Dynamika: "  & FORMAT ( diff * 100, "0.0" ) & " pp. vs LY"

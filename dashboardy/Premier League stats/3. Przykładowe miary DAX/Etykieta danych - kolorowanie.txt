@@ -1,0 +1,10 @@
+1. W formatowaniu warunkowym wykorzystuje 1 bądź 0
+
+CelnoscStrzalow_Kolor_EtykietyDanych = 
+VAR check = SUM( pozostale_statystyki[celnosc_strzalow] ) - [CelnoscStrzalow_avg_wykres]
+RETURN
+SWITCH(
+    TRUE(),
+    check > 0, 1,
+    0
+)

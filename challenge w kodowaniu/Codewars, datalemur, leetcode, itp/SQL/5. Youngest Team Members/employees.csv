@@ -1,0 +1,21 @@
+employee_id,full_name,team,birth_date
+101,Marta Zielińska,backend,1988-05-04
+112,Piotr Kowalski,backend,1992-10-11
+118,Agnieszka Nowak,backend,1995-01-20
+127,Omar Al-Sayed,backend,1997-07-02
+135,Kamil Nowak,backend,1999-11-23
+106,Julia Wójcik,frontend,1989-03-12
+109,Anna Garcia,frontend,1991-12-05
+121,Mikołaj Bąk,frontend,1996-06-18
+129,Sara Thompson,frontend,1997-08-25
+141,Leon Król,frontend,2000-07-12
+103,John Carter,devops,1985-02-14
+111,Magdalena Pawlak,devops,1990-09-09
+116,Ravi Patel,devops,1993-04-03
+128,Elena Petrova,devops,1996-12-30
+139,Jakub Mazur,devops,1998-09-30
+102,Katarzyna Lewandowska,design,1987-01-22
+110,Nina Müller,design,1992-03-17
+122,Carlos Ruiz,design,1994-11-05
+133,Łukasz Stępień,design,1999-02-27
+144,Aisha Khan,design,2001-03-14

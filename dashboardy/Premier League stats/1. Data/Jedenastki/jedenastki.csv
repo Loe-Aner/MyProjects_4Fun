@@ -1,0 +1,67 @@
+﻿Season,League,Team,Formation,Position_Code,Position_PL,Position_PL_Abbr,Player_Full,Player_Short
+2024/2025,Premier League,Manchester City,4-2-3-1,GK,Bramkarz,BR,Ederson,Ederson
+2024/2025,Premier League,Manchester City,4-2-3-1,RB,Prawy obrońca,PO,Kyle Walker,K. Walker
+2024/2025,Premier League,Manchester City,4-2-3-1,RCB,Prawy środkowy obrońca,PŚO,Rúben Dias,R. Dias
+2024/2025,Premier League,Manchester City,4-2-3-1,LCB,Lewy środkowy obrońca,LŚO,Joško Gvardiol,J. Gvardiol
+2024/2025,Premier League,Manchester City,4-2-3-1,LB,Lewy obrońca,LO,Nathan Aké,N. Aké
+2024/2025,Premier League,Manchester City,4-2-3-1,RDM,Prawy defensywny pomocnik,PDP,Rodri,Rodri
+2024/2025,Premier League,Manchester City,4-2-3-1,LDM,Lewy defensywny pomocnik,LDP,Mateo Kovačić,M. Kovačić
+2024/2025,Premier League,Manchester City,4-2-3-1,RW,Prawy skrzydłowy,PS,Phil Foden,P. Foden
+2024/2025,Premier League,Manchester City,4-2-3-1,CAM,Środkowy ofensywny pomocnik,ŚOP,Kevin De Bruyne,K. De Bruyne
+2024/2025,Premier League,Manchester City,4-2-3-1,LW,Lewy skrzydłowy,LS,Jérémy Doku,J. Doku
+2024/2025,Premier League,Manchester City,4-2-3-1,ST,Środkowy napastnik,ŚN,Erling Haaland,E. Haaland
+2024/2025,Premier League,Manchester United,4-2-3-1,GK,Bramkarz,BR,André Onana,A. Onana
+2024/2025,Premier League,Manchester United,4-2-3-1,RB,Prawy obrońca,PO,Diogo Dalot,D. Dalot
+2024/2025,Premier League,Manchester United,4-2-3-1,RCB,Prawy środkowy obrońca,PŚO,Harry Maguire,H. Maguire
+2024/2025,Premier League,Manchester United,4-2-3-1,LCB,Lewy środkowy obrońca,LŚO,Lisandro Martínez,L. Martínez
+2024/2025,Premier League,Manchester United,4-2-3-1,LB,Lewy obrońca,LO,Luke Shaw,L. Shaw
+2024/2025,Premier League,Manchester United,4-2-3-1,RDM,Prawy defensywny pomocnik,PDP,Casemiro,Casemiro
+2024/2025,Premier League,Manchester United,4-2-3-1,LDM,Lewy defensywny pomocnik,LDP,Kobbie Mainoo,K. Mainoo
+2024/2025,Premier League,Manchester United,4-2-3-1,RW,Prawy skrzydłowy,PS,Alejandro Garnacho,A. Garnacho
+2024/2025,Premier League,Manchester United,4-2-3-1,CAM,Środkowy ofensywny pomocnik,ŚOP,Bruno Fernandes,B. Fernandes
+2024/2025,Premier League,Manchester United,4-2-3-1,LW,Lewy skrzydłowy,LS,Marcus Rashford,M. Rashford
+2024/2025,Premier League,Manchester United,4-2-3-1,ST,Środkowy napastnik,ŚN,Rasmus Højlund,R. Højlund
+2024/2025,Premier League,Liverpool,4-2-3-1,GK,Bramkarz,BR,Alisson Becker,A. Becker
+2024/2025,Premier League,Liverpool,4-2-3-1,RB,Prawy obrońca,PO,Trent Alexander-Arnold,T. Alexander-Arnold
+2024/2025,Premier League,Liverpool,4-2-3-1,RCB,Prawy środkowy obrońca,PŚO,Ibrahima Konaté,I. Konaté
+2024/2025,Premier League,Liverpool,4-2-3-1,LCB,Lewy środkowy obrońca,LŚO,Virgil van Dijk,V. van Dijk
+2024/2025,Premier League,Liverpool,4-2-3-1,LB,Lewy obrońca,LO,Andrew Robertson,A. Robertson
+2024/2025,Premier League,Liverpool,4-2-3-1,RDM,Prawy defensywny pomocnik,PDP,Alexis Mac Allister,A. Mac Allister
+2024/2025,Premier League,Liverpool,4-2-3-1,LDM,Lewy defensywny pomocnik,LDP,Wataru Endo,W. Endo
+2024/2025,Premier League,Liverpool,4-2-3-1,RW,Prawy skrzydłowy,PS,Mohamed Salah,M. Salah
+2024/2025,Premier League,Liverpool,4-2-3-1,CAM,Środkowy ofensywny pomocnik,ŚOP,Dominik Szoboszlai,D. Szoboszlai
+2024/2025,Premier League,Liverpool,4-2-3-1,LW,Lewy skrzydłowy,LS,Luis Díaz,L. Díaz
+2024/2025,Premier League,Liverpool,4-2-3-1,ST,Środkowy napastnik,ŚN,Darwin Núñez,D. Núñez
+2024/2025,Premier League,Chelsea,4-2-3-1,GK,Bramkarz,BR,Robert Sánchez,R. Sánchez
+2024/2025,Premier League,Chelsea,4-2-3-1,RB,Prawy obrońca,PO,Malo Gusto,M. Gusto
+2024/2025,Premier League,Chelsea,4-2-3-1,RCB,Prawy środkowy obrońca,PŚO,Axel Disasi,A. Disasi
+2024/2025,Premier League,Chelsea,4-2-3-1,LCB,Lewy środkowy obrońca,LŚO,Levi Colwill,L. Colwill
+2024/2025,Premier League,Chelsea,4-2-3-1,LB,Lewy obrońca,LO,Marc Cucurella,M. Cucurella
+2024/2025,Premier League,Chelsea,4-2-3-1,RDM,Prawy defensywny pomocnik,PDP,Moisés Caicedo,M. Caicedo
+2024/2025,Premier League,Chelsea,4-2-3-1,LDM,Lewy defensywny pomocnik,LDP,Enzo Fernández,E. Fernández
+2024/2025,Premier League,Chelsea,4-2-3-1,RW,Prawy skrzydłowy,PS,Cole Palmer,C. Palmer
+2024/2025,Premier League,Chelsea,4-2-3-1,CAM,Środkowy ofensywny pomocnik,ŚOP,Christopher Nkunku,C. Nkunku
+2024/2025,Premier League,Chelsea,4-2-3-1,LW,Lewy skrzydłowy,LS,Raheem Sterling,R. Sterling
+2024/2025,Premier League,Chelsea,4-2-3-1,ST,Środkowy napastnik,ŚN,Nicolas Jackson,N. Jackson
+2024/2025,Premier League,Tottenham,4-2-3-1,GK,Bramkarz,BR,Guglielmo Vicario,G. Vicario
+2024/2025,Premier League,Tottenham,4-2-3-1,RB,Prawy obrońca,PO,Pedro Porro,P. Porro
+2024/2025,Premier League,Tottenham,4-2-3-1,RCB,Prawy środkowy obrońca,PŚO,Cristian Romero,C. Romero
+2024/2025,Premier League,Tottenham,4-2-3-1,LCB,Lewy środkowy obrońca,LŚO,Micky van de Ven,M. van de Ven
+2024/2025,Premier League,Tottenham,4-2-3-1,LB,Lewy obrońca,LO,Destiny Udogie,D. Udogie
+2024/2025,Premier League,Tottenham,4-2-3-1,RDM,Prawy defensywny pomocnik,PDP,Pape Matar Sarr,P. Matar Sarr
+2024/2025,Premier League,Tottenham,4-2-3-1,LDM,Lewy defensywny pomocnik,LDP,Yves Bissouma,Y. Bissouma
+2024/2025,Premier League,Tottenham,4-2-3-1,RW,Prawy skrzydłowy,PS,Dejan Kulusevski,D. Kulusevski
+2024/2025,Premier League,Tottenham,4-2-3-1,CAM,Środkowy ofensywny pomocnik,ŚOP,James Maddison,J. Maddison
+2024/2025,Premier League,Tottenham,4-2-3-1,LW,Lewy skrzydłowy,LS,Heung-min Son,H. Son
+2024/2025,Premier League,Tottenham,4-2-3-1,ST,Środkowy napastnik,ŚN,Richarlison,Richarlison
+2024/2025,Premier League,Arsenal,4-3-3,GK,Bramkarz,BR,David Raya,D. Raya
+2024/2025,Premier League,Arsenal,4-3-3,RB,Prawy obrońca,PO,Ben White,B. White
+2024/2025,Premier League,Arsenal,4-3-3,RCB,Prawy środkowy obrońca,PŚO,William Saliba,W. Saliba
+2024/2025,Premier League,Arsenal,4-3-3,LCB,Lewy środkowy obrońca,LŚO,Gabriel Magalhães,G. Magalhães
+2024/2025,Premier League,Arsenal,4-3-3,LB,Lewy obrońca,LO,Jakub Kiwior,J. Kiwior
+2024/2025,Premier League,Arsenal,4-3-3,DM,Defensywny pomocnik,DP,Declan Rice,D. Rice
+2024/2025,Premier League,Arsenal,4-3-3,RCM,Prawy środkowy pomocnik,PŚP,Martin Ødegaard,M. Ødegaard
+2024/2025,Premier League,Arsenal,4-3-3,LCM,Lewy środkowy pomocnik,LŚP,Jorginho,Jorginho
+2024/2025,Premier League,Arsenal,4-3-3,RW,Prawy skrzydłowy,PS,Bukayo Saka,B. Saka
+2024/2025,Premier League,Arsenal,4-3-3,ST,Środkowy napastnik,ŚN,Kai Havertz,K. Havertz
+2024/2025,Premier League,Arsenal,4-3-3,LW,Lewy skrzydłowy,LS,Gabriel Martinelli,G. Martinelli

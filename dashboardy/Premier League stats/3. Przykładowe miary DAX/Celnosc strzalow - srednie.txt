@@ -1,0 +1,20 @@
+========= 1. dostosowuje się do dat =========
+
+CelnoscStrzalow_avg = 
+VAR maks_sezon = MAX( DimSezon[season] )
+VAR tbl = 
+FILTER(
+    ALL( DimSezon ),
+    DimSezon[season] <= maks_sezon &&
+    DimSezon[season] >= maks_sezon - 6
+)
+RETURN
+AVERAGEX( tbl, CALCULATE( MAX ( pozostale_statystyki[celnosc_strzalow] ) ) )
+
+
+========= 2. Nie reaguje na daty, to jest ta linia prosta na wykresach =========
+CelnoscStrzalow_avg_wykres = 
+CALCULATE(
+    [CelnoscStrzalow_avg],
+    REMOVEFILTERS( DimSezon )
+)

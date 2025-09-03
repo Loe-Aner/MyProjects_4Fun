@@ -1,0 +1,12 @@
+========================= 6 MIESIECY =========================
+
+
+Odch_Std_StopZwrotu_6M_Dziennie = 
+STDEVX.S(
+    DATESINPERIOD( 
+        dimCalendar[Data],
+        MAX( dimCalendar[Data] ),
+        -6, MONTH
+    ),
+    [StopaZwrotu_1D]
+)

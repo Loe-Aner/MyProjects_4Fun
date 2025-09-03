@@ -1,0 +1,7 @@
+1. 1223 mln PLN @-@
+2. 50% WIG + 25% G0PL + 25% GFPL @-@
+3. Akcje 52,45%, Obligacje skarbowe o stałym % 34,74%, Obligacje nieskarbowe o zmiennym % 9,04%, Obligacje nieskarbowe o stałym % 5,46%, Obligacje skarbowe o zmiennym % 0,08%, Inne (m.in. instrumenty pochodne, depozyty zabezpieczające) -0,51%, Gotówka i lokaty skorygowane o saldo należności i zobowiązań -1,27% @-@
+4. Polska 89,83%, Luksemburg 3,76%, Węgry 2,62%, Austria 1,36%, Francja 0,71%, Hiszpania 0,31%, Dania 0,28%, Portugalia 0,25%, Holandia 0,24%, Stany Zjednoczone 0,23% @-@
+5. PS0729 7,46%, Futures/Euro-Bobl Index 6,67%, WS0429 5,17%, DS1033 5,16%, Powszechna Kasa Oszczędności Bank Polski S.A. 3,78%, Orlen S.A. 2,84%, Powszechny Zakład Ubezpieczeń S.A. 2,65%, PS0527 2,56%, DS1034 2,44%, Alior Bank S.A. 2,31% @-@
+6. Finanse 20,75%, Technologia i Media 6,70%, Spółki konsumenckie 5,12%, Spółki przemysłowe 4,82%, Dobra codziennego użytku 4,80%, Energia 3,72%, Surowce 2,78%, Telekomunikacja 1,64%, Zdrowie 1,60%, Spółki użyteczności publicznej 0,54%, Składniki portfela inne niż akcje 47,55% @-@
+7. PLN 89,29%, EUR 8,07%, HUF 1,89%, USD 0,30%, Inne 0,46% @-@

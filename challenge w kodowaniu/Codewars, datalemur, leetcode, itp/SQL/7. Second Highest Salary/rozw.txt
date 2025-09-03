@@ -1,0 +1,10 @@
+WITH tbl AS (SELECT
+  ROW_NUMBER() OVER w AS sal_rank,
+  salary
+FROM employee
+WINDOW w AS (ORDER BY salary DESC)
+)
+
+SELECT salary
+FROM tbl 
+WHERE sal_rank = 2;

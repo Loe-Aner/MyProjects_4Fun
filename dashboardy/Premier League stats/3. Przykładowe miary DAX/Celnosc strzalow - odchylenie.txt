@@ -1,0 +1,16 @@
+CelnoscStrzalow_std_Summary = 
+VAR max_sezon = MAX ( DimSezon[season] )
+VAR min_sezon = max_sezon - 6
+VAR tbl =
+    FILTER (
+        ALL ( DimSezon[season] ),
+        DimSezon[season] >= min_sezon &&
+        DimSezon[season] <= max_sezon
+    )
+VAR Std_pp =
+    STDEVX.P (
+        tbl,
+        CALCULATE( SUM( pozostale_statystyki[celnosc_strzalow]) )
+    ) * 100
+RETURN
+"📏 Zmienność: " & FORMAT ( Std_pp, "0.0" ) & " pp."

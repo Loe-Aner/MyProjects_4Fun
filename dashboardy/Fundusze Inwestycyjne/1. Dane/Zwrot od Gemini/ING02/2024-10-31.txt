@@ -1,0 +1,7 @@
+1. 1175 mln PLN @-@
+2. 50% WIG + 25% G0PL + 25% GFPL @-@
+3. Akcje 54,05%, Obligacje skarbowe o stałym % 49,35%, Inne (m.in. instrumenty pochodne, depozyty zabezpieczające) 18,66%, Obligacje nieskarbowe o zmiennym % 9,60%, Obligacje nieskarbowe o stałym % 5,85%, Gotówka i lokaty skorygowane o saldo należności i zobowiązań -37,52% @-@
+4. Polska 90,71%, Luksemburg 3,34%, Węgry 2,42%, Austria 0,99%, Francja 0,65%, Niemcy 0,46%, Hiszpania 0,25%, Portugalia 0,24%, Dania 0,21%, Holandia 0,20% @-@
+5. Futures/Euro-Schatz Index 16,54%, DS1034 7,63%, DS1033 5,67%, WS0429 5,63%, PS0729 5,44%, DS0432 3,73%, Powszechna Kasa Oszczędności Bank Polski S.A. 3,50%, PS0527 2,76%, Powszechny Zakład Ubezpieczeń S.A. 2,42%, Orlen S.A. 2,42% @-@
+6. Finanse 21,50%, Technologia i Media 5,92%, Spółki konsumenckie 5,80%, Dobra codziennego użytku 5,49%, Spółki przemysłowe 4,56%, Surowce 3,30%, Energia 3,19%, Zdrowie 1,59%, Telekomunikacja 1,48%, Spółki użyteczności publicznej 1,23%, Składniki portfela inne niż akcje 45,95% @-@
+7. PLN 90,33%, EUR 6,52%, HUF 2,10%, USD 0,60%, Inne 0,44% @-@

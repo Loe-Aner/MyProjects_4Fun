@@ -1,0 +1,7 @@
+1. 139,2 mln PLN @-@
+2. Brak @-@
+3. Akcje 93,7, Fundusze 1,6, Instrumenty pochodne 0,8, Gotówka 3,9 @-@
+4. USA 82,0, Chiny 6,4, Australia 2,8, Tajwan 2,7, Singapur 1,8, Kanada 1,5, Wlk. Brytania 1,4, Francja 1,0, Holandia 0,5 @-@
+5. NVIDIA CORP 8,1, BROADCOM INC 5,5, ELI LILLY & CO 5,2, META PLATFORMS INC-CLASS A 4,0, SALESFORCE INC 3,9, MICROSOFT CORP 3,6, TESLA INC 3,2, APPLE INC 3,1, ALIBABA GROUP HOLDING LIMITED 2,8, CONSTELLATION ENERGY 2,7 @-@
+6. Sektor informatyczny 50,0, Dobra luksusowe 13,1, Sektor finansowy 12,5, Ochrona zdrowia 11,0, Komunikacja elektroniczna 7,1, Sektor przemysłowy 3,4, Sektor dóbr pożytku publicznego 2,9 @-@
+7. Brak @-@

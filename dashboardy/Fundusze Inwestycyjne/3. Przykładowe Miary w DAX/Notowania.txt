@@ -1,0 +1,79 @@
+========================= NAJNOWSZE =========================
+
+Notowanie_Last_ACT = 
+VAR maxData = MAX( dimCalendar[Data] )
+RETURN
+CALCULATE(
+    SUM( dane[Zamkniecie] ),
+    dimCalendar[Data] = maxData
+)
+
+
+========================= YTD =========================
+
+Notowanie_Beginning_YTD = 
+VAR currentYear = YEAR( MAX(dimCalendar[Data]) )
+VAR minData = DATE(currentYear, 1, 1)
+VAR actualPrice =
+  CALCULATE(
+    SUM( dane[Zamkniecie] ),
+    dimCalendar[Data] = minData
+  )
+VAR beginningDate =
+  CALCULATE(
+    LASTNONBLANK( dimCalendar[Data], SUM( dane[Zamkniecie] ) ),
+    DATESINPERIOD( dimCalendar[Data], minData, -20, DAY )
+  )
+RETURN
+COALESCE(
+  actualPrice,
+  CALCULATE( SUM( dane[Zamkniecie] ), dimCalendar[Data] = beginningDate )
+)
+
+
+========================= 6 MIESIECY =========================
+
+Notowanie_Last_6M = 
+VAR maxDate = MAX( dimCalendar[Data] )
+VAR compareDate = EDATE( maxDate, -6 )
+VAR directPrice =
+  CALCULATE(
+    SUM( dane[Zamkniecie] ),
+    dimCalendar[Data] = compareDate
+  )
+VAR fallbackDate =
+  CALCULATE(
+    LASTNONBLANK( dimCalendar[Data], SUM( dane[Zamkniecie] ) ),
+    DATESINPERIOD( dimCalendar[Data], compareDate, -20, DAY )
+  )
+RETURN
+COALESCE(
+  directPrice,
+  CALCULATE( SUM( dane[Zamkniecie] ), dimCalendar[Data] = fallbackDate )
+)
+
+
+========================= 2 LATA =========================
+
+Notowanie_Last_2Y = 
+VAR maxDate = MAX( dimCalendar[Data] )
+VAR compareDate = EDATE( maxDate, -12 * 2 )
+VAR directPrice =
+  CALCULATE(
+    SUM( dane[Zamkniecie] ),
+    dimCalendar[Data] = compareDate
+  )
+VAR fallbackDate =
+  CALCULATE(
+    LASTNONBLANK( dimCalendar[Data], SUM( dane[Zamkniecie] ) ),
+    DATESINPERIOD( dimCalendar[Data], compareDate, -20, DAY )
+  )
+RETURN
+COALESCE(
+  directPrice,
+  CALCULATE( SUM( dane[Zamkniecie] ), dimCalendar[Data] = fallbackDate )
+)
+
+
+
+

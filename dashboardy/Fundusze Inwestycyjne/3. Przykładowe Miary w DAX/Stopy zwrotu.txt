@@ -1,0 +1,15 @@
+========================= 6 MIESIECY =========================
+
+
+PRZYKLAD LICZENIA NOTOWAN W PLIKU: Notowania
+
+
+StopaZwrotu_6M = 
+VAR result = DIVIDE( [Notowanie_Last_ACT], [Notowanie_Last_6M] ) - 1
+RETURN
+SWITCH(
+    TRUE(),
+    ISBLANK( result ), BLANK(),
+    result = -1, BLANK(),
+    result
+)
