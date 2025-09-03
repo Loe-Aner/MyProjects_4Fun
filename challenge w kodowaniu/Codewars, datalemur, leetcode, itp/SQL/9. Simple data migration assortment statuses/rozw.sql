@@ -30,7 +30,7 @@ rnk AS (
       ORDER BY c.cnt DESC, st.priority ASC
     ) AS rn
   FROM cnt AS c
-  JOIN statuses AS st
+  INNER JOIN statuses AS st
     ON st.id = c.status_id
 )
 INSERT INTO product_cluster_statuses (product_id, cluster_id, status_id)
