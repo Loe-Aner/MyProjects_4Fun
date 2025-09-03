@@ -9,7 +9,7 @@ WITH src AS (
             '.csv', ''
         ) AS Team
     FROM read_csv(
-        'C:/Users/piotr/OneDrive/_Programowanie - aplikacje/Power BI/Premier League stats/Data/*.csv',
+        'abc/*.csv',
         AUTO_DETECT = TRUE,
         HEADER = TRUE,
         HIVE_PARTITIONING = TRUE,
