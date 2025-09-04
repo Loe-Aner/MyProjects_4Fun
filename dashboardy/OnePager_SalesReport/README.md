@@ -10,7 +10,7 @@ Zaprojektowany tak, aby **na jednym raporcie** zobaczyć kluczowe KPI i szybko o
 - Szybka **ocena realizacji targetów** sprzedażowych i marżowych (ACT vs BDG, ACT vs YTD).  
 - Wskazanie **kontrybutorów wzrostu/spadku** (TopN po kategoriach).  
 - Podgląd **trendów M/M**: ewolucja sprzedaży i marży oraz **Margin%**.  
-- Łatwe **przekroje po miesiącu i kategorii** dzięki filtratorom/parametrom na górze raportu.  
+- Łatwe **przekroje po miesiącu i kategorii** dzięki parametrom na górze raportu.  
 
 ---
 

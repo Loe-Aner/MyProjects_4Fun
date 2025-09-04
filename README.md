@@ -5,12 +5,20 @@ Pracuję jako **Analityk Danych** i mega lubię się rozwijać w: Python, SQL, D
 
 ---
 
-## ❗ WAŻNE
+## 🚀 O projektach
 
-To **nie są projekty prowadzone „za rękę”**, jak można spotkać na platformach typu DataCamp (zrób to, sprawdź to, itp.).  
-Dane **wyszukuję i zrzucam samodzielnie** (np. Kaggle, pliki źródłowe, PDF-y, API).  
-Po zapoznaniu się z nimi przechodzę do analizy i wizualizacji.  
-**Problemy i pytania badawcze wymyślam sam** – dzięki temu każdy projekt jest unikalny.
+Moje projekty są prowadzone **end-to-end**:  
+- 📥 **Pozyskiwanie danych** – API, Kaggle, pliki źródłowe, PDF-y  
+- 🔧 **Przygotowanie i modelowanie** – czyszczenie, transformacje, budowa modeli danych  
+- 📊 **Analiza i wizualizacja** – Power BI, SQL, Python  
+
+Każdy projekt zaczyna się od **pytania biznesowego/badawczego**,  
+dlatego rozwiązania są **unikalne i nastawione na efekt**.  
+
+Repo zawiera:  
+- 💻 kod,  
+- 📝 notatki,  
+- 📑 krótkie omówienia wyników.  
 
 ---
 
@@ -39,10 +47,10 @@ Po zapoznaniu się z nimi przechodzę do analizy i wizualizacji.
 
 ## 🧰 Technologie
 
-**Języki**: 🐍 Python, 🗃️ SQL + DuckDB (podobny do PostgreSQL)  
-**BI & Wizualizacja**: 📊 Power BI + DAX + PowerQuery (M) 
+**Języki**: 🐍 Python, 🗃️ SQL + DuckDB (podobny do PostgreSQL)     
+**BI & Wizualizacja**: 📊 Power BI + DAX + PowerQuery (M)   
 **Obsługa danych**: 🐼 pandas (wkrótce ⚡ polars!), CSV/XLSX, czasem PDF (parsowanie)  
-**Kontrola wersji**: 🌿 Git + GitHub
+**Kontrola wersji**: 🌿 Git + GitHub  
 
 ---
 
@@ -55,5 +63,5 @@ Po zapoznaniu się z nimi przechodzę do analizy i wizualizacji.
 
 ## 🙌 Kontakt
 
-Jeśli masz uwagi, pytania albo chcesz podrzucić ciekawy pomysł - śmiało otwórz **Issue** lub napisz komentarz w dyskusji. Ja sam tam coś powrzucam, by nie zapomnieć :)
+Jeśli masz uwagi, pytania albo chcesz podrzucić ciekawy pomysł - śmiało otwórz **Issue** lub napisz komentarz w dyskusji. Ja sam tam coś powrzucam, by nie zapomnieć :)  
 Dzięki za odwiedziny i miłego przeglądania!
