@@ -1,0 +1,6 @@
+Tool Tip = 
+VAR Txt = IF( ([SelectedMeasure] - [SelectedMeasureBDG]) >=0, "Surplus ","Deficit ")
+RETURN
+    "Sales " & FORMAT([SelectedMeasure],"0,0") & UNICHAR(10) &  
+    "Target " & FORMAT([SelectedMeasureBDG],"0,0") & UNICHAR(10) & 
+    Txt & FORMAT([SelectedMeasure] - [SelectedMeasureBDG], "0,0;(0,0)")

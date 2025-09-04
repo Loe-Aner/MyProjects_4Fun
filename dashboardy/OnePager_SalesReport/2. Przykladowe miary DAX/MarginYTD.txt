@@ -1,0 +1,2 @@
+MarginYTD = 
+CALCULATE( [Margin Amount], DATESYTD(DatesDim[DateKey]) )

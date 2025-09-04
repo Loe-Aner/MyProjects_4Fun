@@ -1,0 +1,6 @@
+TopN = 
+CALCULATE( [SelectedMeasure], 
+   KEEPFILTERS( 
+    TOPN([TopN Num Value], 
+    ALLSELECTED( CategoryDim[CategoryName]), 
+    [SelectedMeasure],DESC) ))

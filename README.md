@@ -1,7 +1,7 @@
 # Cześć, Dzień dobry :)
 
 To repo to moja przestrzeń do **dodatkowej praktyki, nauki i eksperymentów** — od wizualizacji, przez odpowiedzi na nurtujące mnie pytania, po rozwijanie umiejętności programistycznych.  
-Pracuję jako **Analityk Danych** i mega lubię się rozwijać: Python, SQL, DAX, Power BI, modelowanie i wizualizowaniu danych.
+Pracuję jako **Analityk Danych** i mega lubię się rozwijać w: Python, SQL, DAX, Power BI, modelowaniu i wizualizacji danych.
 
 ---
 
@@ -14,7 +14,7 @@ Po zapoznaniu się z nimi przechodzę do analizy i wizualizacji.
 
 ---
 
-> **Cel:** pokazywać, jak myślę o problemach, uczyć się nowych narzędzi i metod, a przy okazji budować z czasem solidne portfolio zadań i mini-projektów.
+> **Cel:** pokazywać, jak myślę o problemach, uczyć się nowych narzędzi i metod, rozwijać myślenie, a przy okazji budować z czasem solidne portfolio zadań i mini-projektów.
 
 ---
 
@@ -27,7 +27,7 @@ Po zapoznaniu się z nimi przechodzę do analizy i wizualizacji.
     `dashboards/premier-league-stats/`
 
 - **Code Challenges/**
-  - **Python** – krótkie zadania/ćwiczenia, algorytmy, utility funkcje.  
+  - **Python** – krótkie zadania/ćwiczenia, algorytmy.  
     `code-challenges/python/`
   - **SQL** – analizy i zapytania (okienka, CTE, agregacje, jakościowe porządki pod BI).  
     `code-challenges/sql/`
@@ -40,7 +40,7 @@ Po zapoznaniu się z nimi przechodzę do analizy i wizualizacji.
 ## 🧰 Technologie
 
 **Języki**: 🐍 Python, 🗃️ SQL + DuckDB (podobny do PostgreSQL)  
-**BI & Wizualizacja**: 📊 Power BI + DAX + PowerQuery (M)  
+**BI & Wizualizacja**: 📊 Power BI + DAX + PowerQuery (M) 
 **Obsługa danych**: 🐼 pandas (wkrótce ⚡ polars!), CSV/XLSX, czasem PDF (parsowanie)  
 **Kontrola wersji**: 🌿 Git + GitHub
 

@@ -1,0 +1,5 @@
+AvgSales = 
+AVERAGEX( 
+    VALUES( CountryDim[Country] ),
+    CALCULATE( [SelectedMeasure] )
+    )

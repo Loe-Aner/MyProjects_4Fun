@@ -1,0 +1,11 @@
+Colour Format Rev = 
+VAR Var_1 = [NetSales]
+VAR Var_2 = [AvgSalesDates]
+VAR Result = 
+SWITCH(
+    TRUE(),
+    Var_1 >= Var_2, "#70BBFF",
+    Var_1 < Var_2, "#F497A0"
+)
+RETURN
+Result
