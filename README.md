@@ -33,6 +33,8 @@ Repo zawiera:
     `dashboards/fundusze-inwestycyjne/`
   - **Premier League – Top 6** – najważniejsze informacje i statystyki klubów na bazie datasetu z Kaggle; przykłady składów, formacji i metryk meczowych.  
     `dashboards/premier-league-stats/`
+  - **Sales Report - OnePager** – prosty raporcik, w którym przedstawiam najważniejsze mierniki z ewolucją geograficzną oraz okresową.  
+    `dashboards/one-pager-report-sales/`  
 
 - **Code Challenges/**
   - **Python** – krótkie zadania/ćwiczenia, algorytmy.  
