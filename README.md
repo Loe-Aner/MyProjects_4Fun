@@ -22,10 +22,6 @@ Repo zawiera:
 
 ---
 
-> **Cel:** pokazywać, jak myślę o problemach, uczyć się nowych narzędzi i metod, rozwijać myślenie, a przy okazji budować z czasem solidne portfolio zadań i mini-projektów.
-
----
-
 ## 🔍 Zawartość repozytorium
 
 - **Dashboards/**
