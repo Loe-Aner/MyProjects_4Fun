@@ -1,0 +1,9 @@
+SELECT
+  p.pokemon_name,
+  m.multiplier * p.str AS modifiedStrength,
+  m.element
+FROM pokemon AS p
+INNER JOIN multipliers AS m
+  ON p.element_id = m.id
+WHERE m.multiplier * p.str >= 40
+ORDER BY modifiedStrength DESC;
