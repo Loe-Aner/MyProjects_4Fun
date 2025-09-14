@@ -1,6 +1,6 @@
 WITH course_bookings AS (
   SELECT *
-  FROM read_csv('D:\MyProjects_4Fun\code_challenges\SQL\Tracking Active Bookings Over Time\sample.csv')
+  FROM read_csv('abc\sample.csv')
 ),
 
 dts AS (
