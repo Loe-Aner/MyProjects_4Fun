@@ -1,0 +1,26 @@
+WITH agg_tbl AS (
+SELECT
+  category,
+  product,
+  sum(spend) AS spend
+FROM product_spend
+WHERE date_part('year', transaction_date) = 2022
+GROUP BY category, product
+),
+
+rank_tbl AS (
+SELECT
+  category,
+  product,
+  spend,
+  dense_rank() OVER w AS rnk
+FROM agg_tbl
+WINDOW w AS (PARTITION BY category ORDER BY spend DESC)
+  )
+  
+SELECT
+  category,
+  product,
+  spend
+FROM rank_tbl
+WHERE rnk <= 2;
