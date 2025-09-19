@@ -1,0 +1,22 @@
+WITH tbl_1 AS (
+SELECT
+  date_part('year', transaction_date) AS year,
+  product_id,
+  spend AS curr_year_spend
+FROM user_transactions
+),
+
+tbl_2 AS (
+SELECT
+  *,
+  LAG(curr_year_spend) OVER (
+    PARTITION BY product_id
+    ORDER BY year ASC
+    ) AS prev_year_spend
+FROM tbl_1
+)
+
+SELECT
+  *,
+  ROUND((curr_year_spend / prev_year_spend - 1) * 100, 2) AS yoy_rate
+FROM tbl_2

@@ -1,0 +1,12 @@
+WITH tbl AS (
+SELECT
+  e.user_id,
+  t.signup_action
+FROM emails AS e 
+INNER JOIN texts AS t 
+  USING(email_id)
+  )
+  
+SELECT 
+  ROUND(COUNT(*) FILTER (WHERE signup_action = 'Confirmed') * 1.0 / COUNT(*), 2)
+FROM tbl;
