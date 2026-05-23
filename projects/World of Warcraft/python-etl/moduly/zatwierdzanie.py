@@ -330,11 +330,13 @@ def stworz_excele_do_recznych_tlumaczen(silnik, kraina = None, fabula = None, do
     warunki_sql = sklej_warunki_w_WHERE(kraina, fabula, dodatek)
 
     q_select_misje_id = text(f"""
-        SELECT m.MISJA_ID_MOJE_PK
+        SELECT DISTINCT m.MISJA_ID_MOJE_PK
         FROM dbo.MISJE AS m
+        INNER JOIN dbo.ARCHIWUM_MISJE_DIALOGI AS amd
+          ON m.MISJA_ID_Z_GRY = amd.MISJA_ID_Z_GRY
         WHERE 1=1
           AND m.MISJA_ID_MOJE_PK <> 123456789
-          AND m.WSKAZNIK_ZGODNOSCI > 0.70000
+          AND (m.WSKAZNIK_ZGODNOSCI > 0.70000 OR m.WSKAZNIK_ZGODNOSCI IS NULL)
           AND (m.STATUS_MISJI IS NULL OR m.STATUS_MISJI <> 3)
 
         {warunki_sql}
@@ -586,6 +588,15 @@ def zatwierdz_tlumaczenia(silnik, sciezka):
         .assign(HASH_EN=lambda x: x["TRESC"].apply(generuj_hash_djb2))
     )
 
+    df_tytul_pl = (
+        df.loc[
+            (df["SEGMENT"] == "TYTUL") & (df["STATUS"] == "3_ZATWIERDZONO"),
+            ["MISJA_ID", "TRESC"]
+        ]
+        .dropna(subset=["TRESC"])
+        .drop_duplicates(subset=["MISJA_ID"])
+    )
+
     df_zatw = (
         df
         [tylko_zatwierdzone]
@@ -680,6 +691,21 @@ def zatwierdz_tlumaczenia(silnik, sciezka):
 
             if parametry_hash:
                 conn.execute(q_update_hash_tytul, parametry_hash)
+
+            q_update_tytul = text("""
+                UPDATE dbo.MISJE
+                SET MISJA_TYTUL_PL = :tytul_pl
+                WHERE MISJA_ID_MOJE_PK = :misja_id
+            """)
+
+            parametry_tytul = [
+                {"misja_id": int(w["MISJA_ID"]), "tytul_pl": w["TRESC"]}
+                for w in df_tytul_pl.loc[df_tytul_pl["MISJA_ID"].isin(misje_id), ["MISJA_ID", "TRESC"]].to_dict("records")
+                if w["TRESC"] is not None
+            ]
+
+            if parametry_tytul:
+                conn.execute(q_update_tytul, parametry_tytul)
 
     except IntegrityError as e:
         print(f"--- BŁĄD integralności danych przy misjach: {e}")

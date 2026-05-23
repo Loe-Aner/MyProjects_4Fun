@@ -9,6 +9,7 @@ silnik = utworz_engine_do_db()
 # ZMIAN JEST MALO, DLATEGO RECZNIE TO TLUMACZE
 stworz_excele_do_recznych_tlumaczen(
     silnik,
-    fabula="The Path of Light",
-    sciezka=sciezka_excel_zatwierdzenia("The Path of Light_RECZNE.xlsx")
+    fabula="Ripple Effects",
+    dodatek="Midnight",
+    sciezka=sciezka_excel_zatwierdzenia("Ripple Effects_RECZNE.xlsx")
 )
