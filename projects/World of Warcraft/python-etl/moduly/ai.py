@@ -11,7 +11,6 @@ from sqlalchemy import text, bindparam
 import pandas as pd
 
 from moduly.services_persist_wynik import (
-    przefiltruj_dane_misji, 
     save_quests_dialogues_to_db
 )
 from moduly.ai_prompty import (
@@ -21,6 +20,9 @@ from moduly.ai_prompty import (
     instrukcja_dane_npc_stala,
     instrukcja_dane_npc_zmienna
 )
+
+from moduly.ai_prompty_RAG import get_questions_lore
+
 from moduly.ai_core import (
     MODEL_GEMINI_POZOSTALE,
     MODEL_GEMINI_POMOCNICZY,
@@ -36,7 +38,8 @@ from moduly.ai_prompty_misje import (
 )
 from moduly.ai_modele import (
     llm_translator,
-    llm_editor
+    llm_editor,
+    llm_lore
 )
 from moduly.ai_logi import (
     create_logs,
@@ -44,10 +47,7 @@ from moduly.ai_logi import (
 )
 
 from moduly.sciezki import sciezka_excel_mappingi
-from scraper_wiki_main import parsuj_misje_z_url
-from moduly.utils import sklej_warunki_w_WHERE
-import zlib
-import base64
+from moduly.utils import hash_do_wsad_json, sklej_warunki_w_WHERE
 
 def pobierz_przetworz_zapisz_batch_lista(
         silnik, 
@@ -312,20 +312,16 @@ def przetworz_pojedyncza_misje(
                 print(f"SKIP [ID: {misja_id}] - Brak danych.")
                 return
 
-            skompresowane_bajty = base64.b64decode(zakodowane_dane)
-            tekst_html = zlib.decompress(skompresowane_bajty).decode("utf-8")
-            surowe_dane = parsuj_misje_z_url(url=None, html_content=tekst_html)
-            przetworzone_dane = przefiltruj_dane_misji(dane_wejsciowe=surowe_dane, jezyk="EN")
-
             wsad_npc = set(n for n in npc_z_bazy)
             wsad_sk = set(s for s in slowa_kluczowe_z_bazy)
-            wsad_json = json.dumps(przetworzone_dane, indent=4, ensure_ascii=False)
+            wsad_json = hash_do_wsad_json(zakodowane_dane, jezyk="EN")
 
             txt_npc = "\n".join([f"- {n[0]} -> {n[1]} | PLEC={n[2]} | RASA={n[3]}" for n in wsad_npc if n[0] and n[1]])
             txt_sk = "\n".join([f"- {k[0]} -> {k[1]}" for k in wsad_sk if k[0] and k[1]])
 
             _translator = llm_translator()
             _editor = llm_editor()
+            _lore = llm_lore()
 
             result_translator = None
             result_editor = None
@@ -335,12 +331,22 @@ def przetworz_pojedyncza_misje(
             current_llm = None
             
             print(f"--- [ID: {misja_id}] Start Tlumaczenia... ---")
-            try:
+
+# =========================================================================================
+# ========================================== RAG ==========================================
+# =========================================================================================
+
+            questions = get_questions_lore(_lore, wsad_json)
+
+            for q in questions:
+                pass
+            # 1. DODAC LOGI
+            # 2. CZY NIE POWINNO TO BYĆ W TRY NA DOLE?
 
 # =========================================================================================
 # ======================================= TRANSLATOR ======================================
 # =========================================================================================
-
+            try:
                 current_stage = "translator"
                 current_llm = _translator
                 raw_response = None

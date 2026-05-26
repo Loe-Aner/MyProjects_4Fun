@@ -21,6 +21,24 @@ def generuj_hash_djb2(tekst):
         
     return f"{hash_val:08x}{hash_val_2:08x}"
 
+def hash_do_wsad_json(zakodowany_string: str, jezyk: str = "EN") -> str:
+    if not zakodowany_string:
+        return "{}"
+
+    import base64
+    import json
+    import zlib
+
+    from moduly.services_persist_wynik import przefiltruj_dane_misji
+    from scraper_wiki_main import parsuj_misje_z_url
+
+    skompresowane_bajty = base64.b64decode(zakodowany_string)
+    tekst_html = zlib.decompress(skompresowane_bajty).decode("utf-8")
+    surowe_dane = parsuj_misje_z_url(url=None, html_content=tekst_html)
+    przetworzone_dane = przefiltruj_dane_misji(dane_wejsciowe=surowe_dane, jezyk=jezyk)
+
+    return json.dumps(przetworzone_dane, indent=4, ensure_ascii=False)
+
 # if __name__ == "__main__":
 #     przyklady = [
 #         ("Apocalyptic threats have taken many forms in Azeroth's history, but today we face Xal'atath and her Twilight's Blade.", "6b7431ab582fdb80")

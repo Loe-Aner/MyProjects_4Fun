@@ -3,8 +3,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+TEMPERATURE_LORE = 0.0
 TEMPERATURE_TRANSLATOR = 0.05
 TEMPERATURE_EDITOR = 0.15
+
+def llm_lore():
+    llm = ChatOpenAI(
+        model="gpt-5.4-mini",
+        temperature=TEMPERATURE_LORE,
+        reasoning_effort="medium",
+        use_responses_api=True,
+        max_retries=2
+    )
+    return llm
 
 def llm_translator():
     llm = ChatOpenAI(

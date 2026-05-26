@@ -1,4 +1,5 @@
 from typing import Literal
+from pydantic import BaseModel, Field
 
 from langchain_core.messages import AIMessage
 from typing_extensions import Annotated, TypedDict
@@ -54,3 +55,12 @@ class QuestContentResult(TypedDict):
     raw: AIMessage
     parsed: QuestContentResponse | None
     parsing_error: BaseException | None
+
+
+class LoreQuestion(BaseModel):
+    aspect: str = Field(description="The entity or theme this question targets, e.g. 'Lightbloom', 'Orweyna'")
+    question: str = Field(description="A single English question about that aspect")
+
+
+class QuestLoreResult(BaseModel):
+    questions: list[LoreQuestion] = Field(min_length=2, max_length=3)

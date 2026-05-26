@@ -13,7 +13,7 @@ COLLECTION_NAME = "wow_lore_chunks"
 MODEL_NAME = "BAAI/bge-large-en-v1.5"
 RERANK_MODEL = "Xenova/ms-marco-MiniLM-L-12-v2"
 VECTOR_SIZE = 1024
-# BGE: dokumenty/passage BEZ prefiksu, instrukcja doklejana tylko do query.
+# BGE: dokumenty/passage bez prefiksu, instrukcja doklejana tylko do query
 QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
 QDRANT_URL = "http://localhost:6333"
 RETRIEVE_TOP = 50  # ilu kandydatów z dense retrievalu trafia do rerankera (etap 1)
@@ -183,22 +183,29 @@ def rerank(query: str, candidates: list[dict], reranker: TextCrossEncoder) -> li
     return sorted(candidates, key=lambda candidate: candidate["rerank_score"], reverse=True)[:RERANK_TOP]
 
 
-# client = load_client()
-# reset_collection(client)
+def _main_index():
+    """Odpalać rzadko i tylko ręcznie, gdy zmienią się chunki."""
+    client = load_client()
+    reset_collection(client)
+    model = load_model()
+    records = get_records()
+    embeddings = get_embeddings(records, model)
+    upsert_points(client, build_points(records, embeddings))
 
-# model = load_model()
-# records = get_records()
-# embeddings = get_embeddings(records, model)
-# points = build_points(records, embeddings)
-# upsert_points(client, points)   
+def main(query: str):
+    client = load_client()
+    model = load_model()
+    reranker = load_reranker()
+    candidates = get_data_from_rag(client, query, model)
+    return rerank(query, candidates, reranker)
 
-model = load_model()
-reranker = load_reranker()
-client = load_client()
+def answer(query: str):
+    pass
 
-query = "Why did Lightbloom begin behaving erratically near Fairbreeze Village after the Sunwell flared?"
-candidates = get_data_from_rag(client, query, model)
-final = rerank(query, candidates, reranker)
 
-for item in final:
-    print(item["rerank_score"], item["chunk_title"])
+if __name__ == "__main__":
+    query = "who restored the Sunwell"
+
+    final = main(query)
+    for item in final:
+        print(item["rerank_score"], item["chunk_title"])
