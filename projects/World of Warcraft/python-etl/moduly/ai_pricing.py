@@ -1,4 +1,12 @@
 MODEL_PRICING = {
+    "gpt-5.5": {
+        "provider": "openai",
+        "langchain_package": "langchain-openai",
+        "langchain_class": "ChatOpenAI",
+        "currency": "USD",
+        "input_per_1m": 5.00,
+        "output_per_1m": 30.00
+    },
     "gpt-5.4": {
         "provider": "openai",
         "langchain_package": "langchain-openai",
@@ -54,6 +62,14 @@ MODEL_PRICING = {
         "currency": "USD",
         "input_per_1m": 2.00,
         "output_per_1m": 12.00
+    },
+    "gemini-3.5-flash": {
+        "provider": "google",
+        "langchain_package": "langchain-google-genai",
+        "langchain_class": "ChatGoogleGenerativeAI",
+        "currency": "USD",
+        "input_per_1m": 1.50,
+        "output_per_1m": 9.00
     },
     "gemini-3-flash-preview": {
         "provider": "google",

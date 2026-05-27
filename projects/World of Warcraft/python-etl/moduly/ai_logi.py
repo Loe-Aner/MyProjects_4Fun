@@ -9,10 +9,20 @@ from langchain_openai import ChatOpenAI
 
 from moduly.ai_modele import (
     TEMPERATURE_TRANSLATOR,
-    TEMPERATURE_EDITOR
+    TEMPERATURE_EDITOR,
+    TEMPERATURE_LORE,
+    TEMPERATURE_CONTEXT,
 )
 
 from moduly.ai_pricing import MODEL_PRICING
+
+
+TEMPERATURE_BY_STAGE = {
+    "translator": TEMPERATURE_TRANSLATOR,
+    "editor": TEMPERATURE_EDITOR,
+    "rag_questions": TEMPERATURE_LORE,
+    "rag_context": TEMPERATURE_CONTEXT,
+}
 
 
 def format_created_at(created_at: Any) -> str | None:
@@ -48,7 +58,7 @@ def create_logs(
     misja_id_moje_fk: int,
     input_chars: int,
     output_chars: int,
-    stage: Literal["translator", "editor"],
+    stage: Literal["translator", "editor", "rag_context"],
     duration_ms: int | None = None,
     parsing_error: str | None = None
 ) -> dict[str, Any]:
@@ -103,7 +113,7 @@ def create_logs(
         "OUTPUT_CHARS_ONLY_JSON": output_chars,
         "REASONING_EFFORT": getattr(llm, "reasoning_effort", None),
         "TEMPERATURE_FROM_LLM": getattr(llm, "temperature", None),
-        "TEMPERATURE_FROM_CONST": TEMPERATURE_TRANSLATOR if stage == "translator" else TEMPERATURE_EDITOR,
+        "TEMPERATURE_FROM_CONST": TEMPERATURE_BY_STAGE.get(stage),
         "PARSING_ERROR": parsing_error,
     }
 

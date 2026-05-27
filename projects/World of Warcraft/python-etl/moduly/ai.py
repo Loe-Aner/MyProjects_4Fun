@@ -21,7 +21,12 @@ from moduly.ai_prompty import (
     instrukcja_dane_npc_zmienna
 )
 
-from moduly.ai_prompty_RAG import get_questions_lore
+from moduly.ai_prompty_RAG import (
+    get_context_lore
+)
+from moduly.AI_RAG import (
+    get_filtered_candidates
+)
 
 from moduly.ai_core import (
     MODEL_GEMINI_POZOSTALE,
@@ -39,7 +44,8 @@ from moduly.ai_prompty_misje import (
 from moduly.ai_modele import (
     llm_translator,
     llm_editor,
-    llm_lore
+    llm_lore,
+    llm_context
 )
 from moduly.ai_logi import (
     create_logs,
@@ -322,6 +328,7 @@ def przetworz_pojedyncza_misje(
             _translator = llm_translator()
             _editor = llm_editor()
             _lore = llm_lore()
+            _context = llm_context()
 
             result_translator = None
             result_editor = None
@@ -332,21 +339,33 @@ def przetworz_pojedyncza_misje(
             
             print(f"--- [ID: {misja_id}] Start Tlumaczenia... ---")
 
+            try:
 # =========================================================================================
 # ========================================== RAG ==========================================
 # =========================================================================================
+                current_stage = "rag_context"
+                current_llm = _context
+                started_at = time.perf_counter() # uwzgledniam czas lacznie z generowaniem
+                                                 # pytan, qdrant i reranking
 
-            questions = get_questions_lore(_lore, wsad_json)
+                chunks_context = get_filtered_candidates(_lore, wsad_json)
+                context_lore = get_context_lore(_context, wsad_json, chunks_context)
+                raw_response = context_lore
 
-            for q in questions:
-                pass
-            # 1. DODAC LOGI
-            # 2. CZY NIE POWINNO TO BYĆ W TRY NA DOLE?
+                logs = create_logs(
+                    raw_response=raw_response,
+                    llm=_context,
+                    misja_id_moje_fk=misja_id,
+                    stage="rag_context",
+                    duration_ms=round((time.perf_counter() - started_at) * 1000),
+                    input_chars=len(wsad_json) + len(chunks_context),
+                    output_chars=len(context_lore.content or "")
+                )
+                save_ai_logs_to_db(silnik=silnik, logs=logs)
 
 # =========================================================================================
 # ======================================= TRANSLATOR ======================================
 # =========================================================================================
-            try:
                 current_stage = "translator"
                 current_llm = _translator
                 raw_response = None

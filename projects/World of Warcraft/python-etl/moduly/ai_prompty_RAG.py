@@ -1,4 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import AIMessage
+
 from moduly.ai_klasy import LoreQuestion, QuestLoreResult
 
 CONST_RULES_QUESTIONS_CONTEXT_RETRIEVAL = """
@@ -12,7 +14,7 @@ CRITICAL RAG OPTIMIZATION RULES:
 1. DO NOT ask "How are X, Y, and Z connected?" or list multiple anchors in one question. Vector embeddings fail on over-constrained, cluttered queries.
 2. Isolate concepts. Each question must target ONE specific entity, phenomenon, or faction relationship to fetch its objective background lore.
 3. Write queries as clean, direct, factual questions. Avoid phrasing like "What does character X mean when they say..." or "Why is X reacting this way...". Instead, search for the underlying lore fact (e.g., "What is the nature of the Lightbloom phenomenon?").
-4. Never use prohibited phrases: "in this quest", "in this scene", "Warcraft lore", "in the lore", "mentioned above".
+4. Never use prohibited phrases: "in this quest", "in this scene", "Warcraft lore", "in the lore", "mentioned above/below".
 5. All outputs must strictly use double quotes ("") for both aspect and question. No single quotes allowed.
 
 EVALUATION CRITERIA FOR QUEUSTIONS:
@@ -52,15 +54,35 @@ aspect="ENTITY_NAME" question="CLEAN_QUESTION_2"
 aspect="ENTITY_NAME" question="CLEAN_QUESTION_3"
 """
 
+CONST_RULES_SUMMARY_CONTEXT_RETRIEVAL = """
+Jesteś asystentem przygotowującym kontekst lore dla tłumacza i redaktora w grze World of Warcraft.
+
+Dostaniesz:
+1. Tekst misji do przetłumaczenia.
+2. Fragmenty wiedzy z RAG, które mogą zawierać istotny kontekst fabularny, nazwy własne, relacje między postaciami, miejsca, wydarzenia i pojęcia. Znajduje się tam również pytanie, na bazie którego wygenerowano odpowiedni chunk.
+
+Twoim zadaniem jest przygotować krótkie na max 100-125 słów, praktyczne podsumowanie kontekstu, które pomoże tłumaczowi i modelowi tłumaczącemu poprawnie zrozumieć sens misji i otoczki wokół niej. Pamiętaj, że chunki pochodzą z RAG - mogą zdarzyć się błędne chunki na pytania. Wtedy pomiń, nie wymyślaj nic. Jeśli żaden fragment RAG nie jest istotnie powiązany z misją, zwróć pusty tekst.
+
+Nie tłumacz tekstu misji.
+Nie wymyślaj informacji spoza dostarczonych danych. Bazuj wyłącznie na tym co masz, nic nie dodawaj od siebie.
+Jeśli jakiś fragment RAG wydaje się niepowiązany z misją, pomiń go by nie wprowadzać chaosu.
+Skup się na tym, co realnie może wpłynąć na tłumaczenie i redagowanie: ton, intencje, znaczenie nazw, relacje, zagrożenia, tło fabularne.
+Nie strukturyzuj odpowiedzi - zwróc prosty tekst.
+Jeśli związek między fragmentem RAG a misją jest prawdopodobny, ale niepewny, użyj ostrożnego języka: „najpewniej”, „może nawiązywać do”, „wydaje się związane z”. Nie przedstawiaj interpretacji jako faktu, jeśli nie wynika jasno z danych.
+Nazwy własne, takie jak imiona postaci, miejsca, frakcje, zjawiska i tytuły, traktuj ostrożnie. Nie spolszczaj ich samodzielnie i nie proponuj tłumaczeń nazw własnych, chyba że wynika to bezpośrednio z danych.
+Priorytetem jest przydatność dla tłumacza: wyjaśnij tylko te elementy, które mogą zmienić rozumienie wypowiedzi, tonu, intencji postaci albo sensu quest objective/quest completion.
+Jeśli kilka chunków mówi o tym samym, scal informacje i unikaj powtórzeń.
+"""
+
 def get_questions_lore(llm, mission: str) -> list[LoreQuestion]:
 
     prompt_questions_lore = ChatPromptTemplate.from_messages(
-    [
-        ("system", CONST_RULES_QUESTIONS_CONTEXT_RETRIEVAL),
-        ("human", """
-            {misje_tekst}
-        """)
-    ]
+        [
+            ("system", CONST_RULES_QUESTIONS_CONTEXT_RETRIEVAL),
+            ("human", """
+                {misje_tekst}
+            """)
+        ]
     )
 
     structured_model = prompt_questions_lore | llm.with_structured_output(
@@ -76,3 +98,25 @@ def get_questions_lore(llm, mission: str) -> list[LoreQuestion]:
     )
 
     return list(result["parsed"].questions)
+
+def get_context_lore(llm, mission: str, rag_context: str) -> AIMessage:
+    prompt_context_lore = ChatPromptTemplate.from_messages(
+        [
+            ("system", CONST_RULES_SUMMARY_CONTEXT_RETRIEVAL),
+            ("human", """
+                TEKST MISJI:
+                {misje_tekst}
+            
+                PYTANIE + TEKST Z RAG:
+                {chunks}
+            """)
+        ]
+    )
+
+    chain = prompt_context_lore | llm
+    result = chain.invoke({
+        "misje_tekst": mission,
+        "chunks": rag_context,
+    })
+
+    return result

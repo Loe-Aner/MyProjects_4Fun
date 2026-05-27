@@ -7,6 +7,8 @@ from fastembed.rerank.cross_encoder import TextCrossEncoder
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
+from moduly.ai_prompty_RAG import get_questions_lore
+
 
 FOLDER = Path("C:/____Moje-MOJE/MyProjects_4Fun/projects/World of Warcraft/rag-pliki/02_chunki")
 COLLECTION_NAME = "wow_lore_chunks"
@@ -17,7 +19,7 @@ VECTOR_SIZE = 1024
 QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
 QDRANT_URL = "http://localhost:6333"
 RETRIEVE_TOP = 50  # ilu kandydatów z dense retrievalu trafia do rerankera (etap 1)
-RERANK_TOP = 5     # ile zwracamy po rerankingu (etap 2)
+RERANK_TOP = 5     # ile zwracam po rerankingu (etap 2)
 EMBED_BATCH = 128
 UPSERT_BATCH = 128
 
@@ -72,7 +74,7 @@ def get_embeddings(
     records: list[dict],
     model: TextEmbedding,
 ) -> list:
-    # BGE: dokumenty bez żadnego prefiksu — goły tekst.
+    # BGE: dokumenty bez żadnego prefiksu - goły tekst.
     documents = [record["embedding_text"] for record in records]
 
     return list(model.embed(documents, batch_size=EMBED_BATCH))
@@ -137,7 +139,7 @@ def build_points(records: list[dict], embeddings: list) -> list[PointStruct]:
 
 
 def query_to_embedding(query: str, model: TextEmbedding) -> list[float]:
-    # BGE: do query doklejamy instrukcję (bez dwukropka jak w e5).
+    # BGE: do query doklejam instrukcję (bez dwukropka jak w e5).
     embedded_query = model.embed([f"{QUERY_INSTRUCTION}{query}"])
     return list(next(embedded_query))
 
@@ -192,20 +194,70 @@ def _main_index():
     embeddings = get_embeddings(records, model)
     upsert_points(client, build_points(records, embeddings))
 
-def main(query: str):
-    client = load_client()
-    model = load_model()
-    reranker = load_reranker()
+
+def load_rag_components():
+    return load_client(), load_model(), load_reranker()
+
+
+def get_candidates(query: str, client, model, reranker):
     candidates = get_data_from_rag(client, query, model)
     return rerank(query, candidates, reranker)
 
-def answer(query: str):
-    pass
+
+def get_filtered_candidates(llm, misje_tekst) -> str:
+    """
+    Tworzy zbiór z odsianymi chunkami. Zbudowany jest z krotek: tytuł oraz tekst.
+    """
+
+    client, model, reranker = load_rag_components()
+    questions = get_questions_lore(llm, misje_tekst)
+    
+    cands = dict()
+    for i, question in enumerate(questions):
+        candidates = get_candidates(question.question, client, model, reranker)
+
+        filtered_candidates = [
+            candidate
+            for candidate in candidates
+            if candidate.get("rerank_score", 0) > 0 # ====== wstepne zalozenie ======
+        ]
+
+        cands[i+1] = {
+            "question": question.question,
+            "candidates": filtered_candidates
+        }
+
+    cands = {
+        key: value
+        for key, value in cands.items()
+        if value["candidates"] # wyrzucam te chunki, ktore zwrocily pusta liste
+    }
+
+    rag_context_chunks = []
+
+    for record in cands.values():
+        question = record["question"]
+
+        for candidate in record["candidates"]:
+            title = candidate["chunk_title"]
+            embedding_text = candidate["embedding_text"]
+
+            rag_context_chunks.append({
+                "question": question,
+                "title": title,
+                "answer": embedding_text,
+            })
+    return "\n\n".join(
+        f"### Pytanie: {chunk['question']}\n"
+        f"### Tytuł: {chunk['title']}\n"
+        f"### Odpowiedź:\n{chunk['answer']}"
+        for chunk in rag_context_chunks
+    ) # type: ignore
 
 
-if __name__ == "__main__":
-    query = "who restored the Sunwell"
+# if __name__ == "__main__":
+#     query = "who restored the Sunwell"
 
-    final = main(query)
-    for item in final:
-        print(item["rerank_score"], item["chunk_title"])
+#     final = get_candidates(query)
+#     for item in final:
+#         print(item["rerank_score"], item["chunk_title"])

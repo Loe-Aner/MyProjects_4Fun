@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚔️ World of Warcraft - stan na 24.03.2026
+# ⚔️ World of Warcraft - stan na 25.05.2026
 
 ![Status](https://img.shields.io/badge/STATUS-WORK%20IN%20PROGRESS-007ec6?style=for-the-badge)
 ![Wersja](https://img.shields.io/badge/WERSJA-PRE--ALPHA-6e7781?style=for-the-badge)
@@ -12,11 +12,12 @@
 > To jest **wstępna wersja README** i sam projekt nadal jest w budowie.  
 > Dokumentacja będzie rozwijana razem z kolejnymi etapami prac.
 
-Projekt ma na celu stworzenie **kompleksowego polskiego rozwiązania dla World of Warcraft** obejmującego tłumaczenia, zaplecze danych, rozwój backendu oraz integrację z addonem. Docelowo chcę, aby każdy możliwy do odczytania obiekt w WoW'ie został przetłumaczony.
+Projekt ma na celu stworzenie **kompleksowego polskiego rozwiązania dla World of Warcraft** obejmującego tłumaczenia, zaplecze danych, rozwój backendu oraz integrację z addonem. Docelowo chcę, aby każdy możliwy do odczytania obiekt w WoW'ie został przetłumaczony. Jak przygotuję wszystko, chciałbym też zrobić addon z polskimi głosami - mam już nawet pomysł na architekturę ;)
 
 ## Aktualny etap
 - ✅ Projekt bazy danych oraz proces ETL
 - ✅ Mapowania, słowniki i przygotowanie procesu
+- ✅ Przygotowanie bazy Qdrant (przez Dockera) pod RAG. Kontekst będzie "wsparciem" dla tłumacza i redaktora
 - 🔄 Tłumaczenie i redakcja tekstów *(w trakcie zatwierdzania tekstów)*
 - 🔄 Rozwój backendu *(dodaję nowe funkcjonalności i rozwijam logikę procesu)*
 - 🔄 Stopniowo zmieniam nazwy zmiennych i funkcji na angielskie (dlatego może być miks)
