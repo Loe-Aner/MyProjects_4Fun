@@ -156,7 +156,7 @@ for batch_nr, batch in enumerate(chunks(linki_z_kolejki, BATCH_SIZE), start=1):
 
             zapisz_zrodlo_do_db(
                 silnik=silnik,
-                tabela_zrodlo="dbo.ZRODLO",
+                tabela_zrodlo="dbo.ZRODLO_MISJE",
                 misja_id=misja_id,
                 wynik=wynik,
                 zrodlo="wiki",

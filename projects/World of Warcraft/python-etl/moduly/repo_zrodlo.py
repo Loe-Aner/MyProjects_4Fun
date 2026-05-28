@@ -26,7 +26,7 @@ def zapisz_zrodlo_do_db(
 
     q_insert = text(f"""
         INSERT INTO {tabela_zrodlo} (
-            MISJA_ID_MOJE_FK, ZRODLO_NAZWA,
+            MISJA_ID_MOJE_FK, ZRODLO_NAZWA, RODZAJ,
             HTML_HASH_GLOWNY_CEL, HTML_HASH_PODRZEDNY_CEL,
             HTML_HASH_TRESC, HTML_HASH_POSTEP, HTML_HASH_ZAKONCZENIE, HTML_HASH_NAGRODY,
             HTML_HASH_DYMKI, HTML_HASH_GOSSIP,
@@ -34,7 +34,7 @@ def zapisz_zrodlo_do_db(
         )
         OUTPUT inserted.TECH_ID
         VALUES (
-            :misja_id_fk, :zrodlo_nazwa,
+            :misja_id_fk, :zrodlo_nazwa, :rodzaj,
             :hash_glowny_cel, :hash_podrzedny_cel,
             :hash_tresc, :hash_postep, :hash_zakonczenie, :hash_nagrody,
             :hash_dymki, :hash_gossip,
@@ -48,6 +48,7 @@ def zapisz_zrodlo_do_db(
             {
                 "misja_id_fk": misja_id,
                 "zrodlo_nazwa": zrodlo,
+                "rodzaj": "MISJA",
                 "hash_glowny_cel": hash_glowny_cel,
                 "hash_podrzedny_cel": hash_podrzedny_cel,
                 "hash_tresc": hash_tresc,

@@ -321,6 +321,8 @@ def przetworz_pojedyncza_misje(
             wsad_npc = set(n for n in npc_z_bazy)
             wsad_sk = set(s for s in slowa_kluczowe_z_bazy)
             wsad_json = hash_do_wsad_json(zakodowane_dane, jezyk="EN")
+            # wsad_rag = tylko na bazie tresci misji, bez dialogow
+            wsad_rag = json.dumps(json.loads(wsad_json).get("Misje_EN", {}), indent=4, ensure_ascii=False)
 
             txt_npc = "\n".join([f"- {n[0]} -> {n[1]} | PLEC={n[2]} | RASA={n[3]}" for n in wsad_npc if n[0] and n[1]])
             txt_sk = "\n".join([f"- {k[0]} -> {k[1]}" for k in wsad_sk if k[0] and k[1]])
@@ -336,6 +338,7 @@ def przetworz_pojedyncza_misje(
             started_at = None
             current_stage = None
             current_llm = None
+            context_lore_text = ""
             
             print(f"--- [ID: {misja_id}] Start Tlumaczenia... ---")
 
@@ -348,9 +351,10 @@ def przetworz_pojedyncza_misje(
                 started_at = time.perf_counter() # uwzgledniam czas lacznie z generowaniem
                                                  # pytan, qdrant i reranking
 
-                chunks_context = get_filtered_candidates(_lore, wsad_json)
-                context_lore = get_context_lore(_context, wsad_json, chunks_context)
+                chunks_context = get_filtered_candidates(_lore, wsad_rag)
+                context_lore = get_context_lore(_context, wsad_rag, chunks_context)
                 raw_response = context_lore
+                context_lore_text = str(context_lore.content or "")
 
                 logs = create_logs(
                     raw_response=raw_response,
@@ -358,8 +362,8 @@ def przetworz_pojedyncza_misje(
                     misja_id_moje_fk=misja_id,
                     stage="rag_context",
                     duration_ms=round((time.perf_counter() - started_at) * 1000),
-                    input_chars=len(wsad_json) + len(chunks_context),
-                    output_chars=len(context_lore.content or "")
+                    input_chars=len(wsad_rag) + len(chunks_context),
+                    output_chars=len(context_lore_text)
                 )
                 save_ai_logs_to_db(silnik=silnik, logs=logs)
 
@@ -374,6 +378,9 @@ def przetworz_pojedyncza_misje(
                     llm=_translator,
                     tekst_oryginalny=wsad_json,
                     tekst_niemiecki="",
+                    # DODAĆ RAG
+                    # DODAC WYTYCZNE RASY
+                    # DODAC RASY PRZYKLADY
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk
                 )
@@ -405,9 +412,10 @@ def przetworz_pojedyncza_misje(
                     llm=_editor,
                     tekst_oryginalny=wsad_json,
                     tekst_przetlumaczony=translated_json,
-                    tekst_pomocniczy="",
+                    tekst_pomocniczy=context_lore_text,
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk,
+                    # DODAĆ RAG
                     tekst_wytyczne_rasy="",
                     tekst_rasy_przyklady="",
                     tekst_klasy_przyklady=""
@@ -473,7 +481,7 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
     WITH hashe AS (
         SELECT m.MISJA_ID_MOJE_PK, z.HTML_SKOMPRESOWANY,
             ROW_NUMBER() OVER (PARTITION BY z.MISJA_ID_MOJE_FK ORDER BY z.DATA_WYSCRAPOWANIA DESC) AS r
-        FROM dbo.ZRODLO AS z
+        FROM dbo.ZRODLO_MISJE AS z
         INNER JOIN dbo.MISJE AS m 
           ON z.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
         WHERE 1=1 
@@ -526,6 +534,7 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
 
     print(f"Znaleziono {liczba_zadan} misji do przetworzenia. Uruchamiam {liczba_watkow} wątków...")
     print("Dostawca tłumaczenia: langchain/openai")
+    # ========================================== DODAC REDAGOWANIE ?? ==========================================
     print("Redagowanie: pominięte")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=liczba_watkow) as executor:

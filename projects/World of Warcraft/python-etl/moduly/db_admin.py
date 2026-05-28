@@ -24,7 +24,7 @@ def czerwony_przycisk(
         DROP TABLE IF EXISTS dbo.DIALOGI_STATUSY;
         DROP TABLE IF EXISTS dbo.MISJE_STATUSY;
         DROP TABLE IF EXISTS dbo.NPC_STATUSY;
-        DROP TABLE IF EXISTS dbo.ZRODLO;
+        DROP TABLE IF EXISTS dbo.ZRODLO_MISJE;
         
         DROP TABLE IF EXISTS dbo.MISJE;
         

@@ -23,7 +23,7 @@ def roznice_hashe (
                             PARTITION BY MISJA_ID_MOJE_FK
                             ORDER BY DATA_WYSCRAPOWANIA DESC
                         ) AS rnk
-                    FROM dbo.ZRODLO
+                    FROM dbo.ZRODLO_MISJE
                     WHERE ZRODLO_NAZWA = N'wiki'
                 ),
                 porownanie AS (
@@ -80,7 +80,7 @@ def roznice_hashe_usun_rekordy_z_db(
     q_select_data = text("""
         SELECT m.MISJA_URL_WIKI, z.HTML_SKOMPRESOWANY
         FROM dbo.MISJE AS m
-        LEFT JOIN dbo.ZRODLO AS z ON z.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
+        LEFT JOIN dbo.ZRODLO_MISJE AS z ON z.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
         WHERE m.MISJA_ID_MOJE_PK = :misja_id
         ORDER BY z.DATA_WYSCRAPOWANIA DESC
     """)
@@ -93,7 +93,7 @@ def roznice_hashe_usun_rekordy_z_db(
                     "dbo.DIALOGI_STATUSY",
                     "dbo.MISJE_STATUSY",
                     "dbo.MISJE_WSKAZNIKI_ZGODNOSCI",
-                    "dbo.ZRODLO",
+                    "dbo.ZRODLO_MISJE",
                     "dbo.MISJE"
                 ]
 

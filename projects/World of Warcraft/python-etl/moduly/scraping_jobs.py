@@ -103,7 +103,7 @@ def hashuj_kategorie_i_zapisz_zrodlo(
         zrodlo: str,
         sleep_s: float = 0.25,
         tabela_misje: str = "dbo.MISJE",
-        tabela_zrodlo: str = "dbo.ZRODLO"
+        tabela_zrodlo: str = "dbo.ZRODLO_MISJE"
     ) -> None:
 
     q_select_misja_id = text(f"""
@@ -156,7 +156,7 @@ def hashuj_kategorie_i_zapisz_zrodlo(
                     wynik=wynik,
                     zrodlo=zrodlo
                 )
-                print("    + zapisano hashe do ZRODLO")
+                print("    + zapisano hashe do ZRODLO_MISJE")
 
             except Exception as e:
                 print(f"    ! BŁĄD: {e}")

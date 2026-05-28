@@ -5,7 +5,7 @@ from moduly.utils import usun_stare_daty_pokaz_zmiany
 silnik = utworz_engine_do_db()
 
 # PONIZSZY SKRYPT TWORZY DF Z LICZBA DOSTEPNYCH MISJI PER GRUPY POZIOMOW, NP 1-10, 10-20 ITP
-# NATEPNIE PRZERZUCA JE DO DBO.MISJE_ZMIANY_WIKI
+# NASTEPNIE PRZERZUCA JE DO DBO.MISJE_ZMIANY_WIKI
 pobierz_przerzuc_questy_per_lvle(
     silnik=silnik,
     url="https://warcraft.wiki.gg/wiki/Category:Quests_by_level"
