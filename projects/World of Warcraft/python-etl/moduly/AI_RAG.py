@@ -1,13 +1,25 @@
 from pathlib import Path
+import re
 import uuid
+
+from sqlalchemy import text
 
 import yaml
 from fastembed import TextEmbedding
 from fastembed.rerank.cross_encoder import TextCrossEncoder
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.models import (
+    Distance,
+    FieldCondition,
+    Filter,
+    FilterSelector,
+    MatchValue,
+    PointStruct,
+    VectorParams,
+)
 
 from moduly.ai_prompty_RAG import get_questions_lore
+from moduly.db_core import utworz_engine_do_db
 
 
 FOLDER = Path("C:/____Moje-MOJE/MyProjects_4Fun/projects/World of Warcraft/rag-pliki/02_chunki")
@@ -24,30 +36,79 @@ EMBED_BATCH = 128
 UPSERT_BATCH = 128
 
 
-def get_records(folder: Path = FOLDER) -> list[dict]:
+def repair_quoted_yaml_scalars(front_matter: str) -> str:
+    repaired_lines = []
+
+    for line in front_matter.splitlines():
+        match = re.match(r'^(\s*[\w-]+:\s*)"(.*)"(\s*)$', line)
+
+        if not match:
+            repaired_lines.append(line)
+            continue
+
+        prefix, value, suffix = match.groups()
+        repaired_lines.append(f'{prefix}"{value.replace(chr(34), chr(92) + chr(34))}"{suffix}')
+
+    return "\n".join(repaired_lines)
+
+
+def load_front_matter(front_matter: str, path: Path) -> dict:
+    try:
+        return yaml.safe_load(front_matter) or {}
+    except yaml.YAMLError:
+        try:
+            return yaml.safe_load(repair_quoted_yaml_scalars(front_matter)) or {}
+        except yaml.YAMLError as exc:
+            raise ValueError(f"Invalid YAML front matter in file: {path}") from exc
+
+
+def get_records(folder: Path = FOLDER, document_ids: set[str] | None = None) -> list[dict]:
     records = []
+    skipped_invalid = 0
 
     for path in sorted(folder.rglob("*.md")):
         text = path.read_text(encoding="utf-8")
 
         if not text.startswith("---"):
+            if document_ids is not None:
+                skipped_invalid += 1
+                continue
+
             raise ValueError(f"Missing front matter in file: {path}")
 
         parts = text.split("---", maxsplit=2)
 
         if len(parts) < 3:
+            if document_ids is not None:
+                skipped_invalid += 1
+                continue
+
             raise ValueError(f"Invalid front matter structure in file: {path}")
 
         front_matter = parts[1].strip()
         body = parts[2].strip()
 
-        metadata = yaml.safe_load(front_matter) or {}
+        try:
+            metadata = load_front_matter(front_matter, path)
+        except ValueError:
+            if document_ids is not None:
+                skipped_invalid += 1
+                continue
+
+            raise
 
         chunk_id = metadata.get("chunk_id")
+        document_id = metadata.get("document_id")
         chunk_title = metadata.get("chunk_title")
 
         if not chunk_id:
             raise ValueError(f"Missing chunk_id in file: {path}")
+
+        if not document_id:
+            raise ValueError(f"Missing document_id in file: {path}")
+
+        if document_ids is not None and document_id not in document_ids:
+            continue
 
         if not chunk_title:
             raise ValueError(f"Missing chunk_title in file: {path}")
@@ -62,6 +123,9 @@ def get_records(folder: Path = FOLDER) -> list[dict]:
         }
 
         records.append(record)
+
+    if skipped_invalid:
+        print(f"Qdrant RAG: skipped invalid chunk files: {skipped_invalid}")
 
     return records
 
@@ -170,6 +234,143 @@ def upsert_points(client: QdrantClient, points: list[PointStruct], batch_size: i
         client.upsert(collection_name=COLLECTION_NAME, points=points[i:i + batch_size])
 
 
+def delete_document_points(client: QdrantClient, document_id: str) -> None:
+    client.delete(
+        collection_name=COLLECTION_NAME,
+        points_selector=FilterSelector(
+            filter=Filter(
+                must=[
+                    FieldCondition(
+                        key="document_id",
+                        match=MatchValue(value=document_id),
+                    )
+                ]
+            )
+        ),
+        wait=True,
+    )
+
+
+def get_pending_qdrant_documents(silnik, include_already_upserted: bool = False) -> list[dict]:
+    already_upserted_filter = ""
+
+    if not include_already_upserted:
+        already_upserted_filter = """
+        AND NOT EXISTS (
+            SELECT 1
+            FROM dbo.ZRODLO_QDRANT AS zq
+            WHERE zq.DOC_ID = zr.DOC_ID
+                AND zq.BODY_HASH = zr.BODY_HASH
+                AND zq.STATUS = 'upserted'
+                AND zq.EMBEDDING_MODEL = :embedding_model
+                AND zq.COLLECTION_NAME = :collection_name
+        )
+        """
+
+    q_select_records = text(f"""
+        WITH latest AS (
+            SELECT *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY DOC_ID
+                    ORDER BY DATA_WYSCRAPOWANIA DESC, TECH_ID DESC
+                ) AS rn
+            FROM dbo.ZRODLO_RAG
+            WHERE STATUS IN ('created', 'updated')
+        )
+
+        SELECT zr.TECH_ID, zr.DOC_ID, zr.BODY_HASH, zr.STATUS
+        FROM latest AS zr
+        WHERE zr.rn = 1
+        {already_upserted_filter};
+    """)
+
+    with silnik.connect() as conn:
+        return conn.execute(
+            q_select_records,
+            {
+                "embedding_model": MODEL_NAME,
+                "collection_name": COLLECTION_NAME,
+            },
+        ).mappings().all()
+
+
+def save_qdrant_log(
+    silnik,
+    doc_id: str,
+    body_hash: str,
+    status: str,
+    chunk_count: int | None = None,
+    error_message: str | None = None,
+) -> None:
+    if status == "upserted":
+        q_insert_log = text("""
+            IF NOT EXISTS (
+                SELECT 1
+                FROM dbo.ZRODLO_QDRANT
+                WHERE DOC_ID = :doc_id
+                  AND BODY_HASH = :body_hash
+                  AND STATUS = 'upserted'
+                  AND EMBEDDING_MODEL = :embedding_model
+                  AND COLLECTION_NAME = :collection_name
+            )
+            BEGIN
+                INSERT INTO dbo.ZRODLO_QDRANT (
+                    DOC_ID,
+                    BODY_HASH,
+                    STATUS,
+                    EMBEDDING_MODEL,
+                    COLLECTION_NAME,
+                    ILE_CHUNKOW,
+                    ERROR_MESSAGE
+                )
+                VALUES (
+                    :doc_id,
+                    :body_hash,
+                    :status,
+                    :embedding_model,
+                    :collection_name,
+                    :chunk_count,
+                    :error_message
+                );
+            END
+        """)
+    else:
+        q_insert_log = text("""
+            INSERT INTO dbo.ZRODLO_QDRANT (
+                DOC_ID,
+                BODY_HASH,
+                STATUS,
+                EMBEDDING_MODEL,
+                COLLECTION_NAME,
+                ILE_CHUNKOW,
+                ERROR_MESSAGE
+            )
+            VALUES (
+                :doc_id,
+                :body_hash,
+                :status,
+                :embedding_model,
+                :collection_name,
+                :chunk_count,
+                :error_message
+            );
+        """)
+
+    with silnik.begin() as conn:
+        conn.execute(
+            q_insert_log,
+            {
+                "doc_id": doc_id,
+                "body_hash": body_hash,
+                "status": status,
+                "embedding_model": MODEL_NAME,
+                "collection_name": COLLECTION_NAME,
+                "chunk_count": chunk_count,
+                "error_message": error_message,
+            },
+        )
+
+
 def load_reranker(model_name: str = RERANK_MODEL) -> TextCrossEncoder:
     return TextCrossEncoder(model_name=model_name)
 
@@ -185,14 +386,119 @@ def rerank(query: str, candidates: list[dict], reranker: TextCrossEncoder) -> li
     return sorted(candidates, key=lambda candidate: candidate["rerank_score"], reverse=True)[:RERANK_TOP]
 
 
-def _main_index():
-    """Odpalać rzadko i tylko ręcznie, gdy zmienią się chunki."""
+def insert_into_qdrant_collection(reset: bool = False):
+    """"""
+    silnik = utworz_engine_do_db()
     client = load_client()
-    reset_collection(client)
+
+    if reset:
+        reset_collection(client)
+    else:
+        create_collection_if_not_exists(client)
+
+    todo_docs = get_pending_qdrant_documents(
+        silnik,
+        include_already_upserted=reset,
+    )
+
+    if not todo_docs:
+        print("Qdrant RAG: no documents to index")
+        return
+
+    print(f"Qdrant RAG: documents to index: {len(todo_docs)}")
+
+    docs_by_id = {doc["DOC_ID"]: doc for doc in todo_docs}
+    document_ids = set(docs_by_id)
+    records = get_records(document_ids=document_ids)
+
+    records_by_doc_id: dict[str, list[dict]] = {
+        document_id: [] for document_id in document_ids
+    }
+
+    for record in records:
+        records_by_doc_id[record["payload"]["document_id"]].append(record)
+
+    for doc in todo_docs:
+        doc_id = doc["DOC_ID"]
+        body_hash = doc["BODY_HASH"]
+
+        if not records_by_doc_id[doc_id]:
+            save_qdrant_log(
+                silnik,
+                doc_id=doc_id,
+                body_hash=body_hash,
+                status="error",
+                error_message=f"No chunks found for DOC_ID={doc_id}",
+            )
+            print(f"{doc_id}=error (no chunks found)")
+
+    records = [
+        record
+        for doc_records in records_by_doc_id.values()
+        for record in doc_records
+    ]
+
+    if not records:
+        print("Qdrant RAG: no chunks found for selected documents")
+        return
+
+    if not reset:
+        for doc in todo_docs:
+            if doc["STATUS"] != "updated":
+                continue
+
+            doc_id = doc["DOC_ID"]
+            body_hash = doc["BODY_HASH"]
+            delete_document_points(client, doc_id)
+            print(f"{doc_id}=deleted_old")
+            save_qdrant_log(
+                silnik,
+                doc_id=doc_id,
+                body_hash=body_hash,
+                status="deleted_old",
+            )
+
     model = load_model()
-    records = get_records()
-    embeddings = get_embeddings(records, model)
-    upsert_points(client, build_points(records, embeddings))
+
+    try:
+        print(f"Qdrant RAG: embedding chunks: {len(records)}")
+        embeddings = get_embeddings(records, model)
+        upsert_points(client, build_points(records, embeddings))
+    except Exception as exc:
+        for doc in todo_docs:
+            doc_id = doc["DOC_ID"]
+            doc_records = records_by_doc_id[doc_id]
+
+            if not doc_records:
+                continue
+
+            save_qdrant_log(
+                silnik,
+                doc_id=doc_id,
+                body_hash=doc["BODY_HASH"],
+                status="error",
+                chunk_count=len(doc_records),
+                error_message=str(exc),
+            )
+            print(f"{doc_id}=error")
+
+        raise
+
+    for doc in todo_docs:
+        doc_id = doc["DOC_ID"]
+        doc_records = records_by_doc_id[doc_id]
+
+        if not doc_records:
+            continue
+
+        save_qdrant_log(
+            silnik,
+            doc_id=doc_id,
+            body_hash=doc["BODY_HASH"],
+            status="upserted",
+            chunk_count=len(doc_records),
+        )
+        print(f"{doc_id}=upserted ({len(doc_records)} chunks)")
 
 
 def load_rag_components():

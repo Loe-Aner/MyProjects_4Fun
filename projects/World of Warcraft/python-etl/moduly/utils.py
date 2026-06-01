@@ -1,5 +1,6 @@
 from sqlalchemy import text
 import pandas as pd
+from urllib.parse import unquote, urlparse
 
 def generuj_hash_djb2(tekst):
 
@@ -178,3 +179,7 @@ def usun_stare_daty_pokaz_zmiany(silnik):
     except Exception as e:
         print(f"--- Błąd podczas odczytywania danych: {e}")
         return pd.DataFrame()
+
+def extract_wiki_name(page_url: str) -> str:
+    path = urlparse(page_url).path
+    return unquote(path.split("/wiki/", 1)[1])
