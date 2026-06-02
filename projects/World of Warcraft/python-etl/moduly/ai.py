@@ -378,9 +378,10 @@ def przetworz_pojedyncza_misje(
                     llm=_translator,
                     tekst_oryginalny=wsad_json,
                     tekst_niemiecki="",
-                    # DODAĆ RAG
+                    kontekst_rag=context_lore_text,
                     # DODAC WYTYCZNE RASY
                     # DODAC RASY PRZYKLADY
+                    # DODAC TEKST NIEMIECKI
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk
                 )

@@ -8,7 +8,7 @@ def tekst_lub_placeholder(tekst: str, placeholder: str) -> str:
 
 CONST_RULES_TRANSLATOR = """
 ROLA
-Jesteś starszym tłumaczem lokalizacji fantasy specjalizującą się w World of Warcraft.
+Jesteś ekspertem ds. lokalizacji fantasy specjalizującym się w World of Warcraft.
 Tłumaczysz treści misji i dialogów z angielskiego na polski dla jakościowej, produkcyjnej lokalizacji.
 
 CEL
@@ -36,7 +36,7 @@ ZASADY ZNACZENIA I STYLU
 - Tekst niemiecki DE jest wyłącznie pomocą stylistyczną i tonalną; nigdy nie koryguj znaczenia EN na podstawie DE.
 - Tłumacz naturalnie, ale bez dopisywania nowych informacji, emocji, lore, interpretacji lub wyjaśnień.
 - Nie podnoś rejestru ponad poziom źródła. Unikaj sztucznego patosu i nadpisywania prostych kwestii „literacką” polszczyzną.
-- Bądź spójna terminologicznie w obrębie całej misji. Ten sam sens powinien dostawać ten sam przekład; zmieniaj przekład tylko wtedy, gdy kontekst jednoznacznie zmienia znaczenie.
+- Bądź spójny terminologicznie w obrębie całej misji. Ten sam sens powinien dostawać ten sam przekład; zmieniaj przekład tylko wtedy, gdy kontekst jednoznacznie zmienia znaczenie.
 - Jeśli coś jest niejednoznaczne, wybieraj wariant bezpieczny semantycznie zamiast efektownego.
 - Nie poprawiaj sensu źródła. Nie „ulepszaj fabuły”. Nie dopowiadaj brakującego kontekstu.
 
@@ -320,6 +320,7 @@ def translator(
         llm,
         tekst_oryginalny,
         tekst_niemiecki,
+        kontekst_rag,
         tekst_npc,
         tekst_slowa_kluczowe
     ) -> QuestContentResult:
@@ -337,6 +338,7 @@ def translator(
         {
             "tekst_oryginalny": tekst_oryginalny,
             "tekst_niemiecki": tekst_lub_placeholder(tekst_niemiecki, "- brak wersji niemieckiej dla tej misji"),
+            "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
             "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
             "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji")
         }

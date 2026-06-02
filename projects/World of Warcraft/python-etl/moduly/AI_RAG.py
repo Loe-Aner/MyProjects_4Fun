@@ -31,7 +31,7 @@ VECTOR_SIZE = 1024
 QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
 QDRANT_URL = "http://localhost:6333"
 RETRIEVE_TOP = 50  # ilu kandydatów z dense retrievalu trafia do rerankera (etap 1)
-RERANK_TOP = 5     # ile zwracam po rerankingu (etap 2)
+RERANK_TOP = 10     # ile zwracam po rerankingu (etap 2)
 EMBED_BATCH = 128
 UPSERT_BATCH = 128
 
