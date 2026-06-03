@@ -1,0 +1,70 @@
+DECLARE @dodatek NVARCHAR(30) = N'Midnight';
+
+WITH MISJE AS (
+    SELECT
+        m.MISJA_ID_MOJE_PK
+    FROM dbo.MISJE AS m
+    WHERE m.DODATEK_EN = @dodatek
+),
+
+NpcWMisjach AS (
+    SELECT DISTINCT
+        mm.MISJA_ID_MOJE_PK AS MISJA_ID,
+        v.NPC_ID
+    FROM MISJE AS mm
+    INNER JOIN dbo.MISJE AS m
+        ON m.MISJA_ID_MOJE_PK = mm.MISJA_ID_MOJE_PK
+    CROSS APPLY (
+        VALUES
+            (m.NPC_START_ID),
+            (m.NPC_KONIEC_ID)
+    ) AS v(NPC_ID)
+    WHERE v.NPC_ID IS NOT NULL
+
+    UNION
+
+    SELECT DISTINCT
+        ds.MISJA_ID_MOJE_FK AS MISJA_ID,
+        ds.NPC_ID_FK AS NPC_ID
+    FROM dbo.DIALOGI_STATUSY AS ds
+    INNER JOIN MISJE AS mm
+        ON mm.MISJA_ID_MOJE_PK = ds.MISJA_ID_MOJE_FK
+    WHERE ds.STATUS = N'0_ORYGINAŁ'
+),
+
+StatystykaRas AS (
+    SELECT
+        COALESCE(NULLIF(LTRIM(RTRIM(n.RASA)), N''), N'Brak danych') AS RASA,
+        COUNT(DISTINCT nwm.NPC_ID) AS ILE_NPC,
+        COUNT(DISTINCT nwm.MISJA_ID) AS ILE_MISJI
+    FROM NpcWMisjach AS nwm
+    INNER JOIN dbo.NPC AS n
+        ON n.NPC_ID_MOJE_PK = nwm.NPC_ID
+    GROUP BY COALESCE(NULLIF(LTRIM(RTRIM(n.RASA)), N''), N'Brak danych')
+),
+
+DialogiRas AS (
+    SELECT
+        COALESCE(NULLIF(LTRIM(RTRIM(n.RASA)), N''), N'Brak danych') AS RASA,
+        COUNT(*) AS ILE_WYPOWIEDZI_W_DIALOGACH
+    FROM dbo.DIALOGI_STATUSY AS ds
+    INNER JOIN MISJE AS mm
+        ON mm.MISJA_ID_MOJE_PK = ds.MISJA_ID_MOJE_FK
+    INNER JOIN dbo.NPC AS n
+        ON n.NPC_ID_MOJE_PK = ds.NPC_ID_FK
+    WHERE ds.STATUS = N'0_ORYGINAŁ'
+    GROUP BY COALESCE(NULLIF(LTRIM(RTRIM(n.RASA)), N''), N'Brak danych')
+)
+
+SELECT
+    sr.RASA,
+    sr.ILE_NPC,
+    sr.ILE_MISJI,
+    COALESCE(dr.ILE_WYPOWIEDZI_W_DIALOGACH, 0) AS ILE_WYPOWIEDZI_W_DIALOGACH
+FROM StatystykaRas AS sr
+LEFT JOIN DialogiRas AS dr
+    ON dr.RASA = sr.RASA
+ORDER BY
+    sr.ILE_MISJI DESC,
+    ILE_WYPOWIEDZI_W_DIALOGACH DESC,
+    sr.ILE_NPC DESC;
