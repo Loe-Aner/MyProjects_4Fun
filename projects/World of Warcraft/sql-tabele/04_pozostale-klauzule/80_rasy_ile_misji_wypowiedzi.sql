@@ -64,6 +64,7 @@ SELECT
 FROM StatystykaRas AS sr
 LEFT JOIN DialogiRas AS dr
     ON dr.RASA = sr.RASA
+--WHERE sr.RASA = 'Gnarldin'
 ORDER BY
     sr.ILE_MISJI DESC,
     ILE_WYPOWIEDZI_W_DIALOGACH DESC,

@@ -12,7 +12,7 @@ chunks_output_dir = Path(r"C:\____Moje-MOJE\MyProjects_4Fun\projects\World of Wa
 
 rag_categories = [
     # {"category": "Category:7th Legion", "subtype": "faction", "excluded": ["7th Legion", "SI:7"], "min_body_words": 30},
-    {"category": "Category:A Brewing Storm", "subtype": "scenarios", "excluded": [""], "min_body_words": 30},
+    # {"category": "Category:A Brewing Storm", "subtype": "scenarios", "excluded": [""], "min_body_words": 30},
     # {"category": "Category:A Gilnean's Dream", "subtype": "scenarios", "excluded": [""], "min_body_words": 30},
     # {"category": "Category:A Good War characters", "subtype": "characters", "excluded": [""], "min_body_words": 30},
 ]

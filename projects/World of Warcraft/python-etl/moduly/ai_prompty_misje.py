@@ -352,11 +352,10 @@ def editor(
         tekst_oryginalny,
         tekst_przetlumaczony,
         tekst_pomocniczy,
+        kontekst_rag,
         tekst_npc,
         tekst_slowa_kluczowe,
-        tekst_wytyczne_rasy,
-        tekst_rasy_przyklady,
-        tekst_klasy_przyklady
+        tekst_wytyczne_rasy_i_przyklady
     ) -> QuestContentResult:
     """
     Redaguje przetłumaczoną misję na bazie podanych parametrów.
@@ -373,12 +372,11 @@ def editor(
             "tekst_oryginalny": tekst_lub_placeholder(tekst_oryginalny, "{}"),
             "tekst_przetlumaczony": tekst_lub_placeholder(tekst_przetlumaczony, "{}"),
             "tekst_pomocniczy": tekst_lub_placeholder(tekst_pomocniczy, "- brak wersji niemieckiej dla tej misji"),
+            "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
             "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
             "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
-            "tekst_wytyczne_rasy": tekst_lub_placeholder(tekst_wytyczne_rasy, "- brak wytycznych dla tych ras"),
-            "tekst_rasy_przyklady": tekst_lub_placeholder(tekst_rasy_przyklady, "- brak przykładów redakcji dla tych ras"),
-            "tekst_klasy_przyklady": tekst_lub_placeholder(tekst_klasy_przyklady, "- brak przykładów redakcji dla tych klas"),
-        }
+            "tekst_wytyczne_rasy_i_przyklady": tekst_lub_placeholder(tekst_wytyczne_rasy_i_przyklady, "- brak wytycznych dla tych ras")
+            }
     )
 
     return result

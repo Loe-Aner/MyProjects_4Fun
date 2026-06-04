@@ -379,8 +379,9 @@ def przetworz_pojedyncza_misje(
                     tekst_oryginalny=wsad_json,
                     tekst_niemiecki="",
                     kontekst_rag=context_lore_text,
-                    # DODAC WYTYCZNE RASY
-                    # DODAC RASY PRZYKLADY
+                    # DODAC WYTYCZNE I PRZYKLADY RASY
+                    # DODAC NPC VOICE (POKAZE ALBO NPC VOICE ALBO RASE)
+                    # DODAC PODSUMOWANIE POPRZEDNIEJ MISJI (LLM ROBI)
                     # DODAC TEKST NIEMIECKI
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk
@@ -413,13 +414,15 @@ def przetworz_pojedyncza_misje(
                     llm=_editor,
                     tekst_oryginalny=wsad_json,
                     tekst_przetlumaczony=translated_json,
-                    tekst_pomocniczy=context_lore_text,
+                    tekst_pomocniczy="",
+                    kontekst_rag=context_lore_text,
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk,
-                    # DODAĆ RAG
-                    tekst_wytyczne_rasy="",
-                    tekst_rasy_przyklady="",
-                    tekst_klasy_przyklady=""
+                    tekst_wytyczne_rasy_i_przyklady="",
+                    # DODAC WYTYCZNE I PRZYKLADY RASY
+                    # DODAC NPC VOICE (POKAZE ALBO NPC VOICE ALBO RASE)
+                    # DODAC PODSUMOWANIE POPRZEDNIEJ MISJI (LLM ROBI)
+                    # DODAC TEKST NIEMIECKI
                 )
                 raw_response = result_editor["raw"]
                 edited_json, logs = handle_quest_stage_result(
