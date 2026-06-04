@@ -1,0 +1,59 @@
+WITH teksty_npc AS (
+    SELECT
+        m.NPC_START_ID AS NPC_ID,
+        SUM(LEN(ISNULL(ms.TRESC, N''))) AS ILE_ZNAKOW
+    FROM dbo.MISJE_STATUSY AS ms
+    INNER JOIN dbo.MISJE AS m
+        ON ms.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
+    WHERE ms.MISJA_ID_MOJE_FK = 535
+      AND ms.STATUS = N'0_ORYGINAŁ'
+      AND ms.SEGMENT <> N'ZAKOŃCZENIE'
+      AND m.NPC_START_ID IS NOT NULL
+      AND ms.TRESC <> '...'
+    GROUP BY m.NPC_START_ID
+
+    UNION ALL
+
+    SELECT
+        m.NPC_KONIEC_ID AS NPC_ID,
+        SUM(LEN(ISNULL(ms.TRESC, N''))) AS ILE_ZNAKOW
+    FROM dbo.MISJE_STATUSY AS ms
+    INNER JOIN dbo.MISJE AS m
+        ON ms.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
+    WHERE ms.MISJA_ID_MOJE_FK = 535
+      AND ms.STATUS = N'0_ORYGINAŁ'
+      AND ms.SEGMENT = N'ZAKOŃCZENIE'
+      AND m.NPC_KONIEC_ID IS NOT NULL
+      AND ms.TRESC <> '...'
+    GROUP BY m.NPC_KONIEC_ID
+
+    UNION ALL
+
+    SELECT
+        ds.NPC_ID_FK AS NPC_ID,
+        SUM(LEN(ISNULL(ds.TRESC, N''))) AS ILE_ZNAKOW
+    FROM dbo.DIALOGI_STATUSY AS ds
+    WHERE ds.MISJA_ID_MOJE_FK = 535
+      AND ds.STATUS = N'0_ORYGINAŁ'
+    GROUP BY ds.NPC_ID_FK
+),
+
+npc_zsumowane AS (
+    SELECT
+        NPC_ID,
+        SUM(ILE_ZNAKOW) AS ILE_ZNAKOW
+    FROM teksty_npc
+    GROUP BY NPC_ID
+)
+
+SELECT
+    n.RASA,
+    SUM(nz.ILE_ZNAKOW) AS ILE_ZNAKOW
+FROM npc_zsumowane AS nz
+INNER JOIN dbo.NPC AS n
+    ON n.NPC_ID_MOJE_PK = nz.NPC_ID
+WHERE n.RASA IS NOT NULL
+  AND n.RASA <> N'Unknown'
+GROUP BY n.RASA
+HAVING SUM(nz.ILE_ZNAKOW) > 40
+ORDER BY ILE_ZNAKOW DESC;

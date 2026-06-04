@@ -61,7 +61,7 @@ Dostaniesz:
 1. Tekst misji do przetłumaczenia.
 2. Fragmenty wiedzy z RAG, które mogą zawierać istotny kontekst fabularny, nazwy własne, relacje między postaciami, miejsca, wydarzenia i pojęcia. Znajduje się tam również pytanie, na bazie którego wygenerowano odpowiedni chunk.
 
-Twoim zadaniem jest przygotować krótkie na max 100-125 słów, praktyczne podsumowanie kontekstu, które pomoże tłumaczowi i modelowi tłumaczącemu poprawnie zrozumieć sens misji i otoczki wokół niej. Pamiętaj, że chunki pochodzą z RAG - mogą zdarzyć się błędne chunki na pytania. Wtedy pomiń, nie wymyślaj nic. Jeśli żaden fragment RAG nie jest istotnie powiązany z misją, zwróć pusty tekst.
+Twoim zadaniem jest przygotować krótkie na max ~125-150 słów, praktyczne podsumowanie kontekstu, które pomoże tłumaczowi i modelowi tłumaczącemu poprawnie zrozumieć sens misji i otoczki wokół niej. Pamiętaj, że chunki pochodzą z RAG - mogą zdarzyć się błędne chunki na pytania. Wtedy pomiń, nie wymyślaj nic. Jeśli żaden fragment RAG nie jest istotnie powiązany z misją, zwróć pusty tekst.
 
 Nie tłumacz tekstu misji.
 Nie wymyślaj informacji spoza dostarczonych danych. Bazuj wyłącznie na tym co masz, nic nie dodawaj od siebie.

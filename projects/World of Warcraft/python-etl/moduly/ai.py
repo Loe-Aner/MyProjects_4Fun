@@ -10,6 +10,8 @@ from google.genai import types as genai_types
 from sqlalchemy import text, bindparam
 import pandas as pd
 
+from moduly.ai_przyklady_ras_tony_teksty import RACE_STYLES
+
 from moduly.services_persist_wynik import (
     save_quests_dialogues_to_db
 )
@@ -235,14 +237,9 @@ def handle_quest_stage_result(
     if parsed is None:
         raise ValueError(f"---[ID: {misja_id}] Brak sparsowanego wyniku etapu: {stage}.")
 
-    if hasattr(parsed, "model_dump"):
-        parsed_dict = parsed.model_dump(mode="python")
-        parsed_json = parsed.model_dump_json(indent=2)
-    else:
-        parsed_dict = parsed
-        parsed_json = json.dumps(parsed_dict, indent=2, ensure_ascii=False)
+    parsed_json = json.dumps(parsed, indent=2, ensure_ascii=False)
 
-    validate_quest_content_response(parsed_dict, misja_id=misja_id, stage=stage)
+    validate_quest_content_response(parsed, misja_id=misja_id, stage=stage)
     dms = round((time.perf_counter() - started_at) * 1000) if started_at is not None else None
 
     logs = create_logs(
@@ -255,7 +252,7 @@ def handle_quest_stage_result(
         output_chars=len(parsed_json)
     )
 
-    #save_quests_dialogues_to_db(silnik, misja_id, parsed_dict, status_zapisu)
+    save_quests_dialogues_to_db(silnik, misja_id, parsed, status_zapisu)
     save_ai_logs_to_db(silnik=silnik, logs=logs)
 
     return parsed_json, logs
@@ -270,6 +267,10 @@ def przetworz_pojedyncza_misje(
     """
     misja_id = wiersz["MISJA_ID_MOJE_PK"]
     zakodowane_dane = wiersz["HTML_SKOMPRESOWANY"]
+
+    if not zakodowane_dane:
+        print(f"SKIP [ID: {misja_id}] - Brak danych.")
+        return
 
     with silnik.connect() as conn:
         try:
@@ -311,21 +312,107 @@ def przetworz_pojedyncza_misje(
                 WHERE msk.MISJA_ID_MOJE_FK = :misja_id
             """)
 
+            q_select_rasa = text("""
+            WITH teksty_npc AS (
+                -- NPC start: wszystkie segmenty oprócz zakończenia
+                SELECT
+                    m.NPC_START_ID AS NPC_ID,
+                    SUM(LEN(ISNULL(ms.TRESC, N''))) AS ILE_ZNAKOW
+                FROM dbo.MISJE_STATUSY AS ms
+                INNER JOIN dbo.MISJE AS m
+                    ON ms.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
+                WHERE ms.MISJA_ID_MOJE_FK = :misja_id
+                AND ms.STATUS = N'0_ORYGINAŁ'
+                AND ms.SEGMENT <> N'ZAKOŃCZENIE'
+                AND m.NPC_START_ID IS NOT NULL
+                GROUP BY m.NPC_START_ID
+
+                UNION ALL
+
+                -- NPC koniec: tylko zakończenie
+                SELECT
+                    m.NPC_KONIEC_ID AS NPC_ID,
+                    SUM(LEN(ISNULL(ms.TRESC, N''))) AS ILE_ZNAKOW
+                FROM dbo.MISJE_STATUSY AS ms
+                INNER JOIN dbo.MISJE AS m
+                    ON ms.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
+                WHERE ms.MISJA_ID_MOJE_FK = :misja_id
+                AND ms.STATUS = N'0_ORYGINAŁ'
+                AND ms.SEGMENT = N'ZAKOŃCZENIE'
+                AND m.NPC_KONIEC_ID IS NOT NULL
+                GROUP BY m.NPC_KONIEC_ID
+
+                UNION ALL
+
+                -- Dialogi: NPC per wypowiedź
+                SELECT
+                    ds.NPC_ID_FK AS NPC_ID,
+                    SUM(LEN(ISNULL(ds.TRESC, N''))) AS ILE_ZNAKOW
+                FROM dbo.DIALOGI_STATUSY AS ds
+                WHERE ds.MISJA_ID_MOJE_FK = :misja_id
+                AND ds.STATUS = N'0_ORYGINAŁ'
+                GROUP BY ds.NPC_ID_FK
+            ),
+
+            npc_zsumowane AS (
+                SELECT
+                    NPC_ID,
+                    SUM(ILE_ZNAKOW) AS ILE_ZNAKOW
+                FROM teksty_npc
+                GROUP BY NPC_ID
+            )
+
+            SELECT
+                n.RASA,
+                SUM(nz.ILE_ZNAKOW) AS ILE_ZNAKOW
+            FROM npc_zsumowane AS nz
+            INNER JOIN dbo.NPC AS n
+                ON n.NPC_ID_MOJE_PK = nz.NPC_ID
+            WHERE n.RASA IS NOT NULL
+            AND n.RASA <> N'Unknown'
+            GROUP BY n.RASA
+            HAVING SUM(nz.ILE_ZNAKOW) > 30
+            ORDER BY ILE_ZNAKOW DESC;
+            """)
+
             npc_z_bazy = conn.execute(q_select_npc, {"misja_id": misja_id}).all()
             slowa_kluczowe_z_bazy = conn.execute(q_select_sk, {"misja_id": misja_id}).all()
-
-            if not zakodowane_dane:
-                print(f"SKIP [ID: {misja_id}] - Brak danych.")
-                return
+            wybrane_rasy_z_bazy = conn.execute(q_select_rasa, {"misja_id": misja_id}).all()
 
             wsad_npc = set(n for n in npc_z_bazy)
             wsad_sk = set(s for s in slowa_kluczowe_z_bazy)
             wsad_json = hash_do_wsad_json(zakodowane_dane, jezyk="EN")
-            # wsad_rag = tylko na bazie tresci misji, bez dialogow
             wsad_rag = json.dumps(json.loads(wsad_json).get("Misje_EN", {}), indent=4, ensure_ascii=False)
+            wsad_wybrane_rasy_opis = set(r[0] for r in wybrane_rasy_z_bazy)
 
-            txt_npc = "\n".join([f"- {n[0]} -> {n[1]} | PLEC={n[2]} | RASA={n[3]}" for n in wsad_npc if n[0] and n[1]])
-            txt_sk = "\n".join([f"- {k[0]} -> {k[1]}" for k in wsad_sk if k[0] and k[1]])
+            txt_npc = "\n".join(
+                [(
+                    f"- nazwa_en: {n[0]}\n"
+                    f"  nazwa_pl: {n[1]}\n"
+                    f"  plec: {n[2] or 'Unknown'}\n"
+                    f"  rasa: {n[3] or 'Unknown'}"
+                )
+                    for n in sorted(wsad_npc, key=lambda x: (x[0] or "", x[1] or ""))
+                    if n[0] and n[1]
+                ]
+            )
+
+            txt_sk = "\n".join(
+                [
+                    f"- {k[0]}: {k[1]}"
+                    for k in sorted(wsad_sk, key=lambda x: (x[0] or "", x[1] or ""))
+                    if k[0] and k[1]
+                ]
+            )
+
+            txt_rasy = "\n\n".join(
+                [(
+                    f"rasa: {rasa}\n"
+                    f"wytyczne:\n{RACE_STYLES.get(rasa, 'Brak wytycznych dla tej rasy')}"
+                )
+                    for rasa in sorted(wsad_wybrane_rasy_opis)
+                ]
+            )
 
             _translator = llm_translator()
             _editor = llm_editor()
@@ -379,7 +466,7 @@ def przetworz_pojedyncza_misje(
                     tekst_oryginalny=wsad_json,
                     tekst_niemiecki="",
                     kontekst_rag=context_lore_text,
-                    # DODAC WYTYCZNE I PRZYKLADY RASY
+                    wytyczne_rasy=txt_rasy,
                     # DODAC NPC VOICE (POKAZE ALBO NPC VOICE ALBO RASE)
                     # DODAC PODSUMOWANIE POPRZEDNIEJ MISJI (LLM ROBI)
                     # DODAC TEKST NIEMIECKI
@@ -416,10 +503,9 @@ def przetworz_pojedyncza_misje(
                     tekst_przetlumaczony=translated_json,
                     tekst_pomocniczy="",
                     kontekst_rag=context_lore_text,
+                    wytyczne_rasy=txt_rasy,
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk,
-                    tekst_wytyczne_rasy_i_przyklady="",
-                    # DODAC WYTYCZNE I PRZYKLADY RASY
                     # DODAC NPC VOICE (POKAZE ALBO NPC VOICE ALBO RASE)
                     # DODAC PODSUMOWANIE POPRZEDNIEJ MISJI (LLM ROBI)
                     # DODAC TEKST NIEMIECKI

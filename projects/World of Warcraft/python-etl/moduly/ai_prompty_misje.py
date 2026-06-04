@@ -271,6 +271,10 @@ prompt_translator = ChatPromptTemplate.from_messages(
         {tekst_niemiecki}
         </tekst_de_pomocniczy>
 
+        <wytyczne_dla_ras>
+        {wytyczne_rasy}
+        </wytyczne_dla_ras>
+
         """)
     ]
 )
@@ -301,16 +305,8 @@ prompt_editor = ChatPromptTemplate.from_messages(
         </mapowania_slow_kluczowych>
          
         <wytyczne_dla_ras>
-        {tekst_wytyczne_rasy}
+        {wytyczne_rasy}
         </wytyczne_dla_ras> 
-
-        <przyklady_stylu_ras>
-        {tekst_rasy_przyklady}
-        </przyklady_stylu_ras>
-
-        <przyklady_stylu_klas>
-        {tekst_klasy_przyklady}
-        </przyklady_stylu_klas>
 
         """)
     ]
@@ -321,6 +317,7 @@ def translator(
         tekst_oryginalny,
         tekst_niemiecki,
         kontekst_rag,
+        wytyczne_rasy,
         tekst_npc,
         tekst_slowa_kluczowe
     ) -> QuestContentResult:
@@ -339,6 +336,7 @@ def translator(
             "tekst_oryginalny": tekst_oryginalny,
             "tekst_niemiecki": tekst_lub_placeholder(tekst_niemiecki, "- brak wersji niemieckiej dla tej misji"),
             "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
+            "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
             "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
             "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji")
         }
@@ -353,9 +351,9 @@ def editor(
         tekst_przetlumaczony,
         tekst_pomocniczy,
         kontekst_rag,
+        wytyczne_rasy,
         tekst_npc,
-        tekst_slowa_kluczowe,
-        tekst_wytyczne_rasy_i_przyklady
+        tekst_slowa_kluczowe
     ) -> QuestContentResult:
     """
     Redaguje przetłumaczoną misję na bazie podanych parametrów.
@@ -373,9 +371,9 @@ def editor(
             "tekst_przetlumaczony": tekst_lub_placeholder(tekst_przetlumaczony, "{}"),
             "tekst_pomocniczy": tekst_lub_placeholder(tekst_pomocniczy, "- brak wersji niemieckiej dla tej misji"),
             "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
+            "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
             "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
-            "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
-            "tekst_wytyczne_rasy_i_przyklady": tekst_lub_placeholder(tekst_wytyczne_rasy_i_przyklady, "- brak wytycznych dla tych ras")
+            "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji")
             }
     )
 
