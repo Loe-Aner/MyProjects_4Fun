@@ -47,6 +47,7 @@ from moduly.ai_modele import (
     llm_translator,
     llm_editor,
     llm_lore,
+    llm_quest_summary,
     llm_context
 )
 from moduly.ai_logi import (
@@ -431,6 +432,14 @@ def przetworz_pojedyncza_misje(
 
             try:
 # =========================================================================================
+# ================================== PODSUMOWANIE MISJI ===================================
+# =========================================================================================
+
+
+
+
+
+# =========================================================================================
 # ========================================== RAG ==========================================
 # =========================================================================================
                 current_stage = "rag_context"
@@ -467,7 +476,7 @@ def przetworz_pojedyncza_misje(
                     tekst_niemiecki="",
                     kontekst_rag=context_lore_text,
                     wytyczne_rasy=txt_rasy,
-                    # DODAC NPC VOICE (POKAZE ALBO NPC VOICE ALBO RASE)
+
                     # DODAC PODSUMOWANIE POPRZEDNIEJ MISJI (LLM ROBI)
                     # DODAC TEKST NIEMIECKI
                     tekst_npc=txt_npc,
@@ -506,7 +515,7 @@ def przetworz_pojedyncza_misje(
                     wytyczne_rasy=txt_rasy,
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk,
-                    # DODAC NPC VOICE (POKAZE ALBO NPC VOICE ALBO RASE)
+
                     # DODAC PODSUMOWANIE POPRZEDNIEJ MISJI (LLM ROBI)
                     # DODAC TEKST NIEMIECKI
                 )

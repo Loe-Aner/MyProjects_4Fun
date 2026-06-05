@@ -1,11 +1,11 @@
 SELECT 'MISJE', *
 FROM dbo.MISJE
 WHERE 1=1
-  --AND NAZWA_LINII_FABULARNEJ_EN = 'Path of de Hash''ey'
+  AND NAZWA_LINII_FABULARNEJ_EN = 'Path of de Hash''ey'
   --AND DODANO_W_PATCHU = '12.0.1'
   --AND MISJA_TYTUL_EN = 'The Nethersent'
   --AND MISJA_ID_Z_GRY != 123456789
-  AND DODATEK_EN = 'Midnight'
+  --AND DODATEK_EN = 'Midnight'
   --AND MISJA_ID_Z_GRY = 90959
   AND MISJA_ID_MOJE_PK /*IN (129, 130, 131)*/ = 22
   --AND KRAINA_EN = 'Exile''s Reach'

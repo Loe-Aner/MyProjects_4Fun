@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 from moduly.ai_modele import (
     TEMPERATURE_TRANSLATOR,
     TEMPERATURE_EDITOR,
+    TEMPERATURE_SUMMARY_QUEST,
     TEMPERATURE_LORE,
     TEMPERATURE_CONTEXT,
 )
@@ -22,6 +23,7 @@ TEMPERATURE_BY_STAGE = {
     "editor": TEMPERATURE_EDITOR,
     "rag_questions": TEMPERATURE_LORE,
     "rag_context": TEMPERATURE_CONTEXT,
+    "quest_summary": TEMPERATURE_SUMMARY_QUEST
 }
 
 
@@ -58,7 +60,7 @@ def create_logs(
     misja_id_moje_fk: int,
     input_chars: int,
     output_chars: int,
-    stage: Literal["translator", "editor", "rag_context"],
+    stage: Literal["translator", "editor", "rag_context", "quest_summary"],
     duration_ms: int | None = None,
     parsing_error: str | None = None
 ) -> dict[str, Any]:

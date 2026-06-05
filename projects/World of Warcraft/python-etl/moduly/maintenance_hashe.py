@@ -94,6 +94,7 @@ def roznice_hashe_usun_rekordy_z_db(
                     "dbo.MISJE_STATUSY",
                     "dbo.MISJE_WSKAZNIKI_ZGODNOSCI",
                     "dbo.ZRODLO_MISJE",
+                    "dbo.MISJE_PODSUMOWANIA",
                     "dbo.MISJE"
                 ]
 

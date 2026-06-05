@@ -1,4 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import AIMessage
 
 from moduly.ai_klasy import QuestContentResponse, QuestContentResult
 
@@ -249,6 +250,26 @@ Przed zwróceniem odpowiedzi sprawdź po cichu:
 - czy wynik zawiera wyłącznie poprawny JSON zgodny ze schematem odpowiedzi.
 """
 
+CONST_RULES_QUEST_SUMMARY = """
+Jesteś redaktorem przygotowującym zwięzłe streszczenia questów ze świata Warcraft. Twoje streszczenie posłuży tłumaczom jako szybki kontekst fabularny misji — ma w kilka sekund powiedzieć, o co w niej chodzi.
+
+Dostaniesz angielski tekst jednej misji. Na jego podstawie napisz JEDNO streszczenie po polsku. Nie dodawaj od siebie żadnych komentarzy, potwierdzeń, bloków końcowych - po prostu zwróć streszczenie według zasad niżej.
+
+Zasady:
+- Maksymalnie 65 słów. Mniej jest w porządku, jeśli misja jest prosta.
+- Opieraj się WYŁĄCZNIE na dostarczonym tekście. Nie dodawaj wiedzy o świecie Warcraft spoza tekstu, nie domyślaj się, nie zmyślaj.
+- Skup się na sednie: kto, gdzie, co się dzieje, co robi gracz i jaki jest cel lub rezultat misji.
+- Nazwy własne (postacie, miejsca, frakcje, przedmioty) zostaw w oryginalnej, angielskiej formie.
+- Pisz neutralnie, w trzeciej osobie, w czasie teraźniejszym. Nie zwracaj się do gracza.
+- Jeśli tekst ma znikomą treść fabularną, streść krótko to, co jest — nie uzupełniaj braków.
+- Zwróć wyłącznie treść streszczenia: bez nagłówka, cudzysłowów, znaczników i wstępu w stylu „Podsumowanie:".
+- Najważniejszy jest wątek fabularny: motywacje postaci, konflikty, relacje, decyzje i sposób, w jaki misja się rozwiązuje. To ma być rdzeń streszczenia.
+- Ponumerowane cele i nagrody kompletnie pomiń. Nie pozwól, by mechanika ("rozpal", "zabij", "zbierz") zdominowała streszczenie, jeśli w misji jest historia.
+- Jeśli postacie w dialogach ujawniają osobisty lub emocjonalny wątek (konflikt, relacja, przemiana) — to jest sedno misji i musi się znaleźć w streszczeniu.
+- Nie cytuj. Użyj parafrazowania po polsku, jeżeli jest to konieczne.
+- Trzymaj spójną terminologię w całym streszczeniu, tzn. nie mixuj angielskich słów z polskimi. Nazwy własne trzymajmy po angielsku.
+"""
+
 
 prompt_translator = ChatPromptTemplate.from_messages(
     [
@@ -376,5 +397,24 @@ def editor(
             "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji")
             }
     )
+
+    return result
+
+
+def get_quest_summary(llm, mission: str) -> AIMessage:
+    prompt_context_lore = ChatPromptTemplate.from_messages(
+        [
+            ("system", CONST_RULES_QUEST_SUMMARY),
+            ("human", """
+                TEKST MISJI:
+                {misje_tekst}
+            """)
+        ]
+    )
+
+    chain = prompt_context_lore | llm
+    result = chain.invoke({
+        "misje_tekst": mission
+    })
 
     return result
