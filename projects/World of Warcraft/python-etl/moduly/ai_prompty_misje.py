@@ -122,7 +122,6 @@ Przed zwróceniem odpowiedzi sprawdź po cichu:
 - czy wynik zawiera wyłącznie poprawny JSON zgodny ze schematem odpowiedzi.
 """
 
-
 CONST_RULES_EDITOR = """
 ROLA
 Jesteś głównym redaktorem polskiej lokalizacji gry AAA z gatunku high fantasy osadzonej w uniwersum World of Warcraft.
@@ -292,9 +291,17 @@ prompt_translator = ChatPromptTemplate.from_messages(
         {tekst_niemiecki}
         </tekst_de_pomocniczy>
 
+        <kontekst_rag>
+        {kontekst_rag}
+        </kontekst_rag>
+
         <wytyczne_dla_ras>
         {wytyczne_rasy}
         </wytyczne_dla_ras>
+         
+        <podsumowanie_misji>
+        {podsumowanie_misji}
+        </podsumowanie_misji>
 
         """)
     ]
@@ -317,6 +324,10 @@ prompt_editor = ChatPromptTemplate.from_messages(
         {tekst_pomocniczy}
         </tekst_de_pomocniczy>
 
+        <kontekst_rag>
+        {kontekst_rag}
+        </kontekst_rag>
+
         <mapowania_npc>
         {tekst_npc}
         </mapowania_npc>
@@ -328,6 +339,10 @@ prompt_editor = ChatPromptTemplate.from_messages(
         <wytyczne_dla_ras>
         {wytyczne_rasy}
         </wytyczne_dla_ras> 
+         
+        <podsumowanie_misji>
+        {podsumowanie_misji}
+        </podsumowanie_misji>
 
         """)
     ]
@@ -338,6 +353,7 @@ def translator(
         tekst_oryginalny,
         tekst_niemiecki,
         kontekst_rag,
+        podsumowanie_misji,
         wytyczne_rasy,
         tekst_npc,
         tekst_slowa_kluczowe
@@ -359,7 +375,8 @@ def translator(
             "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
             "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
             "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
-            "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji")
+            "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
+            "podsumowanie_misji": tekst_lub_placeholder(podsumowanie_misji, "- jest to zwykła misja nie będąca w żadnym chainie")
         }
     )
 
@@ -372,6 +389,7 @@ def editor(
         tekst_przetlumaczony,
         tekst_pomocniczy,
         kontekst_rag,
+        podsumowanie_misji,
         wytyczne_rasy,
         tekst_npc,
         tekst_slowa_kluczowe
@@ -394,7 +412,8 @@ def editor(
             "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
             "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
             "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
-            "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji")
+            "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
+            "podsumowanie_misji": tekst_lub_placeholder(podsumowanie_misji, "- jest to zwykła misja nie będąca w żadnym chainie")
             }
     )
 

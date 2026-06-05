@@ -258,6 +258,17 @@ def handle_quest_stage_result(
 
     return parsed_json, logs
 
+def formatuj_podsumowania_poprzednich_misji(wiersze) -> str:
+    if not wiersze:
+        return ""
+
+    podsumowania = {
+        str(numer_misji): podsumowanie
+        for numer_misji, podsumowanie in wiersze
+    }
+
+    return json.dumps(podsumowania, indent=4, ensure_ascii=False)
+
 def przetworz_pojedyncza_misje(
     wiersz,
     silnik,
@@ -304,7 +315,6 @@ def przetworz_pojedyncza_misje(
                 LEFT JOIN dbo.NPC AS n
                   ON n.NPC_ID_MOJE_PK = pvt.ID_NPC;
             """)
-
             q_select_sk = text("""
                 SELECT sk.SLOWO_EN, sk.SLOWO_PL
                 FROM dbo.MISJE_SLOWA_KLUCZOWE AS msk
@@ -312,7 +322,6 @@ def przetworz_pojedyncza_misje(
                    ON msk.SLOWO_ID = sk.SLOWO_ID_PK
                 WHERE msk.MISJA_ID_MOJE_FK = :misja_id
             """)
-
             q_select_rasa = text("""
             WITH teksty_npc AS (
                 -- NPC start: wszystkie segmenty oprócz zakończenia
@@ -375,16 +384,55 @@ def przetworz_pojedyncza_misje(
             HAVING SUM(nz.ILE_ZNAKOW) > 30
             ORDER BY ILE_ZNAKOW DESC;
             """)
+            q_select_fabula = text("""
+                SELECT NAZWA_LINII_FABULARNEJ_EN
+                FROM dbo.MISJE
+                WHERE MISJA_ID_MOJE_PK = :misja_id
+            """)
+            q_select_kolejnosc_misja = text("""
+                SELECT KOLEJNOSC_LINII_FABULARNEJ
+                FROM dbo.MISJE
+                WHERE KOLEJNOSC_LINII_FABULARNEJ IS NOT NULL
+                  AND NAZWA_LINII_FABULARNEJ_EN = :fabula_en
+                  AND MISJA_ID_MOJE_PK = :misja_id
+                ORDER BY KOLEJNOSC_LINII_FABULARNEJ ASC
+            """)
+            q_select_podsumowanie = text("""
+                SELECT 
+                    M.KOLEJNOSC_LINII_FABULARNEJ AS NUMER_MISJI_W_CHAINIE, 
+                    MP.PODSUMOWANIE
+                FROM dbo.MISJE AS M
+                INNER JOIN dbo.MISJE_PODSUMOWANIA AS MP
+                ON M.MISJA_ID_MOJE_PK = MP.MISJA_ID_MOJE_FK
+                WHERE M.KOLEJNOSC_LINII_FABULARNEJ IS NOT NULL
+                AND M.NAZWA_LINII_FABULARNEJ_EN = :fabula_en
+                AND M.KOLEJNOSC_LINII_FABULARNEJ < :kolejnosc_misji
+                ORDER BY NUMER_MISJI_W_CHAINIE ASC
+            """)
 
+            fabula_z_bazy = conn.execute(q_select_fabula, {"misja_id": misja_id}).first()
+            fabula_en = fabula_z_bazy[0] if fabula_z_bazy else None
             npc_z_bazy = conn.execute(q_select_npc, {"misja_id": misja_id}).all()
             slowa_kluczowe_z_bazy = conn.execute(q_select_sk, {"misja_id": misja_id}).all()
             wybrane_rasy_z_bazy = conn.execute(q_select_rasa, {"misja_id": misja_id}).all()
+            kolejnosc_misja = conn.execute(q_select_kolejnosc_misja, {
+                                                                    "misja_id": misja_id,
+                                                                    "fabula_en": fabula_en
+                                                                }).first()
+            kolejnosc_misji = kolejnosc_misja[0] if kolejnosc_misja else None
 
             wsad_npc = set(n for n in npc_z_bazy)
             wsad_sk = set(s for s in slowa_kluczowe_z_bazy)
             wsad_json = hash_do_wsad_json(zakodowane_dane, jezyk="EN")
             wsad_rag = json.dumps(json.loads(wsad_json).get("Misje_EN", {}), indent=4, ensure_ascii=False)
             wsad_wybrane_rasy_opis = set(r[0] for r in wybrane_rasy_z_bazy)
+            podsumowania_poprzednich_misji = []
+            if kolejnosc_misji is not None:
+                podsumowania_poprzednich_misji = conn.execute(q_select_podsumowanie, {
+                    "fabula_en": fabula_en,
+                    "kolejnosc_misji": kolejnosc_misji
+                }).all()
+            wsad_podsumowanie = formatuj_podsumowania_poprzednich_misji(podsumowania_poprzednich_misji)
 
             txt_npc = "\n".join(
                 [(
@@ -432,14 +480,6 @@ def przetworz_pojedyncza_misje(
 
             try:
 # =========================================================================================
-# ================================== PODSUMOWANIE MISJI ===================================
-# =========================================================================================
-
-
-
-
-
-# =========================================================================================
 # ========================================== RAG ==========================================
 # =========================================================================================
                 current_stage = "rag_context"
@@ -477,10 +517,10 @@ def przetworz_pojedyncza_misje(
                     kontekst_rag=context_lore_text,
                     wytyczne_rasy=txt_rasy,
 
-                    # DODAC PODSUMOWANIE POPRZEDNIEJ MISJI (LLM ROBI)
                     # DODAC TEKST NIEMIECKI
                     tekst_npc=txt_npc,
-                    tekst_slowa_kluczowe=txt_sk
+                    tekst_slowa_kluczowe=txt_sk,
+                    podsumowanie_misji=wsad_podsumowanie
                 )
                 raw_response = result_translator["raw"]
                 translated_json, logs = handle_quest_stage_result(
@@ -515,8 +555,8 @@ def przetworz_pojedyncza_misje(
                     wytyczne_rasy=txt_rasy,
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk,
+                    podsumowanie_misji=wsad_podsumowanie
 
-                    # DODAC PODSUMOWANIE POPRZEDNIEJ MISJI (LLM ROBI)
                     # DODAC TEKST NIEMIECKI
                 )
                 raw_response = result_editor["raw"]

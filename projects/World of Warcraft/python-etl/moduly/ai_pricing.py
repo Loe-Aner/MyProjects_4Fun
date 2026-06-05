@@ -103,6 +103,14 @@ MODEL_PRICING = {
         "input_per_1m": 0.30,
         "output_per_1m": 1.0
     },
+    "claude-opus-4-8": {
+        "provider": "anthropic",
+        "langchain_package": "langchain-anthropic",
+        "langchain_class": "ChatAnthropic",
+        "currency": "USD",
+        "input_per_1m": 5.00,
+        "output_per_1m": 25.00
+    },
     "claude-opus-4-7": {
         "provider": "anthropic",
         "langchain_package": "langchain-anthropic",

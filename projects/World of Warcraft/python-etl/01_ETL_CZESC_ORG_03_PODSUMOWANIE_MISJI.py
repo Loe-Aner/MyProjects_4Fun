@@ -13,7 +13,7 @@ generate_and_save_quest_summary(
     
     # ZMIENIC NONE NA KONKRETNA NAZWE W PRXZYPADKU POTRZEB
     kraina=None,
-    fabula="Path of de Hash'ey",
+    fabula="Ripple Effects",
     dodatek=None,
     id_misji=None
 )
