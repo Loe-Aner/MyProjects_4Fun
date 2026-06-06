@@ -224,6 +224,8 @@ def get_data_from_rag(client: QdrantClient, query: str, model: TextEmbedding):
             "score": round(point.score, 3),
             "chunk_title": point.payload["chunk_title"],
             "embedding_text": point.payload["embedding_text"],
+            "chunk_id": point.payload.get("chunk_id"),
+            "document_id": point.payload.get("document_id"),
         }
         for point in results.points
     ]

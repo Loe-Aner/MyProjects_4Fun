@@ -23,11 +23,8 @@ from moduly.ai_prompty import (
     instrukcja_dane_npc_zmienna
 )
 
-from moduly.ai_prompty_RAG import (
-    get_context_lore
-)
-from moduly.AI_RAG import (
-    get_filtered_candidates
+from moduly.ai_lore_kontekst import (
+    czytaj_kontekst_lore
 )
 
 from moduly.ai_core import (
@@ -46,9 +43,7 @@ from moduly.ai_prompty_misje import (
 from moduly.ai_modele import (
     llm_translator,
     llm_editor,
-    llm_lore,
-    llm_quest_summary,
-    llm_context
+    llm_quest_summary
 )
 from moduly.ai_logi import (
     create_logs,
@@ -409,6 +404,9 @@ def przetworz_pojedyncza_misje(
                 AND M.KOLEJNOSC_LINII_FABULARNEJ < :kolejnosc_misji
                 ORDER BY NUMER_MISJI_W_CHAINIE ASC
             """)
+            q_select_referencja_de = text("""
+            
+            """)
 
             fabula_z_bazy = conn.execute(q_select_fabula, {"misja_id": misja_id}).first()
             fabula_en = fabula_z_bazy[0] if fabula_z_bazy else None
@@ -424,7 +422,6 @@ def przetworz_pojedyncza_misje(
             wsad_npc = set(n for n in npc_z_bazy)
             wsad_sk = set(s for s in slowa_kluczowe_z_bazy)
             wsad_json = hash_do_wsad_json(zakodowane_dane, jezyk="EN")
-            wsad_rag = json.dumps(json.loads(wsad_json).get("Misje_EN", {}), indent=4, ensure_ascii=False)
             wsad_wybrane_rasy_opis = set(r[0] for r in wybrane_rasy_z_bazy)
             podsumowania_poprzednich_misji = []
             if kolejnosc_misji is not None:
@@ -465,8 +462,6 @@ def przetworz_pojedyncza_misje(
 
             _translator = llm_translator()
             _editor = llm_editor()
-            _lore = llm_lore()
-            _context = llm_context()
 
             result_translator = None
             result_editor = None
@@ -483,25 +478,7 @@ def przetworz_pojedyncza_misje(
 # ========================================== RAG ==========================================
 # =========================================================================================
                 current_stage = "rag_context"
-                current_llm = _context
-                started_at = time.perf_counter() # uwzgledniam czas lacznie z generowaniem
-                                                 # pytan, qdrant i reranking
-
-                chunks_context = get_filtered_candidates(_lore, wsad_rag)
-                context_lore = get_context_lore(_context, wsad_rag, chunks_context)
-                raw_response = context_lore
-                context_lore_text = str(context_lore.content or "")
-
-                logs = create_logs(
-                    raw_response=raw_response,
-                    llm=_context,
-                    misja_id_moje_fk=misja_id,
-                    stage="rag_context",
-                    duration_ms=round((time.perf_counter() - started_at) * 1000),
-                    input_chars=len(wsad_rag) + len(chunks_context),
-                    output_chars=len(context_lore_text)
-                )
-                save_ai_logs_to_db(silnik=silnik, logs=logs)
+                context_lore_text = czytaj_kontekst_lore(conn, misja_id)
 
 # =========================================================================================
 # ======================================= TRANSLATOR ======================================

@@ -1,4 +1,4 @@
-from scraper_wowhead import buduj_mapping_01
+from scraper_wowhead_metadane import buduj_mapping_01
 
 # OSTATNIE REVIEW: 21.01.2026
 

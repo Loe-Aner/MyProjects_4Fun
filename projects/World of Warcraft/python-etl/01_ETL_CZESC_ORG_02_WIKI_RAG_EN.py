@@ -15,6 +15,8 @@ rag_categories = [
     # {"category": "Category:A Brewing Storm", "subtype": "scenarios", "excluded": [""], "min_body_words": 30},
     # {"category": "Category:A Gilnean's Dream", "subtype": "scenarios", "excluded": [""], "min_body_words": 30},
     # {"category": "Category:A Good War characters", "subtype": "characters", "excluded": [""], "min_body_words": 30},
+    # {"category": "Category:Void ethereals", "subtype": "etherals", "excluded": ["Shadowguard", "Ethereal", "Unbound", "Untethered", "Netherguard", "Nascent"], "min_body_words": 100},
+    {"category": "Category:Worlds", "subtype": "Worlds", "excluded": ["film universe"], "min_body_words": 150},
 ]
 
 

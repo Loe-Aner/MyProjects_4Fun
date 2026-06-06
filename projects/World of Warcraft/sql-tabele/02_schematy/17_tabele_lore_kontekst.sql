@@ -1,0 +1,111 @@
+USE WoW_PL
+;
+
+/* ======================================================================
+   Tabele kontekstu LORE (RAG) - prekomputowane, niezale¿ne od t³umaczenia.
+
+   MISJE_LORE_PYTANIA   - pytania wygenerowane przez LLM (2-3 / misja)
+   MISJE_LORE_TRAFIENIA - œlad trafieñ z Qdranta (BEZ treœci chunków;
+                          tylko ID + score, treœæ odczytujemy z Qdranta)
+   MISJE_LORE_KONTEKST  - finalne podsumowanie lore (jedno na misjê)
+
+   Wszystkie z FK do dbo.MISJE. Przy zmianie na wiki kasowane przez
+   maintenance_hashe (razem z misj¹).
+====================================================================== */
+
+
+-- 1) PYTANIA -----------------------------------------------------------
+CREATE TABLE dbo.MISJE_LORE_PYTANIA (
+  TECH_ID BIGINT IDENTITY(1, 1)     NOT NULL,
+  MISJA_ID_MOJE_FK BIGINT           NOT NULL,
+
+  NR_PYTANIA INT                    NOT NULL,
+  ASPEKT NVARCHAR(255)                  NULL,
+  PYTANIE NVARCHAR(1000)            NOT NULL,
+  MODEL NVARCHAR(100)                   NULL,
+
+  DATA_DODANIA DATETIME2(0)         NOT NULL
+    CONSTRAINT DF_MISJE_LORE_PYTANIA_DATA DEFAULT SYSDATETIME(),
+
+  CONSTRAINT PK_MISJE_LORE_PYTANIA PRIMARY KEY CLUSTERED (TECH_ID),
+  CONSTRAINT FK_MISJE_LORE_PYTANIA_MISJE
+    FOREIGN KEY (MISJA_ID_MOJE_FK) REFERENCES dbo.MISJE (MISJA_ID_MOJE_PK)
+)
+;
+
+CREATE INDEX IX_MISJE_LORE_PYTANIA_MISJA
+ON dbo.MISJE_LORE_PYTANIA (MISJA_ID_MOJE_FK, NR_PYTANIA)
+;
+
+
+-- 2) TRAFIENIA (œlad bez treœci) ---------------------------------------
+CREATE TABLE dbo.MISJE_LORE_TRAFIENIA (
+  TECH_ID BIGINT IDENTITY(1, 1)     NOT NULL,
+  MISJA_ID_MOJE_FK BIGINT           NOT NULL,
+
+  NR_PYTANIA INT                    NOT NULL,
+  POZYCJA INT                       NOT NULL,   -- ranking po rerankingu (1 = najlepszy)
+
+  QDRANT_POINT_ID NVARCHAR(64)      NOT NULL,
+  CHUNK_ID NVARCHAR(255)                NULL,
+  DOCUMENT_ID NVARCHAR(255)             NULL,
+
+  SCORE_DENSE DECIMAL(9, 6)             NULL,   -- cosine z retrievalu
+  RERANK_SCORE DECIMAL(9, 6)            NULL,   -- z cross-encodera
+
+  COLLECTION_NAME NVARCHAR(100)         NULL,
+  EMBEDDING_MODEL NVARCHAR(100)         NULL,
+
+  DATA_DODANIA DATETIME2(0)         NOT NULL
+    CONSTRAINT DF_MISJE_LORE_TRAFIENIA_DATA DEFAULT SYSDATETIME(),
+
+  CONSTRAINT PK_MISJE_LORE_TRAFIENIA PRIMARY KEY CLUSTERED (TECH_ID),
+  CONSTRAINT FK_MISJE_LORE_TRAFIENIA_MISJE
+    FOREIGN KEY (MISJA_ID_MOJE_FK) REFERENCES dbo.MISJE (MISJA_ID_MOJE_PK)
+)
+;
+
+CREATE INDEX IX_MISJE_LORE_TRAFIENIA_MISJA
+ON dbo.MISJE_LORE_TRAFIENIA (MISJA_ID_MOJE_FK, NR_PYTANIA, POZYCJA)
+;
+
+
+-- 3) KONTEKST (finalne podsumowanie, jedno na misjê) -------------------
+CREATE TABLE dbo.MISJE_LORE_KONTEKST (
+  TECH_ID BIGINT IDENTITY(1, 1)     NOT NULL,
+  MISJA_ID_MOJE_FK BIGINT           NOT NULL,
+
+  PODSUMOWANIE NVARCHAR(MAX)            NULL,
+  MODEL NVARCHAR(100)                   NULL,
+
+  DATA_DODANIA DATETIME2(0)         NOT NULL
+    CONSTRAINT DF_MISJE_LORE_KONTEKST_DATA DEFAULT SYSDATETIME(),
+  DATA_AKTUALIZACJI DATETIME2(0)    NOT NULL
+    CONSTRAINT DF_MISJE_LORE_KONTEKST_DATA_UPD DEFAULT SYSDATETIME(),
+
+  CONSTRAINT PK_MISJE_LORE_KONTEKST PRIMARY KEY CLUSTERED (TECH_ID),
+  CONSTRAINT FK_MISJE_LORE_KONTEKST_MISJE
+    FOREIGN KEY (MISJA_ID_MOJE_FK) REFERENCES dbo.MISJE (MISJA_ID_MOJE_PK),
+  CONSTRAINT UQ_MISJE_LORE_KONTEKST_MISJA UNIQUE (MISJA_ID_MOJE_FK)
+)
+;
+
+CREATE INDEX IX_MISJE_LORE_KONTEKST_MISJA
+ON dbo.MISJE_LORE_KONTEKST (MISJA_ID_MOJE_FK)
+;
+GO
+
+CREATE TRIGGER trg_MISJE_LORE_KONTEKST_DATAUPDATE
+ON dbo.MISJE_LORE_KONTEKST
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE k
+    SET DATA_AKTUALIZACJI = SYSDATETIME()
+    FROM dbo.MISJE_LORE_KONTEKST AS k
+    INNER JOIN inserted AS i
+        ON k.TECH_ID = i.TECH_ID;
+END
+GO
