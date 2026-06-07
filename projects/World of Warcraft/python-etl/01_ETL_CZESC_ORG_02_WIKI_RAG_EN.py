@@ -16,7 +16,17 @@ rag_categories = [
     # {"category": "Category:A Gilnean's Dream", "subtype": "scenarios", "excluded": [""], "min_body_words": 30},
     # {"category": "Category:A Good War characters", "subtype": "characters", "excluded": [""], "min_body_words": 30},
     # {"category": "Category:Void ethereals", "subtype": "etherals", "excluded": ["Shadowguard", "Ethereal", "Unbound", "Untethered", "Netherguard", "Nascent"], "min_body_words": 100},
-    {"category": "Category:Worlds", "subtype": "Worlds", "excluded": ["film universe"], "min_body_words": 150},
+    # {"category": "Category:Worlds", "subtype": "Worlds", "excluded": ["film universe"], "min_body_words": 150},
+    # {"category": "Category:Domanaar_characters", "subtype": "characters", "excluded": [], "min_body_words": 250},
+    # {"category": "Category:Haranir_characters", "subtype": "characters", "excluded": [], "min_body_words": 250},
+    # {"category": "Category:Old_Gods", "subtype": "old_gods", "excluded": [], "min_body_words": 150},
+    # {"category": "Category:Religions", "subtype": "religions", "excluded": ["alternate universe"], "min_body_words": 250},
+    # {"category": "Category:Forest_troll_territories", "subtype": "forest_troll_territories", "excluded": [], "min_body_words": 200},
+    # {"category": "Category:Forest_troll_characters", "subtype": "characters", "excluded": ["Amani", "(tactics)", "Amani'shi", "Disciple", "Classic", "Gurubashi", "(beta)", "Smolderthorn", "Shadowpine", "Shadowglen", "Revantusk", "Mossflayer"], "min_body_words": 250},
+    # {"category": "Category:Loa", "subtype": "loa", "excluded": ["tactics", "group"], "min_body_words": 250},
+    # {"category": "Category:Forest_troll_organizations", "subtype": "organizations", "excluded": [], "min_body_words": 150},
+    # {"category": "Category:Zul'Aman_subzones", "subtype": "subzones", "excluded": [], "min_body_words": 150},
+    # {"category": "Category:Twilight's_Blade", "subtype": "characters", "excluded": [], "min_body_words": 250},
 ]
 
 

@@ -1,5 +1,6 @@
 import json
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from sqlalchemy import text
 
@@ -17,6 +18,10 @@ from moduly.AI_RAG import (
 
 # Komunikat dla translatora/redaktora, gdy nie ma prekomputowanego kontekstu.
 PLACEHOLDER_BRAK_KONTEKSTU = "Brak kontekstu dla tej misji - pomiń tę sekcję"
+
+# Ile misji przetwarzac rownolegle. Kazda misja to 2 wywolania LLM + zapytania do Qdranta,
+# czyli praca I/O-bound - watki dobrze sie tu sprawdzaja.
+MAKS_ROWNOLEGLE_MISJE = 5
 
 
 _Q_INS_PYTANIE = text("""
@@ -59,6 +64,23 @@ def czytaj_kontekst_lore(conn, misja_id: int) -> str:
     if not row or not row[0] or not str(row[0]).strip():
         return PLACEHOLDER_BRAK_KONTEKSTU
     return str(row[0]).strip()
+
+
+def _wytnij_tekst(content) -> str:
+    """
+    Wyciaga czysty tekst z AIMessage.content. Pod Responses API content to lista blokow
+    (reasoning + text), wiec bierzemy tylko bloki typu 'text'. Dla zwyklego stringa zwraca go bez zmian.
+    """
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        czesci = [
+            blok.get("text", "")
+            for blok in content
+            if isinstance(blok, dict) and blok.get("type") == "text"
+        ]
+        return "\n".join(czesci).strip()
+    return str(content or "").strip()
 
 
 def _formatuj_chunki(rag_context_chunks: list[dict]) -> str:
@@ -133,7 +155,7 @@ def _zbuduj_kontekst_dla_misji(
     # --- 3) PODSUMOWANIE LORE ---
     t1 = time.perf_counter()
     context_lore = get_context_lore(context_llm, wsad_rag, rag_context)
-    podsumowanie = str(context_lore.content or "").strip()
+    podsumowanie = _wytnij_tekst(context_lore.content)
     save_ai_logs_to_db(silnik, create_logs(
         raw_response=context_lore,
         llm=context_llm,
@@ -224,29 +246,52 @@ def buduj_kontekst_lore(
     context_llm = llm_context()
     rag_components = load_rag_components()
 
+    suma = len(misje)
+
+    def _przetworz_misje(numer: int, rekord) -> tuple[str, str]:
+        """
+        Przetwarza jedna misje. Zwraca (status, komunikat), status in {"ok", "skip"}.
+        Wyjatki nie sa tu lapane - obsluguje je petla wynikow ponizej.
+        """
+        misja_id, _misja_id_z_gry, html_skompresowany = rekord
+
+        if not html_skompresowany:
+            return "skip", f"--- [{numer}/{suma}] Misja {misja_id}: brak HTML, pomijam."
+
+        wsad_json = hash_do_wsad_json(html_skompresowany, jezyk="EN")
+        wsad_rag = json.dumps(json.loads(wsad_json).get("Misje_EN", {}), indent=4, ensure_ascii=False)
+
+        ile_pytan, ile_trafien, dl_pods = _zbuduj_kontekst_dla_misji(
+            silnik, misja_id, wsad_rag,
+            lore_llm, context_llm, rag_components,
+            nadpisz=nadpisz,
+        )
+        return "ok", (
+            f"--- [{numer}/{suma}] Misja {misja_id}: OK "
+            f"(pytania={ile_pytan}, trafienia={ile_trafien}, podsumowanie={dl_pods} zn.)"
+        )
+
     sukces = 0
     bledy = 0
+    pominiete = 0
 
-    for numer, (misja_id, _misja_id_z_gry, html_skompresowany) in enumerate(misje, start=1):
-        if not html_skompresowany:
-            print(f"--- [{numer}/{len(misje)}] Misja {misja_id}: brak HTML, pomijam.")
-            continue
+    with ThreadPoolExecutor(max_workers=MAKS_ROWNOLEGLE_MISJE) as executor:
+        zadania = {
+            executor.submit(_przetworz_misje, numer, rekord): rekord
+            for numer, rekord in enumerate(misje, start=1)
+        }
 
-        try:
-            wsad_json = hash_do_wsad_json(html_skompresowany, jezyk="EN")
-            wsad_rag = json.dumps(json.loads(wsad_json).get("Misje_EN", {}), indent=4, ensure_ascii=False)
+        for przyszlosc in as_completed(zadania):
+            misja_id = zadania[przyszlosc][0]
+            try:
+                status, komunikat = przyszlosc.result()
+                if status == "ok":
+                    sukces += 1
+                else:
+                    pominiete += 1
+                print(komunikat)
+            except Exception as e:
+                bledy += 1
+                print(f"--- Misja {misja_id}: BŁĄD - {e}")
 
-            ile_pytan, ile_trafien, dl_pods = _zbuduj_kontekst_dla_misji(
-                silnik, misja_id, wsad_rag,
-                lore_llm, context_llm, rag_components,
-                nadpisz=nadpisz,
-            )
-            sukces += 1
-            print(f"--- [{numer}/{len(misje)}] Misja {misja_id}: OK "
-                  f"(pytania={ile_pytan}, trafienia={ile_trafien}, podsumowanie={dl_pods} zn.)")
-        except Exception as e:
-            bledy += 1
-            print(f"--- [{numer}/{len(misje)}] Misja {misja_id}: BŁĄD - {e}")
-            continue
-
-    print(f"\n--- Koniec. Zrobione={sukces}, błędy={bledy}")
+    print(f"\n--- Koniec. Zrobione={sukces}, pominięte={pominiete}, błędy={bledy}")

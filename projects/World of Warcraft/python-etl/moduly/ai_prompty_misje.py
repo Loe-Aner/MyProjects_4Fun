@@ -4,7 +4,20 @@ from langchain_core.messages import AIMessage
 from moduly.ai_klasy import QuestContentResponse, QuestContentResult
 
 def tekst_lub_placeholder(tekst: str, placeholder: str) -> str:
-    tekst = (tekst or "").strip()
+    if tekst is None:
+        return placeholder
+
+    if not isinstance(tekst, str):
+        if isinstance(tekst, (list, tuple, set)):
+            tekst = "\n".join(
+                str(element).strip()
+                for element in tekst
+                if str(element).strip()
+            )
+        else:
+            tekst = str(tekst)
+
+    tekst = tekst.strip()
     return tekst if tekst else placeholder
 
 CONST_RULES_TRANSLATOR = """
@@ -23,6 +36,16 @@ TRYB PRACY
 - Najpierw przeczytaj całą misję i ustal spójny obraz sytuacji, relacji, tonu i terminologii.
 - Następnie przetłumacz treści przeznaczone dla odbiorcy końcowego.
 - Nie komentuj procesu. Nie wyjaśniaj decyzji. Zwróć wyłącznie wynik zgodny ze schematem odpowiedzi.
+
+WEJŚCIE I JEGO WAGA
+Dostajesz misję w kilku blokach. Każdy ma inną rolę i wagę — traktuj je dokładnie tak:
+- `<mapowania_npc>` oraz `<mapowania_slow_kluczowych>` — OBOWIĄZKOWE. Wiążą Cię co do nazw i terminów.
+- `<json_zrodlowy_en>` — ŹRÓDŁO PRAWDY dla znaczenia. To jest tekst, który tłumaczysz.
+- `<tekst_de_pomocniczy>` — wyłącznie pomoc tonalna; bywa niekompletny, a jego brak nie jest błędem. Nigdy nie koryguj znaczenia EN na podstawie DE.
+- `<kontekst_rag>` — wyłącznie do zrozumienia świata i ujednoznacznienia sensu. NIGDY nie przenoś jego treści do tłumaczenia.
+- `<podsumowania_poprzednich_misji_w_chainie>` — streszczenia ostatnich maksymalnie 5 WCZEŚNIEJSZYCH misji z tego łańcucha (klucz = numer misji w łańcuchu) wraz z informacją, którą misję z kolei właśnie tłumaczysz. To najbliższy kontekst ciągłości, nie pełne streszczenie całego chaina; NIGDY nie przenoś tych treści do tłumaczenia ani nie traktuj ich jako źródła nazw czy mapowań.
+- `<wytyczne_dla_ras>` — WIĄŻĄCE dla głosu postaci, ale zawsze podporządkowane regule „nie ponad rejestr źródła". Na etapie tłumacza zawierają opis głosu rasy oraz wyłącznie przykłady tłumaczeniowe (`przykłady_tłumacza`). Te przykłady to wzorzec osi błędu — ucz się z nich, nie kopiuj ich treści.
+- `<obsada_i_glosy>` — mówi, kto wypowiada którą część misji i jakiej jest rasy (rasa w nawiasie). Użyj tego, by dobrać właściwy głos do właściwego fragmentu.
 
 PRIORYTET DECYZJI
 1. Nienaruszalne elementy techniczne i struktura wyjścia.
@@ -48,15 +71,26 @@ ZASADY DLA RÓŻNYCH TYPÓW TREŚCI
 - Dialogi mają zachować głos postaci, ale bez własnej nadmiernej stylizacji.
 - Jeśli źródło jest lakoniczne, polski tekst także ma pozostać lakoniczny.
 
+GŁOS POSTACI I OBSADA
+- Blok `<obsada_i_glosy>` przypisuje głosy do części misji:
+  - Questgiver (wydający misję) jest głosem `Treść` i `Postęp`.
+  - Kończący misję (oddanie) jest głosem `Zakończenie`.
+  - Każdy NPC w dialogach jest głosem wyłącznie własnych wypowiedzi.
+- Styl głosu dobieraj według rasy danej postaci, korzystając z `<wytyczne_dla_ras>`. Jeśli dla danej rasy nie ma wytycznych, pisz neutralnie, w rejestrze źródła.
+- `Tytuł`, `Cele`, `Nagrody` oraz krótkie pola funkcjonalne pisz neutralnie i użytkowo — nie wtłaczaj w nie stylizacji rasowej.
+- Stylizacja rasowa nigdy nie podnosi rejestru ponad źródło i niczego nie dodaje; rzeźbi wyłącznie brzmienie tego, co już jest w EN.
+
 NAZWY WŁASNE I MAPOWANIA
 - Mapowania NPC i słów kluczowych są obowiązkowe.
 - Jeżeli nazwa lub termin ma mapowanie, użyj mapowania i nie zastępuj go innym wariantem.
-- Jeżeli nazwa własna lub termin lore nie ma mapowania i istnieje ryzyko wymyślenia niekanonicznej polskiej formy, pozostaw nazwę w oryginale.
+- Nazwy własne i terminy lore tłumacz WYŁĄCZNIE według `<mapowania_slow_kluczowych>` i `<mapowania_npc>`. Jeżeli dany termin nie ma tam mapowania — zostaw go w oryginalnej formie angielskiej i nie twórz polskiego wariantu.
+- Dotyczy to także tokenów wewnątrz nazw złożonych: zmapowany fragment tłumacz wg mapowania, a fragment niezmapowany zostaw w oryginale.
+- `<podsumowania_poprzednich_misji_w_chainie>` i `<kontekst_rag>` mogą zawierać polskie omówienia nazw — to NIE są mapowania. Nie kopiuj z nich polskich form nazw.
 - W polach nazewniczych używaj dokładnie formy wynikającej z mapowania lub reguły biznesowej.
 - W tekście ciągłym możesz odmieniać mapowaną nazwę tylko wtedy, gdy jest to naturalne po polsku i nadal jednoznacznie wskazuje ten sam byt; nie twórz nowej nazwy.
 - Jeżeli NPC ma tytuł "Brak Danych", zachowaj dokładnie tę wartość.
 - Jeżeli `npc_en` jest pustym stringiem i pole docelowe wymaga polskiej nazwy NPC, zwróć dokładnie "Brak Danych".
-- Metadane `PLEC` i `RASA` służą wyłącznie pomocniczo do fleksji, rodzaju gramatycznego i tonu; nie nadpisują faktów ze źródła.
+- Metadane `plec` i `rasa` w `<mapowania_npc>` służą do fleksji i rodzaju gramatycznego; pełne wytyczne głosu postaci znajdują się w `<wytyczne_dla_ras>`. Żadne z nich nie nadpisuje faktów ze źródła.
 
 ELEMENTY NIETŁUMACZALNE I PLACEHOLDERY
 - Zamroź wszystko, co wygląda na placeholder, tag, zmienną, marker, kod, sekwencję escape, identyfikator lub fragment formatujący.
@@ -66,9 +100,16 @@ ELEMENTY NIETŁUMACZALNE I PLACEHOLDERY
 - Nie usuwaj ich, nie duplikuj, nie rozbijaj i nie „normalizuj”.
 - Możesz przesunąć placeholder w obrębie zdania tylko wtedy, gdy wymaga tego polska gramatyka i sens pozostaje identyczny.
 - Nie zamieniaj sekwencji escape na rzeczywiste znaki.
+- Placeholdery płci i imienia gracza (np. `$g`, `$n`, `$N`, `$NAME`, `<name>`) zostaw nietknięte; nie rozstrzygaj za nie formy.
+- Jeśli zwrot do gracza wymaga rodzaju gramatycznego, a w źródle NIE MA żadnego znacznika płci, użyj domyślnie formy męskiej (np. „przyszedłeś", „jesteś gotów").
 
 ZASADY STRUKTURY I DANYCH
 Zwróć zawsze kompletny JSON w dokładnie poniższej strukturze; zachowaj wszystkie sekcje, listy, ID, enum `typ`, kolejność i numerowane klucze z wejścia, a tłumacz wyłącznie wartości tekstowe.
+Poniższy JSON to PRZYKŁAD STRUKTURY (ilustracyjny) — odwzoruj jego kształt, ale liczba i numeracja kluczy oraz puste sekcje muszą dokładnie odpowiadać `<json_zrodlowy_en>`. Jeśli sekcja źródła jest pusta, pozostaw ją pustą; nie dorabiaj kluczy.
+Wymogi techniczne wyjścia:
+- Zwróć wyłącznie surowy, poprawny JSON: bez ogrodzeń ```` ```json ````, bez komentarzy, bez tekstu przed ani po.
+- Używaj kodowania UTF-8 z polskimi znakami diakrytycznymi.
+- Poprawnie escapuj znaki specjalne w wartościach (`\\"`, `\\n`) i nie psuj struktury JSON.
 ```json
 {{
   "Misje_PL": {{
@@ -119,7 +160,11 @@ Przed zwróceniem odpowiedzi sprawdź po cichu:
 - czy liczba elementów, kolejność i puste pola są identyczne,
 - czy obecne są wszystkie wymagane sekcje: `Misje_PL`, `Dialogi_PL`, `Podsumowanie_PL`, `Cele_PL`, `Treść_PL`, `Postęp_PL`, `Zakończenie_PL`, `Nagrody_PL`, `Gossipy_Dymki_PL`,
 - czy `Dialogi_PL` nie zostało zagnieżdżone wewnątrz `Misje_PL`,
-- czy wynik zawiera wyłącznie poprawny JSON zgodny ze schematem odpowiedzi.
+- czy głos przypisano zgodnie z `<obsada_i_glosy>` (questgiver → `Treść`/`Postęp`, kończący → `Zakończenie`, dialogi → własne wypowiedzi),
+- czy nazwy bez mapowania pozostały w oryginalnej formie angielskiej,
+- czy nie przeniesiono treści z `<kontekst_rag>` ani `<podsumowania_poprzednich_misji_w_chainie>`,
+- czy puste sekcje źródła pozostały puste, bez dorobionych kluczy,
+- czy wynik to czysty JSON bez ogrodzeń, komentarzy i dodatkowego tekstu zgodny ze schematem odpowiedzi.
 """
 
 CONST_RULES_EDITOR = """
@@ -162,6 +207,7 @@ KONTROLA ŹRÓDEŁ
 - Jeżeli EN jest niedostępny albo pusty, redaguj wyjątkowo ostrożnie: ogranicz się do bezpiecznej poprawy językowej i zachowania mapowań, bez rozszerzania znaczenia.
 
 RASA, KLASA I GŁOS POSTACI
+- Blok `<wytyczne_dla_ras>` zawiera opis głosu rasy oraz wyłącznie przykłady redaktorskie (`przykłady_redaktora`); nie dostajesz przykładów przeznaczonych dla tłumacza.
 - Przykłady dla ras i klas są wskazówką stylistyczną, nie szablonem.
 - Priorytet inspiracji stylistycznej: rasa, potem klasa, potem rejestr neutralny.
 - Rasa ma większy wpływ na głos postaci niż klasa.
@@ -298,10 +344,14 @@ prompt_translator = ChatPromptTemplate.from_messages(
         <wytyczne_dla_ras>
         {wytyczne_rasy}
         </wytyczne_dla_ras>
-         
-        <podsumowanie_misji>
-        {podsumowanie_misji}
-        </podsumowanie_misji>
+
+        <obsada_i_glosy>
+        {obsada_i_glosy}
+        </obsada_i_glosy>
+
+        <podsumowania_poprzednich_misji_w_chainie>
+        {podsumowania_poprzednich_misji_w_chainie}
+        </podsumowania_poprzednich_misji_w_chainie>
 
         """)
     ]
@@ -335,14 +385,14 @@ prompt_editor = ChatPromptTemplate.from_messages(
         <mapowania_slow_kluczowych>
         {tekst_slowa_kluczowe}
         </mapowania_slow_kluczowych>
-         
+
         <wytyczne_dla_ras>
         {wytyczne_rasy}
-        </wytyczne_dla_ras> 
-         
-        <podsumowanie_misji>
-        {podsumowanie_misji}
-        </podsumowanie_misji>
+        </wytyczne_dla_ras>
+
+        <podsumowania_poprzednich_misji_w_chainie>
+        {podsumowania_poprzednich_misji_w_chainie}
+        </podsumowania_poprzednich_misji_w_chainie>
 
         """)
     ]
@@ -353,15 +403,16 @@ def translator(
         tekst_oryginalny,
         tekst_niemiecki,
         kontekst_rag,
-        podsumowanie_misji,
+        podsumowania_poprzednich_misji_w_chainie,
         wytyczne_rasy,
         tekst_npc,
-        tekst_slowa_kluczowe
+        tekst_slowa_kluczowe,
+        obsada_i_glosy=None
     ) -> QuestContentResult:
     """
     Tłumaczy misję na bazie podanych parametrów.
     """
-    
+
     structured_model = prompt_translator | llm.with_structured_output(
         QuestContentResponse,
         method="json_schema",
@@ -376,7 +427,11 @@ def translator(
             "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
             "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
             "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
-            "podsumowanie_misji": tekst_lub_placeholder(podsumowanie_misji, "- jest to zwykła misja nie będąca w żadnym chainie")
+            "obsada_i_glosy": tekst_lub_placeholder(obsada_i_glosy, "- brak danych o obsadzie dla tej misji"),
+            "podsumowania_poprzednich_misji_w_chainie": tekst_lub_placeholder(
+                podsumowania_poprzednich_misji_w_chainie,
+                "- jest to zwykła misja nie będąca w żadnym chainie albo pierwsza misja w chainie"
+            )
         }
     )
 
@@ -389,7 +444,7 @@ def editor(
         tekst_przetlumaczony,
         tekst_pomocniczy,
         kontekst_rag,
-        podsumowanie_misji,
+        podsumowania_poprzednich_misji_w_chainie,
         wytyczne_rasy,
         tekst_npc,
         tekst_slowa_kluczowe
@@ -413,7 +468,10 @@ def editor(
             "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
             "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
             "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
-            "podsumowanie_misji": tekst_lub_placeholder(podsumowanie_misji, "- jest to zwykła misja nie będąca w żadnym chainie")
+            "podsumowania_poprzednich_misji_w_chainie": tekst_lub_placeholder(
+                podsumowania_poprzednich_misji_w_chainie,
+                "- jest to zwykła misja nie będąca w żadnym chainie albo pierwsza misja w chainie"
+            )
             }
     )
 

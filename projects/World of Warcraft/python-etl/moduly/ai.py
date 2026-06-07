@@ -51,7 +51,15 @@ from moduly.ai_logi import (
 )
 
 from moduly.sciezki import sciezka_excel_mappingi
-from moduly.utils import hash_do_wsad_json, sklej_warunki_w_WHERE
+from moduly.utils import (
+    formatuj_obsada,
+    formatuj_podsumowania_poprzednich_misji,
+    formatuj_referencje_de,
+    formatuj_slowa_kluczowe,
+    formatuj_style_ras,
+    hash_do_wsad_json,
+    sklej_warunki_w_WHERE,
+)
 
 def pobierz_przetworz_zapisz_batch_lista(
         silnik, 
@@ -253,17 +261,6 @@ def handle_quest_stage_result(
 
     return parsed_json, logs
 
-def formatuj_podsumowania_poprzednich_misji(wiersze) -> str:
-    if not wiersze:
-        return ""
-
-    podsumowania = {
-        str(numer_misji): podsumowanie
-        for numer_misji, podsumowanie in wiersze
-    }
-
-    return json.dumps(podsumowania, indent=4, ensure_ascii=False)
-
 def przetworz_pojedyncza_misje(
     wiersz,
     silnik,
@@ -392,7 +389,7 @@ def przetworz_pojedyncza_misje(
                   AND MISJA_ID_MOJE_PK = :misja_id
                 ORDER BY KOLEJNOSC_LINII_FABULARNEJ ASC
             """)
-            q_select_podsumowanie = text("""
+            q_select_podsumowanie_poprz_misje = text("""
                 SELECT 
                     M.KOLEJNOSC_LINII_FABULARNEJ AS NUMER_MISJI_W_CHAINIE, 
                     MP.PODSUMOWANIE
@@ -405,12 +402,65 @@ def przetworz_pojedyncza_misje(
                 ORDER BY NUMER_MISJI_W_CHAINIE ASC
             """)
             q_select_referencja_de = text("""
-            
+            SELECT SEGMENT, NR, TRESC
+            FROM MISJE_STATUSY
+            WHERE MISJA_ID_MOJE_FK = :misja_id
+              AND STATUS = '4_REFERENCJA'
+              AND SEGMENT IN ('TREŚĆ', 'POSTĘP', 'ZAKOŃCZENIE')
+            ORDER BY
+              CASE SEGMENT
+                WHEN 'TREŚĆ' THEN 1
+                WHEN 'POSTĘP' THEN 2
+                WHEN 'ZAKOŃCZENIE' THEN 3
+                ELSE 99
+              END,
+              NR
+            """)
+            q_select_obsada = text("""
+            WITH role_npc AS (
+                SELECT m.NPC_START_ID AS NPC_ID, N'START' AS ROLA, 1 AS KOLEJNOSC
+                FROM dbo.MISJE AS m
+                WHERE m.MISJA_ID_MOJE_PK = :misja_id AND m.NPC_START_ID IS NOT NULL
+
+                UNION ALL
+
+                SELECT m.NPC_KONIEC_ID, N'KONIEC', 2
+                FROM dbo.MISJE AS m
+                WHERE m.MISJA_ID_MOJE_PK = :misja_id AND m.NPC_KONIEC_ID IS NOT NULL
+
+                UNION ALL
+
+                SELECT DISTINCT ds.NPC_ID_FK, N'DIALOG', 3
+                FROM dbo.DIALOGI_STATUSY AS ds
+                WHERE ds.MISJA_ID_MOJE_FK = :misja_id AND ds.NPC_ID_FK IS NOT NULL
+            ),
+            nazwy_npc AS (
+                SELECT
+                    ns.NPC_ID_FK,
+                    MAX(CASE WHEN CHARINDEX('[', ns.NAZWA) > 0
+                             THEN RTRIM(LEFT(ns.NAZWA, CHARINDEX('[', ns.NAZWA) - 1))
+                             ELSE ns.NAZWA END) AS CZYSTA_NAZWA
+                FROM dbo.NPC_STATUSY AS ns
+                WHERE ns.STATUS = N'0_ORYGINAŁ'
+                GROUP BY ns.NPC_ID_FK
+            )
+            SELECT
+                rn.ROLA,
+                rn.KOLEJNOSC,
+                nz.CZYSTA_NAZWA AS NAZWA_EN,
+                n.RASA
+            FROM role_npc AS rn
+            LEFT JOIN nazwy_npc AS nz ON nz.NPC_ID_FK = rn.NPC_ID
+            LEFT JOIN dbo.NPC AS n ON n.NPC_ID_MOJE_PK = rn.NPC_ID
+            ORDER BY rn.KOLEJNOSC, nz.CZYSTA_NAZWA;
             """)
 
+            misja_referencja_de_wiersze = conn.execute(q_select_referencja_de, {"misja_id": misja_id}).fetchall()
+            misja_referencja_de = formatuj_referencje_de(misja_referencja_de_wiersze)
             fabula_z_bazy = conn.execute(q_select_fabula, {"misja_id": misja_id}).first()
             fabula_en = fabula_z_bazy[0] if fabula_z_bazy else None
             npc_z_bazy = conn.execute(q_select_npc, {"misja_id": misja_id}).all()
+            obsada_z_bazy = conn.execute(q_select_obsada, {"misja_id": misja_id}).all()
             slowa_kluczowe_z_bazy = conn.execute(q_select_sk, {"misja_id": misja_id}).all()
             wybrane_rasy_z_bazy = conn.execute(q_select_rasa, {"misja_id": misja_id}).all()
             kolejnosc_misja = conn.execute(q_select_kolejnosc_misja, {
@@ -425,11 +475,14 @@ def przetworz_pojedyncza_misje(
             wsad_wybrane_rasy_opis = set(r[0] for r in wybrane_rasy_z_bazy)
             podsumowania_poprzednich_misji = []
             if kolejnosc_misji is not None:
-                podsumowania_poprzednich_misji = conn.execute(q_select_podsumowanie, {
+                podsumowania_poprzednich_misji = conn.execute(q_select_podsumowanie_poprz_misje, {
                     "fabula_en": fabula_en,
                     "kolejnosc_misji": kolejnosc_misji
                 }).all()
-            wsad_podsumowanie = formatuj_podsumowania_poprzednich_misji(podsumowania_poprzednich_misji)
+            wsad_podsumowania_poprzednich_misji_w_chainie = formatuj_podsumowania_poprzednich_misji(
+                podsumowania_poprzednich_misji,
+                kolejnosc_misji
+            )
 
             txt_npc = "\n".join(
                 [(
@@ -443,22 +496,12 @@ def przetworz_pojedyncza_misje(
                 ]
             )
 
-            txt_sk = "\n".join(
-                [
-                    f"- {k[0]}: {k[1]}"
-                    for k in sorted(wsad_sk, key=lambda x: (x[0] or "", x[1] or ""))
-                    if k[0] and k[1]
-                ]
-            )
+            txt_sk = formatuj_slowa_kluczowe(wsad_sk)
 
-            txt_rasy = "\n\n".join(
-                [(
-                    f"rasa: {rasa}\n"
-                    f"wytyczne:\n{RACE_STYLES.get(rasa, 'Brak wytycznych dla tej rasy')}"
-                )
-                    for rasa in sorted(wsad_wybrane_rasy_opis)
-                ]
-            )
+            txt_rasy_tlumacz = formatuj_style_ras(RACE_STYLES, wsad_wybrane_rasy_opis, etap="tlumacz")
+            txt_rasy_redaktor = formatuj_style_ras(RACE_STYLES, wsad_wybrane_rasy_opis, etap="redaktor")
+
+            txt_obsada = formatuj_obsada(obsada_z_bazy)
 
             _translator = llm_translator()
             _editor = llm_editor()
@@ -490,14 +533,13 @@ def przetworz_pojedyncza_misje(
                 result_translator = translator(
                     llm=_translator,
                     tekst_oryginalny=wsad_json,
-                    tekst_niemiecki="",
+                    tekst_niemiecki=misja_referencja_de,
                     kontekst_rag=context_lore_text,
-                    wytyczne_rasy=txt_rasy,
-
-                    # DODAC TEKST NIEMIECKI
+                    wytyczne_rasy=txt_rasy_tlumacz,
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk,
-                    podsumowanie_misji=wsad_podsumowanie
+                    obsada_i_glosy=txt_obsada,
+                    podsumowania_poprzednich_misji_w_chainie=wsad_podsumowania_poprzednich_misji_w_chainie
                 )
                 raw_response = result_translator["raw"]
                 translated_json, logs = handle_quest_stage_result(
@@ -527,14 +569,12 @@ def przetworz_pojedyncza_misje(
                     llm=_editor,
                     tekst_oryginalny=wsad_json,
                     tekst_przetlumaczony=translated_json,
-                    tekst_pomocniczy="",
+                    tekst_pomocniczy=misja_referencja_de,
                     kontekst_rag=context_lore_text,
-                    wytyczne_rasy=txt_rasy,
+                    wytyczne_rasy=txt_rasy_redaktor,
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk,
-                    podsumowanie_misji=wsad_podsumowanie
-
-                    # DODAC TEKST NIEMIECKI
+                    podsumowania_poprzednich_misji_w_chainie=wsad_podsumowania_poprzednich_misji_w_chainie
                 )
                 raw_response = result_editor["raw"]
                 edited_json, logs = handle_quest_stage_result(
@@ -650,7 +690,7 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
 
     print(f"Znaleziono {liczba_zadan} misji do przetworzenia. Uruchamiam {liczba_watkow} wątków...")
     print("Dostawca tłumaczenia: langchain/openai")
-    # ========================================== DODAC REDAGOWANIE ?? ==========================================
+    # ========================================== DODAC REDAGOWANIE ==========================================
     print("Redagowanie: pominięte")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=liczba_watkow) as executor:
@@ -851,8 +891,8 @@ def pobierz_metadane_npc_do_csv(
     folder_zapisu=sciezka_excel_mappingi("surowe", "npc_metadane"),
 ):
 
-    klient=zaladuj_api_i_klienta("API_TLUMACZENIE")
-    model=MODEL_GEMINI_POMOCNICZY
+    klient = zaladuj_api_i_klienta("API_TLUMACZENIE")
+    model = MODEL_GEMINI_POMOCNICZY
 
     run_id = datetime.now().strftime("%Y_%m_%d_%H%M%S_%f")
 
@@ -870,23 +910,18 @@ def pobierz_metadane_npc_do_csv(
           --AND RASA IN ('Unknown')
         ORDER BY NPC_ID_MOJE_PK
     """)
-    # ('Brak Danych', '...', 'Automatic')
+
     df_wejscie = pd.read_sql_query(sql=q_select_npc, con=silnik)
     liczba_rekordow = len(df_wejscie)
-
     if liczba_rekordow == 0:
         print("Brak NPC do przetworzenia.")
-        return
+        return None
 
     config = genai_types.GenerateContentConfig(
         system_instruction=instrukcja_dane_npc_stala(),
         response_mime_type="application/json",
         response_schema=SCHEMAT_ODPOWIEDZI_DANE_NPC,
-        tools=[
-            genai_types.Tool(
-                google_search=genai_types.GoogleSearch()
-            )
-        ],
+        tools=[genai_types.Tool(google_search=genai_types.GoogleSearch())],
         thinking_config=pobierz_thinking_config_gemini_high(),
         temperature=0.1,
     )
@@ -894,11 +929,7 @@ def pobierz_metadane_npc_do_csv(
     liczba_przetworzonych = 0
     liczba_udanych_batchy = 0
     liczba_batchy = (liczba_rekordow + batch_size - 1) // batch_size
-
-    print(
-        f"Start przetwarzania NPC: {liczba_rekordow} rekordow, "
-        f"batch size = {batch_size}, liczba batchy = {liczba_batchy}, watki = {liczba_watkow}"
-    )
+    print(f"Start przetwarzania NPC: {liczba_rekordow} rekordow, batch size = {batch_size}, liczba batchy = {liczba_batchy}, watki = {liczba_watkow}")
 
     futures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=liczba_watkow) as executor:
@@ -913,18 +944,9 @@ def pobierz_metadane_npc_do_csv(
                 },
                 ensure_ascii=False,
             )
-
             future = executor.submit(
                 przetworz_batch_metadanych_npc,
-                klient,
-                model,
-                config,
-                dane_npc_json,
-                batch_nr,
-                liczba_batchy,
-                len(batch),
-                folder_zapisu,
-                run_id,
+                klient, model, config, dane_npc_json, batch_nr, liczba_batchy, len(batch), folder_zapisu, run_id
             )
             futures.append(future)
 
@@ -933,9 +955,6 @@ def pobierz_metadane_npc_do_csv(
             liczba_przetworzonych += liczba_rekordow_batcha
             if czy_udany:
                 liczba_udanych_batchy += 1
-            print(
-                f"Postep: batchy {liczba_udanych_batchy}/{liczba_batchy}, "
-                f"NPC {liczba_przetworzonych}/{liczba_rekordow}"
-            )
+            print(f"Postep: batchy {liczba_udanych_batchy}/{liczba_batchy}, NPC {liczba_przetworzonych}/{liczba_rekordow}")
 
     print(f"Koniec. Udane batche: {liczba_udanych_batchy}/{liczba_batchy}. Przetworzono: {liczba_przetworzonych}/{liczba_rekordow} NPC.")

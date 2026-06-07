@@ -1,6 +1,7 @@
 from sqlalchemy import text
 import pandas as pd
 from urllib.parse import unquote, urlparse
+import json
 
 def generuj_hash_djb2(tekst):
 
@@ -39,6 +40,191 @@ def hash_do_wsad_json(zakodowany_string: str, jezyk: str = "EN") -> str:
     przetworzone_dane = przefiltruj_dane_misji(dane_wejsciowe=surowe_dane, jezyk=jezyk)
 
     return json.dumps(przetworzone_dane, indent=4, ensure_ascii=False)
+
+def formatuj_podsumowania_poprzednich_misji(wiersze, kolejnosc_biezacej=None, limit=5) -> str:
+    if not wiersze:
+        return ""
+
+    posortowane_wiersze = sorted(wiersze, key=lambda x: x[0])
+    if limit is not None:
+        posortowane_wiersze = posortowane_wiersze[-limit:]
+
+    podsumowania = {
+        str(numer_misji): podsumowanie
+        for numer_misji, podsumowanie in posortowane_wiersze
+    }
+    blok = json.dumps(podsumowania, indent=4, ensure_ascii=False)
+    limit_txt = limit if limit is not None else "wszystkie"
+
+    if kolejnosc_biezacej is not None:
+        naglowek = (
+            f"Aktualnie tłumaczysz misję nr {kolejnosc_biezacej} w tym łańcuchu fabularnym.\n"
+            f"Poniżej streszczenia ostatnich maksymalnie {limit_txt} WCZEŚNIEJSZYCH misji z tego łańcucha "
+            "(klucz = numer misji w łańcuchu). Służą wyłącznie jako kontekst ciągłości - "
+            "nie tłumacz ich i nie przenoś ich treści do wyniku."
+        )
+        return f"{naglowek}\n\n{blok}"
+
+    return blok
+
+
+def formatuj_referencje_de(wiersze) -> str:
+    if not wiersze:
+        return ""
+
+    segmenty: dict[str, list[tuple[int, str]]] = {}
+    for segment, nr, tresc in wiersze:
+        tresc = (tresc or "").strip()
+        if not tresc:
+            continue
+
+        segmenty.setdefault(segment, []).append((nr or 1, tresc))
+
+    kolejnosc_segmentow = ["TREŚĆ", "POSTĘP", "ZAKOŃCZENIE"]
+    bloki = []
+    for segment in kolejnosc_segmentow:
+        linie = segmenty.get(segment)
+        if not linie:
+            continue
+
+        tekst_linii = "\n".join(
+            f"{nr}. {tresc}"
+            for nr, tresc in sorted(linie, key=lambda x: x[0])
+        )
+        bloki.append(f"[{segment}]\n{tekst_linii}")
+
+    return "\n\n".join(bloki)
+
+
+def formatuj_obsada(wiersze) -> str:
+    if not wiersze:
+        return ""
+
+    etykiety = {
+        "START": "Questgiver (Treść, Postęp)",
+        "KONIEC": "Kończący misję (Zakończenie)",
+        "DIALOG": "Dialogi / dymki",
+    }
+    grupy: dict[str, list[str]] = {"START": [], "KONIEC": [], "DIALOG": []}
+    for rola, _kolejnosc, nazwa_en, rasa in wiersze:
+        nazwa = (nazwa_en or "Brak Danych").strip() or "Brak Danych"
+        rasa_txt = (rasa or "Unknown").strip() or "Unknown"
+        grupy.setdefault(rola, grupy["DIALOG"]).append(f"{nazwa} ({rasa_txt})")
+
+    linie = []
+    for rola in ("START", "KONIEC", "DIALOG"):
+        pozycje = grupy[rola]
+        if not pozycje:
+            continue
+
+        unikalne = list(dict.fromkeys(pozycje))
+        linie.append(f"- {etykiety[rola]}: {', '.join(unikalne)}")
+
+    return "\n".join(linie)
+
+
+def formatuj_slowa_kluczowe(wiersze) -> str:
+    if not wiersze:
+        return ""
+
+    linie = []
+    for slowo_en, slowo_pl in sorted(wiersze, key=lambda x: (x[0] or "", x[1] or "")):
+        slowo_en = (slowo_en or "").strip()
+        slowo_pl = (slowo_pl or "").strip()
+
+        if not slowo_en or not slowo_pl:
+            continue
+        if slowo_en == slowo_pl:
+            continue
+
+        linie.append(f"- {slowo_en}: {slowo_pl}")
+
+    return "\n".join(linie)
+
+
+def formatuj_style_ras(style_map: dict, rasy, etap: str) -> str:
+    if not rasy:
+        return ""
+
+    bloki = []
+    for rasa in sorted(rasy):
+        styl = style_map.get(rasa)
+        if styl is None:
+            bloki.append(f"rasa: {rasa}\nwytyczne:\nBrak wytycznych dla tej rasy")
+            continue
+
+        sekcje = [
+            f"rasa: {getattr(styl, 'race_name', rasa)}",
+            f"etykieta: {getattr(styl, 'label', '')}",
+            f"głos: {getattr(styl, 'voice', '')}",
+            f"rytm_i_składnia: {getattr(styl, 'syntax_rhythm', '')}",
+            f"leksyka: {getattr(styl, 'lexicon', '')}",
+            f"unikaj: {getattr(styl, 'avoid', '')}",
+            f"esencja: {getattr(styl, 'essence', '')}",
+        ]
+
+        if etap == "tlumacz":
+            sekcje.append(_formatuj_przyklady_tlumacza(getattr(styl, "translator_examples", [])))
+        elif etap == "redaktor":
+            sekcje.append(_formatuj_przyklady_redaktora(getattr(styl, "editor_examples", [])))
+        else:
+            raise ValueError(f"Nieznany etap formatowania stylu rasy: {etap}")
+
+        bloki.append("\n".join(sekcja for sekcja in sekcje if sekcja))
+
+    return "\n\n".join(bloki)
+
+
+def _formatuj_przyklady_tlumacza(przyklady) -> str:
+    if not przyklady:
+        return "przykłady_tłumacza: brak"
+
+    bloki = ["przykłady_tłumacza:"]
+    for i, przyklad in enumerate(przyklady, start=1):
+        bloki.append(
+            "\n".join(
+                [
+                    f"{i}. kontekst: {getattr(przyklad, 'context', '')}",
+                    f"   en: {getattr(przyklad, 'en', '')}",
+                    f"   good: {getattr(przyklad, 'good', '')}",
+                    f"   bad: {getattr(przyklad, 'bad', '')}",
+                    f"   note: {getattr(przyklad, 'note', '')}",
+                ]
+            )
+        )
+
+    return "\n".join(bloki)
+
+
+def _formatuj_przyklady_redaktora(przyklady) -> str:
+    if not przyklady:
+        return "przykłady_redaktora: brak"
+
+    bloki = ["przykłady_redaktora:"]
+    for i, przyklad in enumerate(przyklady, start=1):
+        zmiany = getattr(przyklad, "zmiany", [])
+        tekst_zmian = "\n".join(
+            f"   - {getattr(zmiana, 'tag', '')}: {getattr(zmiana, 'change', '')} Powód: {getattr(zmiana, 'reason', '')}"
+            for zmiana in zmiany
+        )
+        if not tekst_zmian:
+            tekst_zmian = "   - brak opisanych zmian"
+
+        bloki.append(
+            "\n".join(
+                [
+                    f"{i}. kontekst: {getattr(przyklad, 'context', '')}",
+                    f"   en: {getattr(przyklad, 'en', '')}",
+                    f"   robocze: {getattr(przyklad, 'robocze', '')}",
+                    f"   po_redakcji_good: {getattr(przyklad, 'po_redakcji_good', '')}",
+                    f"   po_redakcji_bad: {getattr(przyklad, 'po_redakcji_bad', '')}",
+                    "   zmiany:",
+                    tekst_zmian,
+                ]
+            )
+        )
+
+    return "\n".join(bloki)
 
 # if __name__ == "__main__":
 #     przyklady = [

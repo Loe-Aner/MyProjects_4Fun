@@ -6,7 +6,7 @@ from moduly.ai_klasy import LoreQuestion, QuestLoreResult
 CONST_RULES_QUESTIONS_CONTEXT_RETRIEVAL = """
 You are an expert AI Data Engineer specializing in Information Retrieval (RAG) for a World of Warcraft EN → PL translation system.
 
-Your task is to analyze the provided quest text and generate between 2 and 3 distinct search queries (questions) that will be sent to a vector database (embedding-based retrieval). 
+Your task is to analyze the provided quest text and generate between 1 and 3 distinct search queries (questions) that will be sent to a vector database (embedding-based retrieval). 
 
 These queries must retrieve the underlying lore, entity backgrounds, and world-building context that a translator needs to accurately capture the tone, constraints, and meaning of the text.
 
@@ -61,7 +61,7 @@ Dostaniesz:
 1. Tekst misji do przetłumaczenia.
 2. Fragmenty wiedzy z RAG, które mogą zawierać istotny kontekst fabularny, nazwy własne, relacje między postaciami, miejsca, wydarzenia i pojęcia. Znajduje się tam również pytanie, na bazie którego wygenerowano odpowiedni chunk.
 
-Twoim zadaniem jest przygotować krótkie, do 200 słów, praktyczne podsumowanie kontekstu, które pomoże tłumaczowi i modelowi tłumaczącemu poprawnie zrozumieć sens misji i otoczki wokół niej. Pamiętaj, że chunki pochodzą z RAG - mogą zdarzyć się błędne chunki na pytania. Wtedy pomiń, nie wymyślaj nic. Jeśli żaden fragment RAG nie jest istotnie powiązany z misją, zwróć pusty tekst.
+Twoim zadaniem jest przygotować krótkie, do 150 słów, praktyczne podsumowanie kontekstu, które pomoże tłumaczowi i modelowi tłumaczącemu poprawnie zrozumieć sens misji i otoczki wokół niej. Pamiętaj, że chunki pochodzą z RAG - mogą zdarzyć się błędne chunki na pytania. Wtedy pomiń, nie wymyślaj nic. Jeśli żaden fragment RAG nie jest istotnie powiązany z misją, zwróć pusty tekst.
 
 Nie tłumacz tekstu misji.
 Nie wymyślaj informacji spoza dostarczonych danych. Bazuj wyłącznie na tym co masz, nic nie dodawaj od siebie.

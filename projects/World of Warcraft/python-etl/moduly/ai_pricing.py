@@ -31,6 +31,14 @@ MODEL_PRICING = {
         "input_per_1m": 0.20,
         "output_per_1m": 1.25
     },
+    "qwen/qwen3.7-max": {
+        "provider": "openrouter",
+        "langchain_package": "langchain-openai",
+        "langchain_class": "ChatOpenAI",
+        "currency": "USD",
+        "input_per_1m": 1.25,
+        "output_per_1m": 3.75
+    },
     "gpt-4.1": {
         "provider": "openai",
         "langchain_package": "langchain-openai",
@@ -143,6 +151,43 @@ MODEL_PRICING = {
         "input_per_1m": 1.00,
         "output_per_1m": 5.00
     },
+    "deepseek-v4-pro": {
+        "provider": "openrouter",
+        "langchain_package": "langchain-openai",
+        "langchain_class": "ChatOpenAI",
+        "model": "deepseek/deepseek-v4-pro",
+        "currency": "USD",
+        "input_per_1m": 0.435,
+        "output_per_1m": 0.87
+    },
+
+    "grok-4-3": {
+        "provider": "openrouter",
+        "langchain_package": "langchain-openai",
+        "langchain_class": "ChatOpenAI",
+        "model": "x-ai/grok-4.3",
+        "currency": "USD",
+        "input_per_1m": 1.25,
+        "output_per_1m": 2.50
+    },
+
+    "mimo-v2-5": {
+        "provider": "openrouter",
+        "langchain_package": "langchain-openai",
+        "langchain_class": "ChatOpenAI",
+        "model": "xiaomi/mimo-v2.5",
+        "currency": "USD",
+        "input_per_1m": 0.14,
+        "output_per_1m": 0.28
+    },
+    "qwen3.7-plus": {
+        "provider": "qwen",
+        "langchain_package": ["langchain-community", "langchain-qwq"],
+        "langchain_class": ["ChatTongyi", "ChatQwen"],
+        "currency": "CNY",
+        "input_per_1m": 0.4,
+        "output_per_1m": 1.6
+    },
     "qwen3.6-plus": {
         "provider": "qwen",
         "langchain_package": ["langchain-community", "langchain-qwq"],
@@ -183,10 +228,10 @@ MODEL_PRICING = {
         "input_per_1m": 1.0,
         "output_per_1m": 3.2
     },
-    "MiniMax-M2.7": {
-        "provider": "minimax",
-        "langchain_package": "langchain-community",
-        "langchain_class": "MiniMaxChat",
+    "minimax/minimax-m3": {
+        "provider": "openrouter",
+        "langchain_package": "langchain-openai",
+        "langchain_class": "ChatOpenAI",
         "currency": "USD",
         "input_per_1m": 0.30,
         "output_per_1m": 1.20
