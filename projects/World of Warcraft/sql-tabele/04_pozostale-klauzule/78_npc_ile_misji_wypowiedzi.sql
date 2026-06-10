@@ -5,7 +5,7 @@ WITH MISJE AS (
         m.MISJA_ID_MOJE_PK
     FROM dbo.MISJE AS m
     WHERE m.DODATEK_EN = @dodatek
-      AND m.NAZWA_LINII_FABULARNEJ_EN IN ('Path of de Hash''ey', 'Dawn of Reckoning', 'Ripple Effects')
+      AND m.NAZWA_LINII_FABULARNEJ_EN IN ('Path of de Hash''ey')
 ),
 
 NPC_MISJE AS (

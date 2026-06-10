@@ -12,6 +12,7 @@ projects/World of Warcraft/python-etl/scraper_wiki_main.py
 projects/World of Warcraft/python-etl/scraper_wiki_rag.py
 projects/World of Warcraft/python-etl/scraper_wowhead_metadane.py
 projects/World of Warcraft/python-etl/scraper_wowhead_misje.py
+projects/World of Warcraft/python-etl/moduly/ai_llm_judge_runner.py
 tempCodeRunnerFile.lua
 *.cursor
 
@@ -22,6 +23,9 @@ projects/World of Warcraft/testy-ai
 projects/World of Warcraft/_arch
 projects/World of Warcraft/rag-pliki
 projects/World of Warcraft/qdrant_storage
+projects/World of Warcraft/_testy_tlumacz
+
+
 
 .env
 .env.*

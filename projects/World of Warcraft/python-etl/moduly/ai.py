@@ -61,6 +61,10 @@ from moduly.utils import (
     sklej_warunki_w_WHERE,
 )
 
+from moduly.a_STALE_STEROWANIE import (
+    ILE_ZNAKOW_WYBOR_RASY
+)
+
 def pobierz_przetworz_zapisz_batch_lista(
         silnik, 
         lista_id_batch, 
@@ -371,9 +375,9 @@ def przetworz_pojedyncza_misje(
             INNER JOIN dbo.NPC AS n
                 ON n.NPC_ID_MOJE_PK = nz.NPC_ID
             WHERE n.RASA IS NOT NULL
-            AND n.RASA <> N'Unknown'
+            AND n.RASA NOT IN (N'Unknown', '???', 'Brak Danych', '...')
             GROUP BY n.RASA
-            HAVING SUM(nz.ILE_ZNAKOW) > 30
+            HAVING SUM(nz.ILE_ZNAKOW) > :stala_01
             ORDER BY ILE_ZNAKOW DESC;
             """)
             q_select_fabula = text("""
@@ -450,8 +454,10 @@ def przetworz_pojedyncza_misje(
                 nz.CZYSTA_NAZWA AS NAZWA_EN,
                 n.RASA
             FROM role_npc AS rn
-            LEFT JOIN nazwy_npc AS nz ON nz.NPC_ID_FK = rn.NPC_ID
-            LEFT JOIN dbo.NPC AS n ON n.NPC_ID_MOJE_PK = rn.NPC_ID
+            LEFT JOIN nazwy_npc AS nz 
+              ON nz.NPC_ID_FK = rn.NPC_ID
+            LEFT JOIN dbo.NPC AS n 
+              ON n.NPC_ID_MOJE_PK = rn.NPC_ID
             ORDER BY rn.KOLEJNOSC, nz.CZYSTA_NAZWA;
             """)
 
@@ -462,7 +468,7 @@ def przetworz_pojedyncza_misje(
             npc_z_bazy = conn.execute(q_select_npc, {"misja_id": misja_id}).all()
             obsada_z_bazy = conn.execute(q_select_obsada, {"misja_id": misja_id}).all()
             slowa_kluczowe_z_bazy = conn.execute(q_select_sk, {"misja_id": misja_id}).all()
-            wybrane_rasy_z_bazy = conn.execute(q_select_rasa, {"misja_id": misja_id}).all()
+            wybrane_rasy_z_bazy = conn.execute(q_select_rasa, {"misja_id": misja_id, "stala_01": ILE_ZNAKOW_WYBOR_RASY}).all()
             kolejnosc_misja = conn.execute(q_select_kolejnosc_misja, {
                                                                     "misja_id": misja_id,
                                                                     "fabula_en": fabula_en
@@ -574,6 +580,7 @@ def przetworz_pojedyncza_misje(
                     wytyczne_rasy=txt_rasy_redaktor,
                     tekst_npc=txt_npc,
                     tekst_slowa_kluczowe=txt_sk,
+                    obsada_i_glosy=txt_obsada,
                     podsumowania_poprzednich_misji_w_chainie=wsad_podsumowania_poprzednich_misji_w_chainie
                 )
                 raw_response = result_editor["raw"]
