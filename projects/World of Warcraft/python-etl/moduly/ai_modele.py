@@ -1,4 +1,6 @@
 from langchain_openai import ChatOpenAI
+from langchain_qwq import ChatQwen
+
 from dotenv import load_dotenv
 import os
 import warnings
@@ -16,9 +18,9 @@ warnings.filterwarnings(
 TEMPERATURE_LORE = 0.0
 TEMPERATURE_CONTEXT = 0.0
 TEMPERATURE_SUMMARY_QUEST = 0.0
-TEMPERATURE_TRANSLATOR = 0.60 # pod qwen 3.7-plus, tak zalecaja
-TEMPERATURE_EDITOR = 0.15
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+TEMPERATURE_TRANSLATOR = 0.60
+TEMPERATURE_EDITOR = 0.60
+# OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 def llm_lore():
     llm = ChatOpenAI(
@@ -50,31 +52,26 @@ def llm_context():
     )
     return llm
 
-def llm_translator():
-    llm = ChatOpenAI(
-        # model="minimax/minimax-m3",
-        # model="qwen/qwen3.7-max",
-        # model="qwen/qwen3.7-plus",
-        # model="deepseek/deepseek-v4-pro",
-        # model="x-ai/grok-4.3",
-        # model="xiaomi/mimo-v2.5",
-        model="google/gemini-3.5-flash",
-        api_key=os.environ.get("OPENROUTER_API_KEY"),
-        base_url=OPENROUTER_BASE_URL,
+def llm_translator() -> ChatQwen:
+    return ChatQwen(
+        model="qwen3.7-plus",
         temperature=TEMPERATURE_TRANSLATOR,
-        max_retries=2,
-        default_headers={
-            "X-Title": "World of Warcraft PL Translation",
+        top_p=0.95,
+        enable_thinking=True,
+        extra_body={
+            "top_k": 20,
         },
+        max_retries=2,
     )
-    return llm
 
 def llm_editor():
-    llm = ChatOpenAI(
-        model="gpt-5.5", # ZMIENIC
+    return ChatQwen(
+        model="qwen3.7-max",
         temperature=TEMPERATURE_EDITOR,
-        reasoning_effort="none",
-        use_responses_api=True,
-        max_retries=2
+        top_p=0.95,
+        enable_thinking=True,
+        extra_body={
+            "top_k": 20,
+        },
+        max_retries=2,
     )
-    return llm

@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import text
 
 from langchain_core.messages import AIMessage
-from langchain_openai import ChatOpenAI
+from langchain_qwq import ChatQwen
 
 from moduly.ai_modele import (
     TEMPERATURE_TRANSLATOR,
@@ -26,6 +26,7 @@ TEMPERATURE_BY_STAGE = {
     "quest_summary": TEMPERATURE_SUMMARY_QUEST
 }
 
+CACHE_HIT_PRICE_FACTOR = 0.2 # dla qwen
 
 def format_created_at(created_at: Any) -> str | None:
     if isinstance(created_at, (int, float)):
@@ -56,7 +57,7 @@ def calculate_price_for_tokens(
 
 def create_logs(
     raw_response: AIMessage,
-    llm: ChatOpenAI,
+    llm: ChatQwen,
     misja_id_moje_fk: int,
     input_chars: int,
     output_chars: int,
@@ -84,8 +85,8 @@ def create_logs(
     input_uncached_tokens = max(input_tokens - input_cached_tokens, 0)
 
     input_tokens_price_value = (
-        (input_uncached_tokens / 1_000_000) * input_per_1m +
-        (input_cached_tokens / 1_000_000) * input_per_1m * 0.1
+        (input_uncached_tokens / 1_000_000) * input_per_1m
+        + (input_cached_tokens / 1_000_000) * input_per_1m * CACHE_HIT_PRICE_FACTOR
     )
     output_tokens_price_value = (output_tokens / 1_000_000) * output_per_1m
 

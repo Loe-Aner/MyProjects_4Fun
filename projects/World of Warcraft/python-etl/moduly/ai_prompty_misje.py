@@ -196,15 +196,15 @@ Zwróć wyłącznie surowy JSON: bez ogrodzeń, komentarzy i tekstu przed/po.
 ═══════════════════════════════════════════════
 ## KONTROLA PRZED ZWROTEM (cicho)
 ═══════════════════════════════════════════════
-[ ] Sens EN bez dodatków/opuszczeń/przesunięć
-[ ] Osoby i zaimki niezmienione (twój≠nasz, cię≠mnie)
-[ ] Każda mapowana nazwa przepisana znak po znaku
-[ ] Rodzaj loa/NPC zgodny z metadanymi i spójny w misji
-[ ] Nazwy bez mapowania zostały po angielsku
-[ ] Cele krótkie i funkcjonalne; dialogi brzmią jak postać
-[ ] Brak książkowości/patosu ponad EN
-[ ] Placeholdery, ID, liczba i kolejność kluczy, puste sekcje — nietknięte
-[ ] Wynik to czysty, poprawny JSON (bez ```), UTF-8 z polskimi znakami
+1. Sens EN bez dodatków/opuszczeń/przesunięć
+2. Osoby i zaimki niezmienione (twój≠nasz, cię≠mnie)
+3. Każda mapowana nazwa przepisana znak po znaku
+4. Rodzaj loa/NPC zgodny z metadanymi i spójny w misji
+5. Nazwy bez mapowania zostały po angielsku
+6. Cele krótkie i funkcjonalne; dialogi brzmią jak postać
+7. Brak książkowości/patosu ponad EN
+8. Placeholdery, ID, liczba i kolejność kluczy, puste sekcje — nietknięte
+9. Wynik to czysty, poprawny JSON (bez ```), UTF-8 z polskimi znakami
 """
 
 CONST_RULES_EDITOR = """
@@ -338,9 +338,7 @@ Zwróć finalną wersję polską, która:
 Zwróć kompletny JSON w dokładnie poniższej strukturze; zachowaj wszystkie sekcje, listy, ID,
 enum `typ`, kolejność i numerowane klucze. Redaguj wyłącznie wartości tekstowe.
 Liczba i numeracja kluczy oraz puste sekcje muszą odpowiadać JSON_ŹRÓDŁOWY_EN.
-Jeśli draft PL odbiega strukturą od EN (zgubiona/dodana linia, inny klucz, inna kolejność),
-przywróć strukturę EN — to błąd tłumacza, nie wzorzec. Brakującą w drafcie linię
-przetłumacz z EN zgodnie ze wszystkimi powyższymi zasadami.
+Brakującą w drafcie linię (jeżeli wystąpi) przetłumacz z EN zgodnie ze wszystkimi powyższymi zasadami.
 ```json
 {{
   "Misje_PL": {{
@@ -384,20 +382,20 @@ przetłumacz z EN zgodnie ze wszystkimi powyższymi zasadami.
 ```
 
 ═══════════════════════════════════════════════
-## KONTROLA KOŃCOWA (po cichu, przed zwrotem)
+## KONTROLA KOŃCOWA — NIE WYPISUJ JEJ W ODPOWIEDZI
 ═══════════════════════════════════════════════
-[ ] Żadne znaczenie nie odpłynęło względem EN; nic nie dodano i nie pominięto.
-[ ] Wszystkie obowiązkowe mapowania utrzymane; odmiana nazw zgodna z płcią z metadanych
-    (żeńskie na spółgłoskę — nieodmienne); terminy wielowyrazowe nieprzebudowane.
-[ ] Punch-lista odhaczona (fleksja wg płci, liczba loa, shrines, dopiski, rejestr,
-    zapis akcentu, tytuł, literówki, rodzaj, rodzaje w gossipach, spójność powtórzonych fraz).
-[ ] Placeholdery, tagi, escape, ID i wartości techniczne nienaruszone; `npc_pl` puste tam,
-    gdzie puste w źródle.
-[ ] Liczba elementów, kolejność i liczba linii identyczne jak w JSON_ŹRÓDŁOWY_EN.
-[ ] Obecne wszystkie sekcje: Misje_PL, Dialogi_PL, Podsumowanie_PL, Cele_PL, Treść_PL,
-    Postęp_PL, Zakończenie_PL, Nagrody_PL, Gossipy_Dymki_PL; Dialogi_PL NIE wewnątrz Misje_PL.
-[ ] Płynność wzrosła bez zmiany sensu; tekst brzmi jak gotowa lokalizacja.
-[ ] Wynik to czysty, parsowalny JSON zgodny ze schematem.
+Przed zwrotem wyniku wykonaj wewnętrzną kontrolę:
+
+1. Sprawdź, czy żadne znaczenie nie odpłynęło względem JSON_ŹRÓDŁOWY_EN; nic nie dodano i niczego nie pominięto.
+2. Sprawdź, czy wszystkie obowiązkowe mapowania zostały utrzymane, a odmiana nazw jest zgodna z płcią z metadanych.
+3. Sprawdź punch-listę: fleksja wg płci, liczba loa, shrines, dopiski, rejestr, zapis akcentu, tytuł, literówki, rodzaj, rodzaje w gossipach, spójność powtórzonych fraz.
+4. Sprawdź, czy placeholdery, tagi, escape, ID i wartości techniczne są nienaruszone.
+5. Sprawdź, czy `npc_pl` pozostaje puste tam, gdzie było puste w źródle.
+6. Sprawdź, czy liczba elementów, kolejność i liczba linii są zgodne z JSON_ŹRÓDŁOWY_EN.
+7. Sprawdź, czy obecne są wszystkie wymagane sekcje: Misje_PL, Dialogi_PL, Podsumowanie_PL, Cele_PL, Treść_PL, Postęp_PL, Zakończenie_PL, Nagrody_PL, Gossipy_Dymki_PL.
+8. Sprawdź, czy Dialogi_PL nie znajduje się wewnątrz Misje_PL.
+9. Sprawdź, czy tekst brzmi jak gotowa polska lokalizacja, ale bez zmiany sensu.
+10. Zwróć wyłącznie czysty JSON zgodny ze schematem. Nie wypisuj tej kontroli, komentarzy ani markdowna.
 """
 
 CONST_RULES_QUEST_SUMMARY = """
@@ -466,41 +464,42 @@ prompt_translator = ChatPromptTemplate.from_messages(
 prompt_editor = ChatPromptTemplate.from_messages(
     [
         ("system", CONST_RULES_EDITOR),
-        ("human", """
+        (
+            "human",
+            """
+=== START: JSON_ŹRÓDŁOWY_EN | ŹRÓDŁO PRAWDY ===
+{tekst_oryginalny}
+=== KONIEC: JSON_ŹRÓDŁOWY_EN | ŹRÓDŁO PRAWDY ===
 
-        <oryginalny_json_en>
-        {tekst_oryginalny}
-        </oryginalny_json_en>
+=== START: DRAFT_JSON_PL | WERSJA DO REDAKCJI ===
+{tekst_przetlumaczony}
+=== KONIEC: DRAFT_JSON_PL | WERSJA DO REDAKCJI ===
 
-        <draft_json_pl>
-        {tekst_przetlumaczony}
-        </draft_json_pl>
+=== START: TEKST_DE_POMOCNICZY | LOKALIZACJA POMOCNICZA BLIZZARDA ===
+{tekst_pomocniczy}
+=== KONIEC: TEKST_DE_POMOCNICZY | LOKALIZACJA POMOCNICZA BLIZZARDA ===
 
-        <tekst_de_pomocniczy>
-        {tekst_pomocniczy}
-        </tekst_de_pomocniczy>
+=== START: KONTEKST_RAG | KONTEKST ŚWIATA, NIE ŹRÓDŁO TEKSTU ===
+{kontekst_rag}
+=== KONIEC: KONTEKST_RAG | KONTEKST ŚWIATA, NIE ŹRÓDŁO TEKSTU ===
 
-        <kontekst_rag>
-        {kontekst_rag}
-        </kontekst_rag>
+=== START: MAPOWANIA_NPC | WIĄŻĄCE ===
+{tekst_npc}
+=== KONIEC: MAPOWANIA_NPC | WIĄŻĄCE ===
 
-        <mapowania_npc>
-        {tekst_npc}
-        </mapowania_npc>
+=== START: MAPOWANIA_SŁÓW_KLUCZOWYCH | WIĄŻĄCE ===
+{tekst_slowa_kluczowe}
+=== KONIEC: MAPOWANIA_SŁÓW_KLUCZOWYCH | WIĄŻĄCE ===
 
-        <mapowania_slow_kluczowych>
-        {tekst_slowa_kluczowe}
-        </mapowania_slow_kluczowych>
+=== START: WYTYCZNE_DLA_RAS | GŁOS POSTACI ===
+{wytyczne_rasy}
+=== KONIEC: WYTYCZNE_DLA_RAS | GŁOS POSTACI ===
 
-        <wytyczne_dla_ras>
-        {wytyczne_rasy}
-        </wytyczne_dla_ras>
-
-        <podsumowania_poprzednich_misji_w_chainie>
-        {podsumowania_poprzednich_misji_w_chainie}
-        </podsumowania_poprzednich_misji_w_chainie>
-
-        """)
+=== START: PODSUMOWANIA_POPRZEDNICH_MISJI_W_CHAINIE | KONTEKST CIĄGŁOŚCI ===
+{podsumowania_poprzednich_misji_w_chainie}
+=== KONIEC: PODSUMOWANIA_POPRZEDNICH_MISJI_W_CHAINIE | KONTEKST CIĄGŁOŚCI ===
+"""
+        ),
     ]
 )
 
