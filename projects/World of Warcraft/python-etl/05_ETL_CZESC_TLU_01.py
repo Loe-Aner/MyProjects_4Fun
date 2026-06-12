@@ -10,10 +10,9 @@ silnik = utworz_engine_do_db()
 # BIERZE POD UWAGE TYLKO MISJE Z TRESCIA
 misje_dialogi_przetlumacz_zredaguj_zapisz(
     silnik, 
-    #dodatek="Midnight", 
     id_misji=8852,
     liczba_watkow=1,
-    #printing=True
+    printing=False
     )
 
 # KOREKTA MISJI - JEŻELI NP. DWIE MISJE O ID 37, 38 MAJĄ TEN SAM TYTUŁ PO ENG, ALE INNY PO PL, TO WYBIERAM PIERWSZY TYTUŁ

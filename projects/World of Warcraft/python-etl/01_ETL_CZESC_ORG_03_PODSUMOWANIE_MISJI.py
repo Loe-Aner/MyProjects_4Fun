@@ -11,7 +11,7 @@ generate_and_save_quest_summary(
     silnik=silnik,
     llm=llm,
     
-    # ZMIENIC NONE NA KONKRETNA NAZWE W PRXZYPADKU POTRZEB
+    # ZMIENIC NONE NA KONKRETNA NAZWE W PRZYPADKU POTRZEB
     kraina=None,
     fabula="Ripple Effects",
     dodatek=None,

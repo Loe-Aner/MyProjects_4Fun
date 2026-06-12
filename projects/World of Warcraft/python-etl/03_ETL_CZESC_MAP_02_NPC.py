@@ -8,7 +8,6 @@ klient = zaladuj_api_i_klienta("API_TLUMACZENIE")
 # PROPOZYCJA TLUMACZEN NAZW NPCOW
 # NAJPIERW WYKONAC KROKI W SKRYPCIE 01_NPC
 przetlumacz_nazwy_npc(
-    silnik=silnik, 
     klient=klient
     )
 

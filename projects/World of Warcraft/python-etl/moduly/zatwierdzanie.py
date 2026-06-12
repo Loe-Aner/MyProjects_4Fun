@@ -121,9 +121,15 @@ def stworz_excele_do_zatwierdzenia_tlumaczen(silnik, kraina = None, fabula = Non
         WHERE 1=1
           AND m.MISJA_ID_MOJE_PK <> 123456789
           AND (
-            m.WSKAZNIK_ZGODNOSCI <= 0.70000
-            OR m.WSKAZNIK_ZGODNOSCI IS NULL
-        )
+                NOT EXISTS (
+                    SELECT 1
+                    FROM dbo.ARCHIWUM_MISJE_DIALOGI AS a
+                    WHERE a.MISJA_ID_Z_GRY = m.MISJA_ID_Z_GRY
+                      AND a.STATUS IN (N'2_ZREDAGOWANO', N'3_ZATWIERDZONO')
+                )
+                OR m.WSKAZNIK_ZGODNOSCI <= 0.70000
+                OR m.WSKAZNIK_ZGODNOSCI IS NULL
+            )
           AND m.STATUS_MISJI = 2
  
         {warunki_sql}
@@ -330,13 +336,17 @@ def stworz_excele_do_recznych_tlumaczen(silnik, kraina = None, fabula = None, do
     warunki_sql = sklej_warunki_w_WHERE(kraina, fabula, dodatek)
 
     q_select_misje_id = text(f"""
-        SELECT DISTINCT m.MISJA_ID_MOJE_PK
+        SELECT m.MISJA_ID_MOJE_PK
         FROM dbo.MISJE AS m
-        INNER JOIN dbo.ARCHIWUM_MISJE_DIALOGI AS amd
-          ON m.MISJA_ID_Z_GRY = amd.MISJA_ID_Z_GRY
         WHERE 1=1
           AND m.MISJA_ID_MOJE_PK <> 123456789
-          AND (m.WSKAZNIK_ZGODNOSCI > 0.70000 OR m.WSKAZNIK_ZGODNOSCI IS NULL)
+          AND m.WSKAZNIK_ZGODNOSCI > 0.70000
+          AND EXISTS (
+                SELECT 1
+                FROM dbo.ARCHIWUM_MISJE_DIALOGI AS a
+                WHERE a.MISJA_ID_Z_GRY = m.MISJA_ID_Z_GRY
+                  AND a.STATUS IN (N'2_ZREDAGOWANO', N'3_ZATWIERDZONO')
+            )
           AND (m.STATUS_MISJI IS NULL OR m.STATUS_MISJI <> 3)
 
         {warunki_sql}

@@ -15,13 +15,6 @@ from moduly.ai_przyklady_ras_tony_teksty import RACE_STYLES
 from moduly.services_persist_wynik import (
     save_quests_dialogues_to_db
 )
-from moduly.ai_prompty import (
-    instrukcja_slowa_kluczowe,
-    instrukcja_tlumacz_npc,
-    instrukcja_tych_npc_nie,
-    instrukcja_dane_npc_stala,
-    instrukcja_dane_npc_zmienna
-)
 
 from moduly.ai_lore_kontekst import (
     czytaj_kontekst_lore
@@ -39,6 +32,13 @@ from moduly.ai_core import (
 from moduly.ai_prompty_misje import (
     translator,
     editor
+)
+from moduly.ai_prompty_sk_NPC import (
+    instrukcja_slowa_kluczowe,
+    instrukcja_tlumacz_npc,
+    instrukcja_tych_npc_nie,
+    instrukcja_dane_npc_stala,
+    instrukcja_dane_npc_zmienna
 )
 from moduly.ai_modele import (
     llm_translator,
@@ -738,9 +738,16 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
         WHERE 1=1 
           AND m.MISJA_ID_Z_GRY IS NOT NULL 
           AND m.MISJA_ID_Z_GRY <> 123456789
-          AND (
-            m.WSKAZNIK_ZGODNOSCI <= 0.70000
-            OR m.WSKAZNIK_ZGODNOSCI IS NULL
+                          
+            AND (
+                NOT EXISTS (
+                    SELECT 1
+                    FROM dbo.ARCHIWUM_MISJE_DIALOGI AS a
+                    WHERE a.MISJA_ID_Z_GRY = m.MISJA_ID_Z_GRY
+                    AND a.STATUS IN (N'2_ZREDAGOWANO', N'3_ZATWIERDZONO')
+                )
+                OR m.WSKAZNIK_ZGODNOSCI <= 0.70000
+                OR m.WSKAZNIK_ZGODNOSCI IS NULL
             )
                           
         {warunki_sql}
@@ -804,7 +811,7 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
     print("\n--- ZAKOŃCZONO PRZETWARZANIE WIELOWĄTKOWE ---")
 
 
-def tych_npcow_nie_tlumacz(silnik, klient):
+def tych_npcow_nie_tlumacz(klient):
     sciezka = sciezka_excel_mappingi("npc.xlsx")
     sciezka_zapis = sciezka_excel_mappingi("surowe", "npc_nie_do_tlumaczenia")
     zakladka = "surowe"
@@ -867,7 +874,7 @@ def tych_npcow_nie_tlumacz(silnik, klient):
     print(f"\n--- KONIEC PROCESU ---")
 
 
-def przetlumacz_nazwy_npc(silnik, klient):
+def przetlumacz_nazwy_npc(klient):
     sciezka = sciezka_excel_mappingi("npc.xlsx")
     sciezka_zapis = sciezka_excel_mappingi("surowe", "propozycja_tlumaczen_npc")
     zakladka = "surowe"
@@ -1001,7 +1008,7 @@ def pobierz_metadane_npc_do_csv(
           AND RASA IS NULL
           AND KLASA IS NULL
           AND TYTUL IS NULL
-          AND NAZWA NOT IN ('Brak Danych', '...', 'Automatic')
+          AND NAZWA NOT IN ('Brak Danych', '...', 'Automatic', '???')
           --AND RASA IN ('Unknown')
         ORDER BY NPC_ID_MOJE_PK
     """)

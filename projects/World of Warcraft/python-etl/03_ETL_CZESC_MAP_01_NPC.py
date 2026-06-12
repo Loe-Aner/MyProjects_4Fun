@@ -9,7 +9,6 @@ klient = zaladuj_api_i_klienta("API_TLUMACZENIE")
 # WYRZUCA DO CSV TYLKO TYCH NPCOW, KTORYCH NIE POWINNO SIE TLUMACZYC - ZGODNIE Z PROMPTEM W FUNKCJI
 # CHCE MIEC NAD TLUMACZENIAMI I JAKOSCIA MAKSYMALNA KONTROLE
 tych_npcow_nie_tlumacz(
-    silnik=silnik, 
     klient=klient
     )
 

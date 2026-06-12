@@ -6,6 +6,7 @@ from sqlalchemy import text
 
 from langchain_core.messages import AIMessage
 from langchain_qwq import ChatQwen
+from langchain_openai import ChatOpenAI
 
 from moduly.ai_modele import (
     TEMPERATURE_TRANSLATOR,
@@ -65,7 +66,7 @@ def calculate_price_for_tokens(
 
 def create_logs(
     raw_response: AIMessage,
-    llm: ChatQwen,
+    llm: ChatQwen | ChatOpenAI,
     misja_id_moje_fk: int,
     input_chars: int,
     output_chars: int,
