@@ -43,7 +43,12 @@ from moduly.ai_prompty_misje import (
 from moduly.ai_modele import (
     llm_translator,
     llm_editor,
-    llm_quest_summary
+    llm_json_corrector,
+)
+from moduly.ai_json_output import (
+    ai_message_text,
+    correct_json_with_llm,
+    validate_quest_json,
 )
 from moduly.ai_logi import (
     create_logs,
@@ -59,6 +64,7 @@ from moduly.utils import (
     formatuj_style_ras,
     hash_do_wsad_json,
     sklej_warunki_w_WHERE,
+    parse_json_with_repair,
 )
 
 from moduly.a_STALE_STEROWANIE import (
@@ -238,36 +244,102 @@ def handle_quest_stage_result(
     silnik,
     status_zapisu
 ):
-    if result["parsing_error"] is not None:
-        raise result["parsing_error"]
+    raw_text = ai_message_text(raw_response)
+    qwen_duration_ms = round((time.perf_counter() - started_at) * 1000) if started_at is not None else None
 
-    parsed = result["parsed"]
-    if parsed is None:
-        raise ValueError(f"---[ID: {misja_id}] Brak sparsowanego wyniku etapu: {stage}.")
+    try:
+        parsed = parse_json_with_repair(raw_text)
+        validate_quest_json(parsed, source_json=wsad_json, misja_id=misja_id, stage=stage)
+    except Exception as qwen_error:
+        qwen_logs = create_logs(
+            raw_response=raw_response,
+            llm=llm,
+            misja_id_moje_fk=misja_id,
+            stage=stage,
+            duration_ms=qwen_duration_ms,
+            parsing_error=str(qwen_error),
+            input_chars=len(wsad_json),
+            output_chars=len(raw_text)
+        )
+        save_ai_logs_to_db(silnik=silnik, logs=qwen_logs)
 
-    parsed_json = json.dumps(parsed, indent=2, ensure_ascii=False)
+        corrector_llm = llm_json_corrector()
+        correction_stage = f"{stage}_json_correction"
+        try:
+            correction_result = correct_json_with_llm(
+                llm=corrector_llm,
+                broken_output=raw_text,
+                source_json=wsad_json,
+                validation_error=str(qwen_error),
+            )
+        except Exception as correction_request_error:
+            error = RuntimeError(f"Wywołanie korektora JSON nie powiodło się: {correction_request_error}")
+            error.ai_log_saved = True
+            raise error from correction_request_error
+        correction_raw = correction_result["raw"]
+        correction_parsed = correction_result.get("parsed")
+        correction_error = correction_result.get("parsing_error")
 
-    validate_quest_content_response(parsed, misja_id=misja_id, stage=stage)
-    dms = round((time.perf_counter() - started_at) * 1000) if started_at is not None else None
+        try:
+            if correction_error is not None:
+                raise correction_error
+            if correction_parsed is None:
+                raise ValueError("Korektor JSON nie zwrócił sparsowanego obiektu.")
+            validate_quest_json(
+                correction_parsed,
+                source_json=wsad_json,
+                misja_id=misja_id,
+                stage=correction_stage,
+            )
+        except Exception as final_error:
+            correction_logs = create_logs(
+                raw_response=correction_raw,
+                llm=corrector_llm,
+                misja_id_moje_fk=misja_id,
+                stage=correction_stage,
+                duration_ms=correction_result["duration_ms"],
+                parsing_error=str(final_error),
+                input_chars=len(raw_text) + len(wsad_json),
+                output_chars=len(ai_message_text(correction_raw)),
+            )
+            save_ai_logs_to_db(silnik=silnik, logs=correction_logs)
+            error = RuntimeError(f"Korekta JSON nie powiodła się: {final_error}")
+            error.ai_log_saved = True
+            raise error from final_error
 
-    logs = create_logs(
-        raw_response=raw_response,
-        llm=llm,
-        misja_id_moje_fk=misja_id,
-        stage=stage,
-        duration_ms=dms,
-        input_chars=len(wsad_json),
-        output_chars=len(parsed_json)
-    )
+        parsed = correction_parsed
+        parsed_json = json.dumps(parsed, indent=2, ensure_ascii=False)
+        correction_logs = create_logs(
+            raw_response=correction_raw,
+            llm=corrector_llm,
+            misja_id_moje_fk=misja_id,
+            stage=correction_stage,
+            duration_ms=correction_result["duration_ms"],
+            input_chars=len(raw_text) + len(wsad_json),
+            output_chars=len(parsed_json),
+        )
+        save_ai_logs_to_db(silnik=silnik, logs=correction_logs)
+        logs = correction_logs
+    else:
+        parsed_json = json.dumps(parsed, indent=2, ensure_ascii=False)
+        logs = create_logs(
+            raw_response=raw_response,
+            llm=llm,
+            misja_id_moje_fk=misja_id,
+            stage=stage,
+            duration_ms=qwen_duration_ms,
+            input_chars=len(wsad_json),
+            output_chars=len(parsed_json)
+        )
+        save_ai_logs_to_db(silnik=silnik, logs=logs)
 
     save_quests_dialogues_to_db(silnik, misja_id, parsed, status_zapisu)
-    save_ai_logs_to_db(silnik=silnik, logs=logs)
-
     return parsed_json, logs
 
 def przetworz_pojedyncza_misje(
     wiersz,
     silnik,
+    printing=False # pod testy
 ):
     """
     Ta funkcja wykonuje całą pracę dla jednej misji.
@@ -519,6 +591,7 @@ def przetworz_pojedyncza_misje(
             current_stage = None
             current_llm = None
             context_lore_text = ""
+            processing_completed = False
             
             print(f"--- [ID: {misja_id}] Start Tlumaczenia... ---")
 
@@ -559,9 +632,11 @@ def przetworz_pojedyncza_misje(
                     silnik=silnik,
                     status_zapisu="1_PRZETŁUMACZONO"
                 )
-                print(translated_json)
-                logs_json = json.dumps(logs, indent=2, ensure_ascii=False)
-                print(logs_json)
+
+                if printing:
+                    print(translated_json)
+                    logs_json = json.dumps(logs, indent=2, ensure_ascii=False)
+                    print(logs_json)
 
 # ============================================================================================
 # ========================================== EDITOR ==========================================
@@ -571,6 +646,7 @@ def przetworz_pojedyncza_misje(
                 current_llm = _editor
                 raw_response = None
                 started_at = time.perf_counter()
+                print(f"--- [ID: {misja_id}] Start Redakcji... ---")
                 result_editor = editor(
                     llm=_editor,
                     tekst_oryginalny=wsad_json,
@@ -595,16 +671,26 @@ def przetworz_pojedyncza_misje(
                     silnik=silnik,
                     status_zapisu="2_ZREDAGOWANO"
                 )
-                print(edited_json)
-                logs_json = json.dumps(logs, indent=2, ensure_ascii=False)
-                print(logs_json)
+                if printing:
+                    print(edited_json)
+                    logs_json = json.dumps(logs, indent=2, ensure_ascii=False)
+                    print(logs_json)
+
+                print(f"+++[ID: {misja_id}] GOTOWE (Redakcja) +++")
+                processing_completed = True
 
 # ========================================================================================
 # ====================================== EXCEPTIONS ======================================
 # ========================================================================================
 
             except Exception as e:
-                if raw_response is not None and current_llm is not None and current_stage is not None:
+                print(f"---BŁĄD ETAPU {current_stage or 'unknown'}: {e}")
+                if (
+                    raw_response is not None
+                    and current_llm is not None
+                    and current_stage is not None
+                    and not getattr(e, "ai_log_saved", False)
+                ):
                     dms = round((time.perf_counter() - started_at) * 1000) if started_at is not None else None
                     err = str(e)
                     parsing_error = err[:997] + "..." if len(err) > 1000 else err
@@ -619,12 +705,13 @@ def przetworz_pojedyncza_misje(
                         input_chars=len(wsad_json),
                         output_chars=0
                     )
-                    print(json.dumps(logs, indent=2, ensure_ascii=False))
-                    save_ai_logs_to_db(silnik=silnik, logs=logs)
-                else:
-                    print(f"---BŁĄD ETAPU {current_stage or 'unknown'}: {e}")
+                    if printing:
+                        print(json.dumps(logs, indent=2, ensure_ascii=False))
 
-            print(f"+++[ID: {misja_id}] GOTOWE (Tlumaczenie) +++")
+                    save_ai_logs_to_db(silnik=silnik, logs=logs)
+
+            if processing_completed:
+                print(f"+++[ID: {misja_id}] GOTOWE (Tlumaczenie i redakcja) +++")
 
         except Exception as e:
             print(f"!!! BLAD przy misji {misja_id}: {e}")
@@ -636,7 +723,8 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
     fabula: str | None = None, 
     dodatek: str | None = None,
     id_misji: int | None = None, 
-    liczba_watkow: int = 4
+    liczba_watkow: int = 4,
+    printing=False
 ):
     warunki_sql = sklej_warunki_w_WHERE(kraina, fabula, dodatek, id_misji)
 
@@ -696,9 +784,8 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
         return
 
     print(f"Znaleziono {liczba_zadan} misji do przetworzenia. Uruchamiam {liczba_watkow} wątków...")
-    print("Dostawca tłumaczenia: langchain/openai")
-    # ========================================== DODAC REDAGOWANIE ==========================================
-    print("Redagowanie: pominięte")
+    print("Dostawca tłumaczenia: langchain/qwen")
+    print("Dostawca redakcji: langchain/qwen")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=liczba_watkow) as executor:
         futures = []
@@ -707,6 +794,7 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
                 przetworz_pojedyncza_misje,
                 wiersz,
                 silnik,
+                printing
             )
             futures.append(future)
 

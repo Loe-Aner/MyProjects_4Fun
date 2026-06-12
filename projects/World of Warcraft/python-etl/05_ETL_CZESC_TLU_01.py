@@ -8,8 +8,13 @@ silnik = utworz_engine_do_db()
 # TŁUMACZY A POTEM REDAGUJE, ZAPISUJĄC DO BAZY DANYCH Z ODPOWIEDNIMI STATUSAMI
 # MOŻNA PODAĆ DOWOLNIE KTORY PARAMETR
 # BIERZE POD UWAGE TYLKO MISJE Z TRESCIA
-misje_dialogi_przetlumacz_zredaguj_zapisz(silnik, dodatek="Battle for Azeroth", liczba_watkow=1, 
-                                                 dostawca_tlumaczenie="gemini", dostawca_redakcja="gemini")
+misje_dialogi_przetlumacz_zredaguj_zapisz(
+    silnik, 
+    #dodatek="Midnight", 
+    id_misji=8852,
+    liczba_watkow=1,
+    #printing=True
+    )
 
 # KOREKTA MISJI - JEŻELI NP. DWIE MISJE O ID 37, 38 MAJĄ TEN SAM TYTUŁ PO ENG, ALE INNY PO PL, TO WYBIERAM PIERWSZY TYTUŁ
 ujednolic_tytuly_misji(silnik)
@@ -17,4 +22,4 @@ ujednolic_tytuly_misji(silnik)
 # TUTAJ SKRYPT USUWAJACY MISJE (ZE STATUSEM PRZETLUMACZONE), KTORE DOSTALY BLAD PRZY REDAKCJI
 # DLA BEZPIECZENSTWA NIECH WYKONA PROCES JESZCZE RAZ
 # NA PRZYSZLOSC: ZROBIC RETRY PRZY BLEDZIE
-usun_niezredagowane(silnik)
+usun_niezredagowane(silnik) 

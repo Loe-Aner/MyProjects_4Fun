@@ -11,6 +11,7 @@ from moduly.ai_modele import (
     TEMPERATURE_TRANSLATOR,
     TEMPERATURE_EDITOR,
     TEMPERATURE_SUMMARY_QUEST,
+    TEMPERATURE_JSON_CORRECTOR,
     TEMPERATURE_LORE,
     TEMPERATURE_CONTEXT,
 )
@@ -26,12 +27,19 @@ TEMPERATURE_BY_STAGE = {
     "quest_summary": TEMPERATURE_SUMMARY_QUEST
 }
 
-CACHE_HIT_PRICE_FACTOR = 0.2 # dla qwen
-
 def format_created_at(created_at: Any) -> str | None:
     if isinstance(created_at, (int, float)):
         return datetime.fromtimestamp(created_at, tz=timezone.utc).astimezone(ZoneInfo("Europe/Warsaw")).isoformat()
     return None
+
+
+def get_nested(mapping: dict[str, Any], *path: str) -> Any:
+    value: Any = mapping
+    for key in path:
+        if not isinstance(value, dict):
+            return None
+        value = value.get(key)
+    return value
 
 
 def calculate_price_for_tokens(
@@ -61,13 +69,14 @@ def create_logs(
     misja_id_moje_fk: int,
     input_chars: int,
     output_chars: int,
-    stage: Literal["translator", "editor", "rag_context", "quest_summary"],
+    stage: str,
     duration_ms: int | None = None,
     parsing_error: str | None = None
 ) -> dict[str, Any]:
 
     response_metadata = raw_response.response_metadata or {}
     usage_metadata = raw_response.usage_metadata or {}
+    additional_kwargs = raw_response.additional_kwargs or {}
     output_token_details = usage_metadata.get("output_token_details", {}) or {}
     input_token_details = usage_metadata.get("input_token_details", {}) or {}
     created_at = response_metadata.get("created_at")
@@ -79,14 +88,36 @@ def create_logs(
     output_tokens = usage_metadata.get("output_tokens") or 0
     total_tokens = usage_metadata.get("total_tokens") or 0
 
+    finish_reason = response_metadata.get("finish_reason")
+    response_status = response_metadata.get("status")
+    status = response_status or ("completed" if finish_reason in (None, "stop") else finish_reason)
+    model_api = (
+        response_metadata.get("model")
+        or response_metadata.get("model_name")
+        or model_name
+    )
+    service_tier = response_metadata.get("service_tier") or getattr(llm, "service_tier", None)
+    if service_tier is None and isinstance(llm, ChatQwen):
+        service_tier = "default"
+    thinking_tokens = (
+        output_token_details.get("reasoning")
+        or output_token_details.get("reasoning_tokens")
+        or get_nested(response_metadata, "token_usage", "completion_tokens_details", "reasoning_tokens")
+        or get_nested(additional_kwargs, "usage", "completion_tokens_details", "reasoning_tokens")
+    )
+    reasoning_effort = getattr(llm, "reasoning_effort", None)
+    if reasoning_effort is None and getattr(llm, "enable_thinking", None) is not None:
+        reasoning_effort = "thinking" if llm.enable_thinking else "disabled"
+
     currency = MODEL_PRICING[model_name]["currency"]
     input_per_1m = MODEL_PRICING[model_name]["input_per_1m"]
     output_per_1m = MODEL_PRICING[model_name]["output_per_1m"]
+    cache_hit_price_factor = MODEL_PRICING[model_name]["cache_prc"]
     input_uncached_tokens = max(input_tokens - input_cached_tokens, 0)
 
     input_tokens_price_value = (
         (input_uncached_tokens / 1_000_000) * input_per_1m
-        + (input_cached_tokens / 1_000_000) * input_per_1m * CACHE_HIT_PRICE_FACTOR
+        + (input_cached_tokens / 1_000_000) * input_per_1m * cache_hit_price_factor
     )
     output_tokens_price_value = (output_tokens / 1_000_000) * output_per_1m
 
@@ -96,14 +127,17 @@ def create_logs(
     return {
         "ANSWER_ID": raw_response.id or response_metadata.get("id"),
         "PROVIDER": response_metadata.get("model_provider"),
-        "SERVICE_TIER": response_metadata.get("service_tier"),
+        "SERVICE_TIER": service_tier,
         "STAGE": stage,
-        "STATUS": "error" if parsing_error else response_metadata.get("status"),
+        "STATUS": "error" if parsing_error else status,
         "DURATION_S": duration_s,
         "MISJA_ID_MOJE_FK": misja_id_moje_fk,
-        "CREATED_AT": format_created_at(created_at),
+        "CREATED_AT": (
+            format_created_at(created_at)
+            or datetime.now(ZoneInfo("Europe/Warsaw")).isoformat()
+        ),
         "MODEL": model_name,
-        "MODEL_API": response_metadata.get("model"),
+        "MODEL_API": model_api,
         "TOTAL_TOKENS": total_tokens,
         "INPUT_TOKENS": input_tokens,
         "OUTPUT_TOKENS": output_tokens,
@@ -111,12 +145,16 @@ def create_logs(
         "OUTPUT_TOKENS_PRICE": output_tokens_price,
         "CURRENCY": currency,
         "CACHED_TOKENS": input_cached_tokens,
-        "THINKING_TOKENS": output_token_details.get("reasoning"),
+        "THINKING_TOKENS": thinking_tokens,
         "INPUT_CHARS_ONLY_JSON": input_chars,
         "OUTPUT_CHARS_ONLY_JSON": output_chars,
-        "REASONING_EFFORT": getattr(llm, "reasoning_effort", None),
+        "REASONING_EFFORT": reasoning_effort,
         "TEMPERATURE_FROM_LLM": getattr(llm, "temperature", None),
-        "TEMPERATURE_FROM_CONST": TEMPERATURE_BY_STAGE.get(stage),
+        "TEMPERATURE_FROM_CONST": (
+            TEMPERATURE_JSON_CORRECTOR
+            if stage.endswith("_json_correction")
+            else TEMPERATURE_BY_STAGE.get(stage)
+        ),
         "PARSING_ERROR": parsing_error,
     }
 

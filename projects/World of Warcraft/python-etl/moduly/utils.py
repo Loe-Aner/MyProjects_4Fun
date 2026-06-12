@@ -2,6 +2,27 @@ from sqlalchemy import text
 import pandas as pd
 from urllib.parse import unquote, urlparse
 import json
+import re
+
+from json_repair import repair_json
+
+
+def strip_json_fence(text: str) -> str:
+    text = text.strip()
+    fenced = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", text, flags=re.DOTALL | re.IGNORECASE)
+    return fenced.group(1).strip() if fenced else text
+
+
+def parse_json_with_repair(text: str) -> dict:
+    cleaned = strip_json_fence(text)
+    try:
+        parsed = json.loads(cleaned)
+    except json.JSONDecodeError:
+        parsed = repair_json(cleaned, return_objects=True)
+
+    if not isinstance(parsed, dict):
+        raise ValueError("Odpowiedź JSON nie jest obiektem głównym.")
+    return parsed
 
 def generuj_hash_djb2(tekst):
 

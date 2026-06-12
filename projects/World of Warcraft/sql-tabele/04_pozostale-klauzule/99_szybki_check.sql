@@ -1,13 +1,13 @@
 SELECT 'MISJE', *
 FROM dbo.MISJE
 WHERE 1=1
-  AND NAZWA_LINII_FABULARNEJ_EN = 'Path of de Hash''ey'
+  --AND NAZWA_LINII_FABULARNEJ_EN = 'Path of de Hash''ey'
   --AND DODANO_W_PATCHU = '12.0.1'
   --AND MISJA_TYTUL_EN = 'The Nethersent'
   --AND MISJA_ID_Z_GRY != 123456789
   --AND DODATEK_EN = 'Midnight'
   --AND MISJA_ID_Z_GRY = 90959
-  AND MISJA_ID_MOJE_PK /*IN (129, 130, 131)*/ = 22
+  AND MISJA_ID_MOJE_PK /*IN (129, 130, 131)*/ = 8852
   --AND KRAINA_EN = 'Exile''s Reach'
   --AND MISJA_URL_WIKI = 'https://warcraft.wiki.gg/wiki/A_Hunter%27s_Trap_(Horde)'
   AND NPC_KONIEC_ID = 91
@@ -18,7 +18,7 @@ FROM dbo.MISJE_STATUSY AS ms
 INNER JOIN dbo.MISJE AS m
   ON ms.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
 WHERE 1=1
-  AND m.MISJA_ID_MOJE_PK = 22
+  AND m.MISJA_ID_MOJE_PK = 8852
   --AND m.MISJA_TYTUL_EN = 'Heart of the Amani'
   AND m.NAZWA_LINII_FABULARNEJ_EN = 'The Path of Light'
   --AND ms.STATUS = '3_ZATWIERDZONO'
@@ -48,7 +48,7 @@ INNER JOIN dbo.MISJE AS m
   ON ds.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
 WHERE 1=1
   --AND m.KRAINA_EN = 'Exile''s Reach'
-  AND m.MISJA_ID_MOJE_PK = 22
+  AND m.MISJA_ID_MOJE_PK = 8852
 ;
 
 SELECT 'ZRODLO_MISJE', *

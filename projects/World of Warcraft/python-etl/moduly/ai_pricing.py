@@ -5,7 +5,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatOpenAI",
         "currency": "USD",
         "input_per_1m": 5.00,
-        "output_per_1m": 30.00
+        "output_per_1m": 30.00,
+        "cache_prc": 0.1
     },
     "gpt-5.4": {
         "provider": "openai",
@@ -13,7 +14,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatOpenAI",
         "currency": "USD",
         "input_per_1m": 2.50,
-        "output_per_1m": 15.00
+        "output_per_1m": 15.00,
+        "cache_prc": 0.1
     },
     "gpt-5.4-mini": {
         "provider": "openai",
@@ -21,7 +23,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatOpenAI",
         "currency": "USD",
         "input_per_1m": 0.75,
-        "output_per_1m": 4.50
+        "output_per_1m": 4.50,
+        "cache_prc": 0.1
     },
     "gpt-5.4-nano": {
         "provider": "openai",
@@ -29,15 +32,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatOpenAI",
         "currency": "USD",
         "input_per_1m": 0.20,
-        "output_per_1m": 1.25
-    },
-    "qwen/qwen3.7-max": {
-        "provider": "openrouter",
-        "langchain_package": "langchain-openai",
-        "langchain_class": "ChatOpenAI",
-        "currency": "USD",
-        "input_per_1m": 1.25,
-        "output_per_1m": 3.75
+        "output_per_1m": 1.25,
+        "cache_prc": 0.1
     },
     "gpt-4.1": {
         "provider": "openai",
@@ -45,7 +41,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatOpenAI",
         "currency": "USD",
         "input_per_1m": 2.00,
-        "output_per_1m": 8.00
+        "output_per_1m": 8.00,
+        "cache_prc": 0.1
     },
     "gpt-4.1-mini": {
         "provider": "openai",
@@ -53,7 +50,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatOpenAI",
         "currency": "USD",
         "input_per_1m": 0.40,
-        "output_per_1m": 1.60
+        "output_per_1m": 1.60,
+        "cache_prc": 0.1
     },
     "gpt-4.1-nano": {
         "provider": "openai",
@@ -61,7 +59,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatOpenAI",
         "currency": "USD",
         "input_per_1m": 0.10,
-        "output_per_1m": 0.40
+        "output_per_1m": 0.40,
+        "cache_prc": 0.1
     },
     "gemini-3.1-pro-preview": {
         "provider": "google",
@@ -69,7 +68,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatGoogleGenerativeAI",
         "currency": "USD",
         "input_per_1m": 2.00,
-        "output_per_1m": 12.00
+        "output_per_1m": 12.00,
+        "cache_prc": 0.1
     },
     "gemini-3.5-flash": {
         "provider": "google",
@@ -77,7 +77,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatGoogleGenerativeAI",
         "currency": "USD",
         "input_per_1m": 1.50,
-        "output_per_1m": 9.00
+        "output_per_1m": 9.00,
+        "cache_prc": 0.1
     },
     "gemini-3-flash-preview": {
         "provider": "google",
@@ -85,7 +86,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatGoogleGenerativeAI",
         "currency": "USD",
         "input_per_1m": 0.50,
-        "output_per_1m": 3.00
+        "output_per_1m": 3.00,
+        "cache_prc": 0.1
     },
     "gemini-3.1-flash-lite-preview": {
         "provider": "google",
@@ -93,7 +95,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatGoogleGenerativeAI",
         "currency": "USD",
         "input_per_1m": 0.25,
-        "output_per_1m": 1.50
+        "output_per_1m": 1.50,
+        "cache_prc": 0.1
     },
     "gemini-2.5-pro": {
         "provider": "google",
@@ -101,7 +104,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatGoogleGenerativeAI",
         "currency": "USD",
         "input_per_1m": 1.25,
-        "output_per_1m": 10.00
+        "output_per_1m": 10.00,
+        "cache_prc": 0.1
     },
     "gemini-2.5-flash": {
         "provider": "google",
@@ -109,7 +113,8 @@ MODEL_PRICING = {
         "langchain_class": "ChatGoogleGenerativeAI",
         "currency": "USD",
         "input_per_1m": 0.30,
-        "output_per_1m": 1.0
+        "output_per_1m": 1.0,
+        "cache_prc": 0.1
     },
     "claude-opus-4-8": {
         "provider": "anthropic",
@@ -180,21 +185,26 @@ MODEL_PRICING = {
         "input_per_1m": 0.14,
         "output_per_1m": 0.28
     },
-    "qwen3.7-plus": {
-        "provider": "qwen",
-        "langchain_package": ["langchain-community", "langchain-qwq"],
-        "langchain_class": ["ChatTongyi", "ChatQwen"],
-        "currency": "CNY",
-        "input_per_1m": 0.4,
-        "output_per_1m": 1.6
+
+    "qwen3.7-max": {
+        "provider": "alibaba",
+        "langchain_package": ["langchain-qwq"],
+        "langchain_class": ["ChatQwen"],
+        "currency": "USD",
+        "input_per_1m": 2.5,
+        "output_per_1m": 7.5,
+        "cache_prc": 0.2
     },
-    "qwen3.6-plus": {
-        "provider": "qwen",
-        "langchain_package": ["langchain-community", "langchain-qwq"],
-        "langchain_class": ["ChatTongyi", "ChatQwen"],
-        "currency": "CNY",
-        "input_per_1m": 0.5,
-        "output_per_1m": 3.0
+    "qwen3.7-plus": {
+        "provider": "alibaba",
+        "region": "Singapore",
+        "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        "langchain_package": ["langchain-qwq"],
+        "langchain_class": ["ChatQwen"],
+        "currency": "USD",
+        "input_per_1m": 0.4,
+        "output_per_1m": 1.6,
+        "cache_prc": 0.2
     },
     "qwen3.5-397B-A17B": {
         "provider": "qwen",

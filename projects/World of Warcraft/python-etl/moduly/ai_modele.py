@@ -2,7 +2,6 @@ from langchain_openai import ChatOpenAI
 from langchain_qwq import ChatQwen
 
 from dotenv import load_dotenv
-import os
 import warnings
 
 load_dotenv()
@@ -18,9 +17,10 @@ warnings.filterwarnings(
 TEMPERATURE_LORE = 0.0
 TEMPERATURE_CONTEXT = 0.0
 TEMPERATURE_SUMMARY_QUEST = 0.0
+TEMPERATURE_JSON_CORRECTOR = 0.0
 TEMPERATURE_TRANSLATOR = 0.60
-TEMPERATURE_EDITOR = 0.60
-# OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+TEMPERATURE_EDITOR = 0.65
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 def llm_lore():
     llm = ChatOpenAI(
@@ -52,6 +52,15 @@ def llm_context():
     )
     return llm
 
+def llm_json_corrector():
+    return ChatOpenAI(
+        model="gpt-5.4-nano",
+        temperature=TEMPERATURE_JSON_CORRECTOR,
+        reasoning_effort="high",
+        use_responses_api=True,
+        max_retries=2
+    )
+
 def llm_translator() -> ChatQwen:
     return ChatQwen(
         model="qwen3.7-plus",
@@ -60,11 +69,12 @@ def llm_translator() -> ChatQwen:
         enable_thinking=True,
         extra_body={
             "top_k": 20,
+            "min_p": 0
         },
         max_retries=2,
     )
 
-def llm_editor():
+def llm_editor() -> ChatQwen:
     return ChatQwen(
         model="qwen3.7-max",
         temperature=TEMPERATURE_EDITOR,
@@ -72,6 +82,7 @@ def llm_editor():
         enable_thinking=True,
         extra_body={
             "top_k": 20,
+            "min_p": 0
         },
         max_retries=2,
     )

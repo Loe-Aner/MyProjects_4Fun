@@ -5,8 +5,6 @@
 #     sys.path.insert(0, str(ETL_ROOT))
 
 from moduly.utils import hash_do_wsad_json, sklej_warunki_w_WHERE
-from moduly.db_core import utworz_engine_do_db
-from moduly.ai_modele import llm_quest_summary
 from moduly.ai_prompty_misje import get_quest_summary
 from moduly.ai_logi import (
     create_logs,

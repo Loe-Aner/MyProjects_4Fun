@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import AIMessage
 
-from moduly.ai_klasy import QuestContentResponse, QuestContentResult
+from moduly.ai_klasy import QuestContentResult
 
 def tekst_lub_placeholder(tekst: str, placeholder: str) -> str:
     if tekst is None:
@@ -217,7 +217,7 @@ tekstu, który mógłby trafić wprost do gry bez dalszej redakcji.
 Zwróć finalną wersję polską, która:
 - zachowuje dokładny sens, intencję i emocjonalną funkcję źródła EN,
 - brzmi naturalnie, płynnie i klimatycznie — jak gotowa lokalizacja, nie jak tłumaczenie,
-- mądrze wykorzystuje DE (ton, rytm), RAG (zrozumienie sceny) i głos rasy,
+- mądrze wykorzystuje DE (ton, rytm), RAG (zrozumienie sceny) i głos rasy (bardzo ważne by każda wypowiedź była dostosowana do konkretnej rasy),
 - utrzymuje spójność lore, nazw, głosu postaci i terminologii,
 - nie narusza placeholderów, struktury, ID ani wartości technicznych.
 
@@ -229,15 +229,41 @@ Zwróć finalną wersję polską, która:
 - Pracuj po cichu. Nie komentuj decyzji. Zwróć WYŁĄCZNIE finalny JSON.
 
 ═══════════════════════════════════════════════
-## POLITYKA ZMIAN — KLUCZOWE
+## POLITYKA ZMIAN — PRODUKCYJNA REDAKCJA
 ═══════════════════════════════════════════════
-- Najmniejsza SKUTECZNA zmiana. „Skuteczna" = usuwa błąd lub realnie podnosi jakość,
-  a nie tylko inaczej układa poprawne zdanie.
+- Draft PL jest bazą, ale nie więzieniem. Masz zachować jego dobre rozwiązania, a nie jego każdą konstrukcję.
+- Celem nie jest najmniejsza liczba zmian znak po znaku, tylko najlepszy finalny tekst przy braku nieuzasadnionych ingerencji.
+- Finalny PL ma być oceniany nie po tym, jak blisko przypomina draft, ale po tym, czy polski gracz odebrałby go jako naturalną, profesjonalną kwestię z gry.
+- Zmieniaj tyle, ile potrzeba, aby tekst brzmiał jak gotowa polska lokalizacja AAA: naturalnie, płynnie, klimatycznie i wiernie wobec EN.
+- Zdanie zostaw bez zmian tylko wtedy, gdy jest jednocześnie:
+  1. wierne EN,
+  2. naturalne po polsku,
+  3. rytmiczne i czytelne,
+  4. zgodne z głosem postaci/rasy,
+  5. gotowe do publikacji w grze.
+- Zdanie poprawne znaczeniowo, ale sztywne, kalkowe, zbyt dosłowne, bez rytmu albo słabsze od możliwej wersji produkcyjnej — popraw.
+- Wolno przebudować szyk, rytm, dobór czasowników, idiomatyczność i rejestr, jeśli poprawia to brzmienie po polsku BEZ zmiany sensu.
 - Błąd sensu, fleksji, rodzaju, kalkę, literówkę lub zawyżony rejestr POPRAW ZAWSZE,
   nawet jeśli zdanie jest „zrozumiałe".
-- Zdanie poprawne, naturalne i klimatyczne ZOSTAW bez zmian — nie przepisuj dla samego przepisania.
+- Nie przepisuj dla samego przepisania. Każda zmiana ma służyć co najmniej jednemu z celów:
+  wierności, naturalności, płynności, klimatowi, głosowi postaci, spójności lore albo poprawności językowej.
 - Nigdy nie dodawaj informacji, emocji, motywacji, relacji ani lore spoza EN.
 - Nigdy nie usuwaj znaczeń obecnych w EN. Nie wzmacniaj tonu ponad źródło.
+
+═══════════════════════════════════════════════
+## KIEDY WOLNO REDAGOWAĆ MOCNIEJ
+═══════════════════════════════════════════════
+Wolno wykonać głębszą redakcję zdania lub całej wypowiedzi, jeśli draft PL:
+- brzmi jak tłumaczenie, a nie jak polski tekst z gry,
+- zachowuje sens, ale ma angielski szyk lub kalkową składnię,
+- jest zbyt płaski emocjonalnie wobec EN/DE,
+- ma nienaturalny rytm dialogu,
+- brzmi zbyt literacko, zbyt urzędowo albo zbyt współcześnie względem sceny,
+- nie oddaje głosu rasy/postaci,
+- używa poprawnych słów, ale w nieidiomatycznym lub mało nośnym układzie,
+- jest zrozumiały, ale nieprodukcyjny.
+
+Głębsza redakcja nie oznacza swobody twórczej. Oznacza doprowadzenie istniejącego sensu do najlepszego naturalnego brzmienia po polsku.
 
 ═══════════════════════════════════════════════
 ## NAJPIERW WYŁAP TO (częste błędy draftu — POPRAW, jeśli występują)
@@ -247,9 +273,7 @@ Zwróć finalną wersję polską, która:
   natomiast żeńskie imię na spółgłoskę zostaje nieodmienne: „złożyć ofiary Akil'zon" jest POPRAWNE.
 - Odwrotny błąd draftu: męska odmiana imienia żeńskiego → cofnij do formy nieodmiennej
   („Akil'zonowi", „z Akil'zonem" → „Akil'zon").
-- loa w sensie mnogim/zbiorowym → orzeczenie w liczbie mnogiej: „loa milczała" → „loa milczały".
-- shrine = kapliczka / sanktuarium, NIE „świątynia" (= temple).
-- Dopiski spoza EN → usuń (np. „na naszej ziemi").
+- Dopiski spoza EN → usuń
 - Zawyżony rejestr / archaizmy → ściągnij do poziomu EN: „uczynić", „rzezać", „przesiadują".
 - Fonetyczny zapis akcentu w PL → cofnij do standardowej polszczyzny; charakter buduje
   leksyka i rytm z WYTYCZNYCH_DLA_RAS, nie zapis.
@@ -257,6 +281,7 @@ Zwróć finalną wersję polską, która:
   (np. „Breaching the Mist" to przedzieranie się przez mgłę, nie jej rozproszenie).
 - Literówki w nazwach i słowach: „władj" → „władaj", „Zwiędła Kóra" → „Kora".
 - Rodzaj postaci wg MAPOWANIA_NPC (np. Akil'zon = ona: „obdarzyła", nie „obdarzył").
+  F → Kobieta, M → Mężczyzna, U → Nieznane (przyjmij wtedy męski)
 - W gossipach/dymkach z pustym `npc_pl`: rozpoznaj mówcę każdej linii po treści i rejestrze
   (skład sceny znasz z OBSADY) i dopilnuj zgodnych form gramatycznych;
   kwestie gracza → forma męska, rejestr neutralny. NIGDY nie uzupełniaj pustego `npc_pl`.
@@ -291,6 +316,27 @@ Zwróć finalną wersję polską, która:
   Głos rzeźbi brzmienie tego, co JEST w EN — nic nie dodaje i nie podnosi rejestru.
 
 ═══════════════════════════════════════════════
+## JAK UŻYWAĆ DE
+═══════════════════════════════════════════════
+- DE traktuj jako profesjonalną referencję redakcyjną: szczególnie dla tonu, rytmu, napięcia,
+  naturalnego podziału zdań, idiomatyczności i tego, jak scena „ma grać".
+- DE ma być mocną pomocą przy ocenie jakości draftu PL. Jeśli draft PL jest poprawny,
+  ale brzmi słabiej, sztywniej lub mniej naturalnie niż rozwiązanie sugerowane przez DE,
+  popraw PL tak, aby dorównał jakościowo scenie i intencji widocznej w DE.
+- DE pomaga rozpoznać, czy wypowiedź ma być sucha, ceremonialna, groźna, żartobliwa,
+  gniewna, wojskowa, mistyczna, potoczna, szorstka czy emocjonalna.
+- DE pomaga ustalić rytm, akcent i nośność wypowiedzi, ale nie jest wzorem do mechanicznego kopiowania.
+- Ton DE nie może nadpisać głosu rasy/postaci z WYTYCZNYCH_DLA_RAS i MAPOWANIA_NPC.
+  Jeśli ton DE oraz głos rasy prowadzą w różne strony, wybierz rozwiązanie zgodne z głosem rasy,
+  ale zachowaj funkcję sceny i jakość stylistyczną sugerowaną przez DE.
+- Nie umniejszaj DE do roli luźnej ciekawostki. Traktuj je jako ważny sygnał profesjonalnego tonu,
+  rytmu i dramaturgii, o ile nie koliduje z EN, mapowaniami, głosem rasy ani strukturą.
+- DE nigdy nie nadpisuje sensu EN, mapowań, nazw, placeholderów ani struktury.
+- Nie kopiuj niemieckiej składni, szyku, złożeń, interpunkcji ani rejestru.
+- Nie przenoś do PL przesadnej stylizacji. Szczególnie u trolli: głos ma być charakterystyczny,
+  ale nie prostacki, karykaturalny ani „wieśniacki".
+
+═══════════════════════════════════════════════
 ## NAZWY WŁASNE I MAPOWANIA
 ═══════════════════════════════════════════════
 - Mapowania NPC i słów kluczowych są obowiązkowe; nie zmieniaj zmapowanej nazwy podczas redakcji.
@@ -320,7 +366,7 @@ Zwróć finalną wersję polską, która:
 ## ELEMENTY NIETŁUMACZALNE I PLACEHOLDERY
 ═══════════════════════════════════════════════
 - Placeholdery, tagi, markery, escape, zmienne i fragmenty formatujące są nienaruszalne:
-  {{PLAYER_NAME}}, <name>, <race>, <class>, %s, %d, $n, $g, |c...|r, \\n, \\t, \\", tagi XML/HTML i pokrewne.
+  {{PLAYER_NAME}}, <name>, <race>, <class>, %s, %d, $n, $g, |c...|r, \\n, \\t, \\\", tagi XML/HTML i pokrewne.
 - Nie tłumacz ich, nie usuwaj, nie duplikuj, nie rozbijaj, nie normalizuj, nie zmieniaj składni.
 - Nie zamieniaj sekwencji escape na rzeczywiste znaki. Poprawnie użyty placeholder zostaw nietknięty.
 
@@ -394,9 +440,10 @@ Przed zwrotem wyniku wykonaj wewnętrzną kontrolę:
 6. Sprawdź, czy liczba elementów, kolejność i liczba linii są zgodne z JSON_ŹRÓDŁOWY_EN.
 7. Sprawdź, czy obecne są wszystkie wymagane sekcje: Misje_PL, Dialogi_PL, Podsumowanie_PL, Cele_PL, Treść_PL, Postęp_PL, Zakończenie_PL, Nagrody_PL, Gossipy_Dymki_PL.
 8. Sprawdź, czy Dialogi_PL nie znajduje się wewnątrz Misje_PL.
-9. Sprawdź, czy tekst brzmi jak gotowa polska lokalizacja, ale bez zmiany sensu.
+9. Sprawdź, czy finalny PL brzmi jak naturalna, profesjonalna kwestia z gry dla polskiego gracza — nie tylko jak tekst bliski draftowi.
 10. Zwróć wyłącznie czysty JSON zgodny ze schematem. Nie wypisuj tej kontroli, komentarzy ani markdowna.
 """
+
 
 CONST_RULES_QUEST_SUMMARY = """
 Jesteś redaktorem przygotowującym zwięzłe streszczenia questów ze świata Warcraft. Twoje streszczenie posłuży tłumaczom jako szybki kontekst fabularny misji — ma w kilka sekund powiedzieć, o co w niej chodzi.
@@ -518,13 +565,7 @@ def translator(
     Tłumaczy misję na bazie podanych parametrów.
     """
 
-    structured_model = prompt_translator | llm.with_structured_output(
-        QuestContentResponse,
-        method="json_schema",
-        strict=False,
-        include_raw=True
-    )
-    result = structured_model.invoke(
+    raw_response = (prompt_translator | llm).invoke(
         {
             "tekst_oryginalny": tekst_oryginalny,
             "tekst_niemiecki": tekst_lub_placeholder(tekst_niemiecki, "- brak wersji niemieckiej dla tej misji"),
@@ -540,7 +581,11 @@ def translator(
         }
     )
 
-    return result
+    return {
+        "raw": raw_response,
+        "parsed": None,
+        "parsing_error": None,
+    }
 
 
 def editor(
@@ -559,13 +604,7 @@ def editor(
     Redaguje przetłumaczoną misję na bazie podanych parametrów.
     """
 
-    structured_model = prompt_editor | llm.with_structured_output(
-        QuestContentResponse,
-        method="json_schema",
-        strict=False,
-        include_raw=True
-    )
-    result = structured_model.invoke(
+    raw_response = (prompt_editor | llm).invoke(
         {
             "tekst_oryginalny": tekst_lub_placeholder(tekst_oryginalny, "{}"),
             "tekst_przetlumaczony": tekst_lub_placeholder(tekst_przetlumaczony, "{}"),
@@ -582,7 +621,11 @@ def editor(
             }
     )
 
-    return result
+    return {
+        "raw": raw_response,
+        "parsed": None,
+        "parsing_error": None,
+    }
 
 
 def get_quest_summary(llm, mission: str) -> AIMessage:

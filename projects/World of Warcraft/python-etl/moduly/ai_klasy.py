@@ -57,6 +57,97 @@ class QuestContentResult(TypedDict):
     parsing_error: BaseException | None
 
 
+QUEST_CONTENT_JSON_SCHEMA = {
+    "title": "QuestContentResponse",
+    "description": "Pełna polska treść misji i dialogów.",
+    "type": "object",
+    "properties": {
+        "Misje_PL": {
+            "type": "object",
+            "properties": {
+                "Podsumowanie_PL": {
+                    "type": "object",
+                    "properties": {
+                        "Tytuł": {"type": "string"},
+                    },
+                    "required": ["Tytuł"],
+                    "additionalProperties": False,
+                },
+                "Cele_PL": {
+                    "type": "object",
+                    "properties": {
+                        "Główny": {
+                            "type": "object",
+                            "additionalProperties": {"type": "string"},
+                        },
+                        "Podrzędny": {
+                            "type": "object",
+                            "additionalProperties": {"type": "string"},
+                        },
+                    },
+                    "required": ["Główny", "Podrzędny"],
+                    "additionalProperties": False,
+                },
+                "Treść_PL": {
+                    "type": "object",
+                    "additionalProperties": {"type": "string"},
+                },
+                "Postęp_PL": {
+                    "type": "object",
+                    "additionalProperties": {"type": "string"},
+                },
+                "Zakończenie_PL": {
+                    "type": "object",
+                    "additionalProperties": {"type": "string"},
+                },
+                "Nagrody_PL": {
+                    "type": "object",
+                    "additionalProperties": {"type": "string"},
+                },
+            },
+            "required": [
+                "Podsumowanie_PL",
+                "Cele_PL",
+                "Treść_PL",
+                "Postęp_PL",
+                "Zakończenie_PL",
+                "Nagrody_PL",
+            ],
+            "additionalProperties": False,
+        },
+        "Dialogi_PL": {
+            "type": "object",
+            "properties": {
+                "Gossipy_Dymki_PL": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "typ": {
+                                "type": "string",
+                                "enum": ["gossip", "dymek"],
+                            },
+                            "npc_pl": {"type": "string"},
+                            "wypowiedzi_PL": {
+                                "type": "object",
+                                "additionalProperties": {"type": "string"},
+                            },
+                        },
+                        "required": ["id", "typ", "npc_pl", "wypowiedzi_PL"],
+                        "additionalProperties": False,
+                    },
+                },
+            },
+            "required": ["Gossipy_Dymki_PL"],
+            "additionalProperties": False,
+        },
+    },
+    "required": ["Misje_PL", "Dialogi_PL"],
+    "additionalProperties": False,
+}
+
+
 class LoreQuestion(BaseModel):
     aspect: str = Field(description="The entity or theme this question targets, e.g. 'Lightbloom', 'Orweyna'")
     question: str = Field(description="A single English question about that aspect")

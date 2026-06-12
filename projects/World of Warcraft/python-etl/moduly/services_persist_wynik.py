@@ -370,7 +370,7 @@ def save_quests_dialogues_to_db(silnik, misja_id, przetlumaczone, status):
             if "Dialogi_PL" in przetlumaczone and przetlumaczone["Dialogi_PL"]["Gossipy_Dymki_PL"]:
                 print("-> Rozpoczynam mapowanie NPC w dialogach...")
                 for blok in przetlumaczone["Dialogi_PL"]["Gossipy_Dymki_PL"]:
-                    npc_nazwa = blok.get("npc_pl")
+                    npc_nazwa = (blok.get("npc_pl") or "").strip() or "Brak Danych"
                     npc_id = conn.execute(q_select_npc, {"nazwa": npc_nazwa}).scalar()
 
                     if npc_id is not None:
