@@ -12,6 +12,7 @@ from moduly.ai_logi import (
 )
 
 from sqlalchemy import text
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 
 
@@ -34,10 +35,11 @@ def _extract_answer_text(answer) -> str:
 def generate_and_save_quest_summary(
         silnik, 
         llm,
-        kraina: str | None = None, 
-        fabula: str | None = None, 
-        dodatek: str | None = None, 
-        id_misji: int | None = None
+        kraina: str | None = None,
+        fabula: str | None = None,
+        dodatek: str | None = None,
+        id_misji: int | None = None,
+        max_workers: int = 10
 ) -> dict[int, str]:
     print(
         "--- Start generowania podsumowan misji "
@@ -109,9 +111,13 @@ def generate_and_save_quest_summary(
 
     summary = {}
     misje_id_z_gry = {}
-    for numer, (misja_id, misja_id_z_gry, html_skompresowany) in enumerate(lista_krotek, start=1):
+    total = len(lista_krotek)
+    print(f"--- Rownolegle przetwarzanie: max_workers={max_workers}")
+
+    def _przetworz_misje(numer, krotka):
+        misja_id, misja_id_z_gry, html_skompresowany = krotka
         started_at = time.perf_counter()
-        print(f"--- [{numer}/{len(lista_krotek)}] Misja {misja_id}: start")
+        print(f"--- [{numer}/{total}] Misja {misja_id}: start")
 
         try:
             tresc_misji = hash_do_wsad_json(html_skompresowany)
@@ -128,12 +134,26 @@ def generate_and_save_quest_summary(
                 output_chars=len(podsumowanie)
             )
             save_ai_logs_to_db(silnik=silnik, logs=logs)
+            print(f"--- [{numer}/{total}] Misja {misja_id}: OK, znaki={len(podsumowanie)}")
+            return misja_id, misja_id_z_gry, podsumowanie
+        except Exception as e:
+            print(f"--- [{numer}/{total}] Misja {misja_id}: BLAD - {e}")
+            return None
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [
+            executor.submit(_przetworz_misje, numer, krotka)
+            for numer, krotka in enumerate(lista_krotek, start=1)
+        ]
+
+        for future in as_completed(futures):
+            wynik = future.result()
+            if wynik is None:
+                continue
+
+            misja_id, misja_id_z_gry, podsumowanie = wynik
             summary[misja_id] = podsumowanie
             misje_id_z_gry[misja_id] = misja_id_z_gry
-            print(f"--- [{numer}/{len(lista_krotek)}] Misja {misja_id}: OK, znaki={len(podsumowanie)}")
-        except Exception as e:
-            print(f"--- [{numer}/{len(lista_krotek)}] Misja {misja_id}: BLAD - {e}")
-            continue
 
     parametry_insert = [
             {
