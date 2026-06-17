@@ -234,7 +234,6 @@ def validate_quest_content_response(parsed: Any, misja_id: int, stage: str) -> N
 
 
 def handle_quest_stage_result(
-    result,
     raw_response,
     llm,
     misja_id,
@@ -242,7 +241,8 @@ def handle_quest_stage_result(
     started_at,
     wsad_json,
     silnik,
-    status_zapisu
+    status_zapisu,
+    prompt_txt=None
 ):
     raw_text = ai_message_text(raw_response)
     qwen_duration_ms = round((time.perf_counter() - started_at) * 1000) if started_at is not None else None
@@ -259,7 +259,9 @@ def handle_quest_stage_result(
             duration_ms=qwen_duration_ms,
             parsing_error=str(qwen_error),
             input_chars=len(wsad_json),
-            output_chars=len(raw_text)
+            output_chars=len(raw_text),
+            input_txt=prompt_txt,
+            output_txt=raw_text
         )
         save_ai_logs_to_db(silnik=silnik, logs=qwen_logs)
 
@@ -329,7 +331,9 @@ def handle_quest_stage_result(
             stage=stage,
             duration_ms=qwen_duration_ms,
             input_chars=len(wsad_json),
-            output_chars=len(parsed_json)
+            output_chars=len(parsed_json),
+            input_txt=prompt_txt,
+            output_txt=parsed_json
         )
         save_ai_logs_to_db(silnik=silnik, logs=logs)
 
@@ -622,7 +626,6 @@ def przetworz_pojedyncza_misje(
                 )
                 raw_response = result_translator["raw"]
                 translated_json, logs = handle_quest_stage_result(
-                    result=result_translator,
                     raw_response=raw_response,
                     llm=_translator,
                     misja_id=misja_id,
@@ -630,7 +633,8 @@ def przetworz_pojedyncza_misje(
                     started_at=started_at,
                     wsad_json=wsad_json,
                     silnik=silnik,
-                    status_zapisu="1_PRZETŁUMACZONO"
+                    status_zapisu="1_PRZETŁUMACZONO",
+                    prompt_txt=result_translator["prompt_txt"]
                 )
 
                 if printing:
@@ -661,7 +665,6 @@ def przetworz_pojedyncza_misje(
                 )
                 raw_response = result_editor["raw"]
                 edited_json, logs = handle_quest_stage_result(
-                    result=result_editor,
                     raw_response=raw_response,
                     llm=_editor,
                     misja_id=misja_id,
@@ -669,7 +672,8 @@ def przetworz_pojedyncza_misje(
                     started_at=started_at,
                     wsad_json=wsad_json,
                     silnik=silnik,
-                    status_zapisu="2_ZREDAGOWANO"
+                    status_zapisu="2_ZREDAGOWANO",
+                    prompt_txt=result_editor["prompt_txt"]
                 )
                 if printing:
                     print(edited_json)

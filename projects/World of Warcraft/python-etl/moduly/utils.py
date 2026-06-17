@@ -1,8 +1,10 @@
 from sqlalchemy import text
 import pandas as pd
 from urllib.parse import unquote, urlparse
+import base64
 import json
 import re
+import zlib
 
 from json_repair import repair_json
 
@@ -61,6 +63,23 @@ def hash_do_wsad_json(zakodowany_string: str, jezyk: str = "EN") -> str:
     przetworzone_dane = przefiltruj_dane_misji(dane_wejsciowe=surowe_dane, jezyk=jezyk)
 
     return json.dumps(przetworzone_dane, indent=4, ensure_ascii=False)
+
+
+def skompresuj_tekst(tekst: str | None) -> str | None:
+    """Kompresja odwracalna (zlib + base64), jak HTML_SKOMPRESOWANY w dbo.ZRODLO."""
+    if not tekst:
+        return None
+    skompresowane_bajty = zlib.compress(tekst.encode("utf-8"))
+    return base64.b64encode(skompresowane_bajty).decode("utf-8")
+
+
+def odkoduj_tekst(zakodowany_string: str | None) -> str | None:
+    """Odwrotność skompresuj_tekst: base64 -> zlib -> czysty string."""
+    if not zakodowany_string:
+        return None
+    skompresowane_bajty = base64.b64decode(zakodowany_string)
+    return zlib.decompress(skompresowane_bajty).decode("utf-8")
+
 
 def formatuj_podsumowania_poprzednich_misji(wiersze, kolejnosc_biezacej=None, limit=5) -> str:
     if not wiersze:

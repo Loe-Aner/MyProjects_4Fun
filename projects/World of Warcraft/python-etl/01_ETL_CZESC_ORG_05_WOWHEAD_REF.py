@@ -9,4 +9,4 @@ from scraper_wowhead_misje import buduj_referencje_dodatku
 #   buduj_referencje_dodatku("Midnight", "Dawn of Reckoning")       # dodatek + linia fabularna (EN)
 #   buduj_referencje_dodatku(linia_fabularna="Dawn of Reckoning")   # sama linia fabularna (EN)
 
-buduj_referencje_dodatku(dodatek="Midnight", linia_fabularna="Path of de Hash'ey")
+buduj_referencje_dodatku(dodatek="Midnight")

@@ -4,8 +4,8 @@ WITH misje_lf AS (
     SELECT m.MISJA_ID_MOJE_PK, m.MISJA_TYTUL_EN,
            m.NAZWA_LINII_FABULARNEJ_EN, m.KOLEJNOSC_LINII_FABULARNEJ
     FROM dbo.MISJE AS m
-    WHERE m.NAZWA_LINII_FABULARNEJ_EN IN
-          (N'Ripple Effects', N'Dawn of Reckoning', N'Path of de Hash''ey')
+    WHERE m.DODATEK_EN IN
+          (N'Midnight')
 ),
 npc_ids AS (
     SELECT mlf.MISJA_ID_MOJE_PK, v.ID_NPC

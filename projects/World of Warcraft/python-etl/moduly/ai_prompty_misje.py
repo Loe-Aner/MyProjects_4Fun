@@ -565,26 +565,28 @@ def translator(
     Tłumaczy misję na bazie podanych parametrów.
     """
 
-    raw_response = (prompt_translator | llm).invoke(
-        {
-            "tekst_oryginalny": tekst_oryginalny,
-            "tekst_niemiecki": tekst_lub_placeholder(tekst_niemiecki, "- brak wersji niemieckiej dla tej misji"),
-            "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
-            "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
-            "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
-            "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
-            "obsada_i_glosy": tekst_lub_placeholder(obsada_i_glosy, "- brak danych o obsadzie dla tej misji"),
-            "podsumowania_poprzednich_misji_w_chainie": tekst_lub_placeholder(
-                podsumowania_poprzednich_misji_w_chainie,
-                "- jest to zwykła misja nie będąca w żadnym chainie albo pierwsza misja w chainie"
-            )
-        }
-    )
+    wejscie = {
+        "tekst_oryginalny": tekst_oryginalny,
+        "tekst_niemiecki": tekst_lub_placeholder(tekst_niemiecki, "- brak wersji niemieckiej dla tej misji"),
+        "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
+        "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
+        "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
+        "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
+        "obsada_i_glosy": tekst_lub_placeholder(obsada_i_glosy, "- brak danych o obsadzie dla tej misji"),
+        "podsumowania_poprzednich_misji_w_chainie": tekst_lub_placeholder(
+            podsumowania_poprzednich_misji_w_chainie,
+            "- jest to zwykła misja nie będąca w żadnym chainie albo pierwsza misja w chainie"
+        )
+    }
+
+    prompt_value = prompt_translator.invoke(wejscie)
+    raw_response = llm.invoke(prompt_value)
 
     return {
         "raw": raw_response,
         "parsed": None,
         "parsing_error": None,
+        "prompt_txt": prompt_value.to_string(),
     }
 
 
@@ -604,27 +606,29 @@ def editor(
     Redaguje przetłumaczoną misję na bazie podanych parametrów.
     """
 
-    raw_response = (prompt_editor | llm).invoke(
-        {
-            "tekst_oryginalny": tekst_lub_placeholder(tekst_oryginalny, "{}"),
-            "tekst_przetlumaczony": tekst_lub_placeholder(tekst_przetlumaczony, "{}"),
-            "tekst_pomocniczy": tekst_lub_placeholder(tekst_pomocniczy, "- brak wersji niemieckiej dla tej misji"),
-            "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
-            "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
-            "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
-            "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
-            "obsada_i_glosy": tekst_lub_placeholder(obsada_i_glosy, "- brak danych o obsadzie dla tej misji"),
-            "podsumowania_poprzednich_misji_w_chainie": tekst_lub_placeholder(
-                podsumowania_poprzednich_misji_w_chainie,
-                "- jest to zwykła misja nie będąca w żadnym chainie albo pierwsza misja w chainie"
-            )
-            }
-    )
+    wejscie = {
+        "tekst_oryginalny": tekst_lub_placeholder(tekst_oryginalny, "{}"),
+        "tekst_przetlumaczony": tekst_lub_placeholder(tekst_przetlumaczony, "{}"),
+        "tekst_pomocniczy": tekst_lub_placeholder(tekst_pomocniczy, "- brak wersji niemieckiej dla tej misji"),
+        "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
+        "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
+        "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
+        "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
+        "obsada_i_glosy": tekst_lub_placeholder(obsada_i_glosy, "- brak danych o obsadzie dla tej misji"),
+        "podsumowania_poprzednich_misji_w_chainie": tekst_lub_placeholder(
+            podsumowania_poprzednich_misji_w_chainie,
+            "- jest to zwykła misja nie będąca w żadnym chainie albo pierwsza misja w chainie"
+        )
+    }
+
+    prompt_value = prompt_editor.invoke(wejscie)
+    raw_response = llm.invoke(prompt_value)
 
     return {
         "raw": raw_response,
         "parsed": None,
         "parsing_error": None,
+        "prompt_txt": prompt_value.to_string(),
     }
 
 

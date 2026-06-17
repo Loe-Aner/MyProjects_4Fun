@@ -47,7 +47,16 @@ rag_categories = [
     # {"category": "Category:Ogre_organizations", "subtype": "ogres", "excluded": ["alternate", "Classic"], "min_body_words": 250}, 
     # {"category": "Category:Cities", "subtype": "cities", "excluded": ["alternate", "Classic", "Warcraft"], "min_body_words": 350}, 
     # {"category": "Category:Demon_hunter_characters", "subtype": "characters", "excluded": ["alternate", "Classic", "Warcraft"], "min_body_words": 350}, 
-    {"category": "Category:Races", "subtype": "races", "excluded": ["alternate", "Classic", "Warcraft"], "min_body_words": 350}, 
+    # {"category": "Category:Races", "subtype": "races", "excluded": ["alternate", "Classic", "Warcraft"], "min_body_words": 350}, 
+    # {"category": "Category:Remember_the_Sunwell", "subtype": "characters", "excluded": ["alternate", "Classic", "Warcraft"], "min_body_words": 250}, 
+    # {"category": "Category:Isle of Quel'Danas subzones", "subtype": "subzones", "excluded": ["alternate", "Classic", "Warcraft"], "min_body_words": 150}, 
+    # {"category": "Category:Ethereal_groups", "subtype": "organizations", "excluded": [], "min_body_words": 150}, 
+    # {"category": "Category:Disorder", "subtype": "disorder", "excluded": [], "min_body_words": 250}, 
+    # {"category": "Category:Demon_hunter_organizations", "subtype": "organizations", "excluded": [], "min_body_words": 250}, 
+    # {"category": "Category:Forests", "subtype": "forests", "excluded": [], "min_body_words": 250}, 
+    # {"category": "Category:Pyramidal_structures", "subtype": "buildings", "excluded": [], "min_body_words": 10}, 
+    # {"category": "Category:Wizards", "subtype": "characters", "excluded": ["Warcraft", "Classic"], "min_body_words": 200}, 
+    {"category": "Category:High_elf_organizations", "subtype": "organizations", "excluded": ["Warcraft", "Classic"], "min_body_words": 200}, 
 ]
 
 

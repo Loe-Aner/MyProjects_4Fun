@@ -10,8 +10,8 @@ silnik = utworz_engine_do_db()
 # BIERZE POD UWAGE TYLKO MISJE Z TRESCIA
 misje_dialogi_przetlumacz_zredaguj_zapisz(
     silnik, 
-    id_misji=8852,
-    liczba_watkow=1,
+    fabula="Path of de Hash'ey",
+    liczba_watkow=4,
     printing=False
     )
 
@@ -21,4 +21,4 @@ ujednolic_tytuly_misji(silnik)
 # TUTAJ SKRYPT USUWAJACY MISJE (ZE STATUSEM PRZETLUMACZONE), KTORE DOSTALY BLAD PRZY REDAKCJI
 # DLA BEZPIECZENSTWA NIECH WYKONA PROCES JESZCZE RAZ
 # NA PRZYSZLOSC: ZROBIC RETRY PRZY BLEDZIE
-usun_niezredagowane(silnik) 
+usun_niezredagowane(silnik)

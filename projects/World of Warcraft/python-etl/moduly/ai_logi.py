@@ -18,6 +18,7 @@ from moduly.ai_modele import (
 )
 
 from moduly.ai_pricing import MODEL_PRICING
+from moduly.utils import skompresuj_tekst
 
 
 TEMPERATURE_BY_STAGE = {
@@ -72,8 +73,12 @@ def create_logs(
     output_chars: int,
     stage: str,
     duration_ms: int | None = None,
-    parsing_error: str | None = None
+    parsing_error: str | None = None,
+    input_txt: str | None = None,
+    output_txt: str | None = None
 ) -> dict[str, Any]:
+
+    zapisz_tresc = stage in ("translator", "editor")
 
     response_metadata = raw_response.response_metadata or {}
     usage_metadata = raw_response.usage_metadata or {}
@@ -157,6 +162,8 @@ def create_logs(
             else TEMPERATURE_BY_STAGE.get(stage)
         ),
         "PARSING_ERROR": parsing_error,
+        "INPUT_SKOMPRESOWANY": skompresuj_tekst(input_txt) if zapisz_tresc else None,
+        "OUTPUT_SKOMPRESOWANY": skompresuj_tekst(output_txt) if zapisz_tresc else None
     }
 
 
@@ -172,7 +179,8 @@ def save_ai_logs_to_db(
                 MODEL, MODEL_API, TOTAL_TOKENS, INPUT_TOKENS,
                 OUTPUT_TOKENS, INPUT_TOKENS_PRICE, OUTPUT_TOKENS_PRICE, CURRENCY,
                 CACHED_TOKENS, THINKING_TOKENS, INPUT_CHARS_ONLY_JSON, OUTPUT_CHARS_ONLY_JSON,
-                REASONING_EFFORT, TEMPERATURE_FROM_LLM, TEMPERATURE_FROM_CONST, PARSING_ERROR
+                REASONING_EFFORT, TEMPERATURE_FROM_LLM, TEMPERATURE_FROM_CONST, PARSING_ERROR,
+                INPUT_SKOMPRESOWANY, OUTPUT_SKOMPRESOWANY
             )
             VALUES (
                 :ANSWER_ID, :PROVIDER, :SERVICE_TIER, :STAGE,
@@ -180,7 +188,8 @@ def save_ai_logs_to_db(
                 :MODEL, :MODEL_API, :TOTAL_TOKENS, :INPUT_TOKENS,
                 :OUTPUT_TOKENS, :INPUT_TOKENS_PRICE, :OUTPUT_TOKENS_PRICE, :CURRENCY,
                 :CACHED_TOKENS, :THINKING_TOKENS, :INPUT_CHARS_ONLY_JSON, :OUTPUT_CHARS_ONLY_JSON,
-                :REASONING_EFFORT, :TEMPERATURE_FROM_LLM, :TEMPERATURE_FROM_CONST, :PARSING_ERROR
+                :REASONING_EFFORT, :TEMPERATURE_FROM_LLM, :TEMPERATURE_FROM_CONST, :PARSING_ERROR,
+                :INPUT_SKOMPRESOWANY, :OUTPUT_SKOMPRESOWANY
             )
         """)
         conn.execute(q_insert, logs)
