@@ -8,6 +8,6 @@ silnik = utworz_engine_do_db()
 # TUTAJ TLUMACZE NOWOSCI
 stworz_excele_do_zatwierdzenia_tlumaczen(
     silnik, 
-    fabula="A Venomous History",
-    sciezka=sciezka_excel_zatwierdzenia("A Venomous History.xlsx")
+    fabula="Path of de Hash'ey",
+    sciezka=sciezka_excel_zatwierdzenia("Path of de Hashey.xlsx")
 )

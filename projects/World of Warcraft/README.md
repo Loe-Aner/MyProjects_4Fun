@@ -28,5 +28,4 @@ Projekt ma na celu stworzenie **kompleksowego polskiego rozwiązania dla World o
 > To nie jest jeszcze finalna wersja rozwiązania.  
 > **Final review**, uzupełnienie braków i dalsze dopracowanie architektury oraz dokumentacji wykonam dopiero po zamknięciu kilku kolejnych etapów projektu.
 
----
 *Więcej szczegółów pojawi się w następnych aktualizacjach.*

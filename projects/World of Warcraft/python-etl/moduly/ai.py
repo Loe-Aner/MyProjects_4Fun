@@ -31,7 +31,6 @@ from moduly.ai_core import (
 
 from moduly.ai_prompty_misje import (
     translator,
-    editor
 )
 from moduly.ai_prompty_sk_NPC import (
     instrukcja_slowa_kluczowe,
@@ -42,7 +41,6 @@ from moduly.ai_prompty_sk_NPC import (
 )
 from moduly.ai_modele import (
     llm_translator,
-    llm_editor,
     llm_json_corrector,
 )
 from moduly.ai_json_output import (
@@ -581,15 +579,12 @@ def przetworz_pojedyncza_misje(
             txt_sk = formatuj_slowa_kluczowe(wsad_sk)
 
             txt_rasy_tlumacz = formatuj_style_ras(RACE_STYLES, wsad_wybrane_rasy_opis, etap="tlumacz")
-            txt_rasy_redaktor = formatuj_style_ras(RACE_STYLES, wsad_wybrane_rasy_opis, etap="redaktor")
 
             txt_obsada = formatuj_obsada(obsada_z_bazy)
 
             _translator = llm_translator()
-            _editor = llm_editor()
 
             result_translator = None
-            result_editor = None
             raw_response = None
             started_at = None
             current_stage = None
@@ -642,45 +637,7 @@ def przetworz_pojedyncza_misje(
                     logs_json = json.dumps(logs, indent=2, ensure_ascii=False)
                     print(logs_json)
 
-# ============================================================================================
-# ========================================== EDITOR ==========================================
-# ============================================================================================
-
-                current_stage = "editor"
-                current_llm = _editor
-                raw_response = None
-                started_at = time.perf_counter()
-                print(f"--- [ID: {misja_id}] Start Redakcji... ---")
-                result_editor = editor(
-                    llm=_editor,
-                    tekst_oryginalny=wsad_json,
-                    tekst_przetlumaczony=translated_json,
-                    tekst_pomocniczy=misja_referencja_de,
-                    kontekst_rag=context_lore_text,
-                    wytyczne_rasy=txt_rasy_redaktor,
-                    tekst_npc=txt_npc,
-                    tekst_slowa_kluczowe=txt_sk,
-                    obsada_i_glosy=txt_obsada,
-                    podsumowania_poprzednich_misji_w_chainie=wsad_podsumowania_poprzednich_misji_w_chainie
-                )
-                raw_response = result_editor["raw"]
-                edited_json, logs = handle_quest_stage_result(
-                    raw_response=raw_response,
-                    llm=_editor,
-                    misja_id=misja_id,
-                    stage="editor",
-                    started_at=started_at,
-                    wsad_json=wsad_json,
-                    silnik=silnik,
-                    status_zapisu="2_ZREDAGOWANO",
-                    prompt_txt=result_editor["prompt_txt"]
-                )
-                if printing:
-                    print(edited_json)
-                    logs_json = json.dumps(logs, indent=2, ensure_ascii=False)
-                    print(logs_json)
-
-                print(f"+++[ID: {misja_id}] GOTOWE (Redakcja) +++")
+                print(f"+++[ID: {misja_id}] GOTOWE (Tlumaczenie) +++")
                 processing_completed = True
 
 # ========================================================================================
@@ -715,13 +672,13 @@ def przetworz_pojedyncza_misje(
                     save_ai_logs_to_db(silnik=silnik, logs=logs)
 
             if processing_completed:
-                print(f"+++[ID: {misja_id}] GOTOWE (Tlumaczenie i redakcja) +++")
+                print(f"+++[ID: {misja_id}] GOTOWE (Tlumaczenie) +++")
 
         except Exception as e:
             print(f"!!! BLAD przy misji {misja_id}: {e}")
 
 
-def misje_dialogi_przetlumacz_zredaguj_zapisz(
+def misje_dialogi_przetlumacz_zapisz(
     silnik, 
     kraina: str | None = None, 
     fabula: str | None = None, 
@@ -794,9 +751,8 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
         print("Nie znaleziono żadnych misji pasujących do kryteriów.")
         return
 
-    print(f"Znaleziono {liczba_zadan} misji do przetworzenia. Uruchamiam {liczba_watkow} wątków...")
+    print(f"Znaleziono {liczba_zadan} misji do przetłumaczenia. Uruchamiam {liczba_watkow} wątków...")
     print("Dostawca tłumaczenia: langchain/qwen")
-    print("Dostawca redakcji: langchain/qwen")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=liczba_watkow) as executor:
         futures = []
@@ -812,7 +768,10 @@ def misje_dialogi_przetlumacz_zredaguj_zapisz(
         for future in concurrent.futures.as_completed(futures):
             pass
 
-    print("\n--- ZAKOŃCZONO PRZETWARZANIE WIELOWĄTKOWE ---")
+    print("\n--- ZAKOŃCZONO TŁUMACZENIE WIELOWĄTKOWE ---")
+
+
+misje_dialogi_przetlumacz_zredaguj_zapisz = misje_dialogi_przetlumacz_zapisz
 
 
 def tych_npcow_nie_tlumacz(klient):

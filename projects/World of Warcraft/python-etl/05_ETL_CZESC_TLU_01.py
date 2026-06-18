@@ -1,24 +1,18 @@
-from moduly.ai import misje_dialogi_przetlumacz_zredaguj_zapisz
+from moduly.ai import misje_dialogi_przetlumacz_zapisz
 from moduly.db_core import utworz_engine_do_db
 from moduly.repo_misje import ujednolic_tytuly_misji
-from moduly.services_persist_wynik import usun_niezredagowane
 
 silnik = utworz_engine_do_db()
 
-# TŁUMACZY A POTEM REDAGUJE, ZAPISUJĄC DO BAZY DANYCH Z ODPOWIEDNIMI STATUSAMI
+# TŁUMACZY ZAPISUJĄC DO BAZY DANYCH Z ODPOWIEDNIMI STATUSAMI
 # MOŻNA PODAĆ DOWOLNIE KTORY PARAMETR
 # BIERZE POD UWAGE TYLKO MISJE Z TRESCIA
-misje_dialogi_przetlumacz_zredaguj_zapisz(
+misje_dialogi_przetlumacz_zapisz(
     silnik, 
-    fabula="Path of de Hash'ey",
-    liczba_watkow=4,
+    fabula="Ripple Effects",
+    liczba_watkow=8,
     printing=False
     )
 
 # KOREKTA MISJI - JEŻELI NP. DWIE MISJE O ID 37, 38 MAJĄ TEN SAM TYTUŁ PO ENG, ALE INNY PO PL, TO WYBIERAM PIERWSZY TYTUŁ
 ujednolic_tytuly_misji(silnik)
-
-# TUTAJ SKRYPT USUWAJACY MISJE (ZE STATUSEM PRZETLUMACZONE), KTORE DOSTALY BLAD PRZY REDAKCJI
-# DLA BEZPIECZENSTWA NIECH WYKONA PROCES JESZCZE RAZ
-# NA PRZYSZLOSC: ZROBIC RETRY PRZY BLEDZIE
-usun_niezredagowane(silnik)

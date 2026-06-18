@@ -11,6 +11,7 @@ projects/World of Warcraft/python-etl/scraper_wiki_async.py
 projects/World of Warcraft/python-etl/scraper_wiki_main.py
 projects/World of Warcraft/python-etl/scraper_wiki_rag.py
 projects/World of Warcraft/python-etl/moduly/ai_json_output.py
+projects/World of Warcraft/python-etl/moduly/ai_batch_redaktor_gemini.py
 projects/World of Warcraft/python-etl/scraper_wowhead_metadane.py
 projects/World of Warcraft/python-etl/scraper_wowhead_misje.py
 projects/World of Warcraft/python-etl/scraper_wowhead_kolejnosc.py
@@ -28,6 +29,7 @@ projects/World of Warcraft/qdrant_storage
 projects/World of Warcraft/_testy_tlumacz
 projects/World of Warcraft/_testy_redaktor
 projects/World of Warcraft/python-etl/testy
+projects/World of Warcraft/python-etl/_batch_gemini_redaktor
 
 
 

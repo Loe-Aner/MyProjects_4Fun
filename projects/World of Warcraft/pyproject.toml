@@ -25,6 +25,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "qdrant-client>=1.18.0",
     "sqlalchemy>=2.0.50",
+    "xlsxwriter>=3.2.9",
 ]
 
 [dependency-groups]
