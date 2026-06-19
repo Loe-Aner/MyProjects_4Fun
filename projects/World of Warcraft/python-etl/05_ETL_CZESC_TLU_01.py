@@ -9,7 +9,7 @@ silnik = utworz_engine_do_db()
 # BIERZE POD UWAGE TYLKO MISJE Z TRESCIA
 misje_dialogi_przetlumacz_zapisz(
     silnik, 
-    fabula="Ripple Effects",
+    fabula="The Light's Summons",
     liczba_watkow=8,
     printing=False
     )

@@ -16,11 +16,9 @@ from moduly.AI_RAG import (
     get_candidates,
 )
 
-# Komunikat dla translatora/redaktora, gdy nie ma prekomputowanego kontekstu.
+
 PLACEHOLDER_BRAK_KONTEKSTU = "Brak kontekstu dla tej misji - pomiń tę sekcję"
 
-# Ile misji przetwarzac rownolegle. Kazda misja to 2 wywolania LLM + zapytania do Qdranta,
-# czyli praca I/O-bound - watki dobrze sie tu sprawdzaja.
 MAKS_ROWNOLEGLE_MISJE = 5
 
 
