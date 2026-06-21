@@ -11,7 +11,7 @@ arch_update_dir = Path(r"C:\____Moje-MOJE\MyProjects_4Fun\projects\World of Warc
 chunks_output_dir = Path(r"C:\____Moje-MOJE\MyProjects_4Fun\projects\World of Warcraft\rag-pliki\02_chunki")
 
 rag_categories = [
-    {"category": "Category:Wars", "subtype": "wars", "excluded": [], "included": [], "min_body_words": 250}, 
+    {"category": "Category:Knights", "subtype": "characters", "excluded": [], "included": ["Uther the Lightbringer"], "min_body_words": 50},
 ]
 
 

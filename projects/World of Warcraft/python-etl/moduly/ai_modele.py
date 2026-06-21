@@ -15,7 +15,7 @@ warnings.filterwarnings(
 )
 
 TEMPERATURE_LORE = 0.0
-TEMPERATURE_CONTEXT = 0.0
+TEMPERATURE_CONTEXT = 0.05
 TEMPERATURE_SUMMARY_QUEST = 0.0
 TEMPERATURE_JSON_CORRECTOR = 0.0
 TEMPERATURE_TRANSLATOR = 0.60
@@ -46,7 +46,7 @@ def llm_context():
     llm = ChatOpenAI(
         model="gpt-5.4-mini",
         temperature=TEMPERATURE_CONTEXT,
-        reasoning_effort="medium",
+        reasoning_effort="high",
         use_responses_api=True,
         max_retries=2
     )

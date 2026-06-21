@@ -9,8 +9,8 @@ silnik = utworz_engine_do_db()
 # BIERZE POD UWAGE TYLKO MISJE Z TRESCIA
 misje_dialogi_przetlumacz_zapisz(
     silnik, 
-    fabula="The Light's Summons",
-    liczba_watkow=8,
+    dodatek="Midnight",
+    liczba_watkow=20,
     printing=False
     )
 

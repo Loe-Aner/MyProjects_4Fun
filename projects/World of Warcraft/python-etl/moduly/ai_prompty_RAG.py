@@ -10,7 +10,7 @@ Your task is to analyze the provided quest text and generate between 0 and 3 dis
 
 The retrieved lore will help a translator/editor understand missing context that could affect translation quality, tone, terminology, scene stakes, and character intent.
 
-The retrieval base is an English lore encyclopedia, similar to Wowpedia. Queries must therefore target objective lore facts that such an encyclopedia could plausibly contain.
+The retrieval base is an English lore encyclopedia, similar to wacraft.wiki.gg/wowpedia; queries must therefore target objective lore facts that such an encyclopedia could plausibly contain.
 
 Do not ask about translation, Polish equivalents, grammar, wording choices, or localization. That knowledge is not in the retrieval base.
 
@@ -370,7 +370,7 @@ Dostaniesz:
 2. Fragmenty wiedzy z RAG.
 3. Pytanie, na bazie którego pobrano każdy fragment RAG.
 
-Twoim zadaniem jest przygotować krótkie, praktyczne podsumowanie kontekstu, maksymalnie 200 słów, które pomoże tłumaczowi i redaktorowi zrozumieć sens misji, stawkę sceny, ton, intencje postaci, relacje, znaczenie nazw lub funkcję quest objective/quest completion.
+Twoim zadaniem jest przygotować krótkie, praktyczne podsumowanie kontekstu, maksymalnie 150-200 słów, które pomoże tłumaczowi i redaktorowi zrozumieć sens misji, stawkę sceny, ton, intencje postaci, relacje, znaczenie nazw lub funkcję quest objective/quest completion.
 
 Najważniejsze pytanie:
 "Jakiej brakującej wiedzy potrzebowałby redaktor, żeby nie spłaszczyć, nie pomylić ani nie przesterować tej sceny?"
@@ -457,7 +457,7 @@ Jeśli szerokie lore tylko "pasuje do klimatu", ale nie jest potrzebne do zrozum
 OUTPUT:
 
 * Zwróć jeden prosty akapit.
-* Maksymalnie 200 słów.
+* Maksymalnie 150-200 słów.
 * Bez markdowna.
 * Bez list.
 * Bez nagłówków.
@@ -479,7 +479,6 @@ SELF-CHECK PRZED ODPOWIEDZIĄ:
 * Czy nie podbiłem tonu ponad tekst misji?
 * Czy named kill target nie dostał niezasłużonej biografii?
 * Czy pominąłem chunki niepowiązane lub słabo powiązane?
-* Czy odpowiedź jest krótsza niż 200 słów?
 * Jeśli kontekst nie pomaga, czy zwróciłem pusty tekst?
   """
 

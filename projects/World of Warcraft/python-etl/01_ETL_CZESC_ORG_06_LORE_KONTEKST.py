@@ -11,4 +11,4 @@ from moduly.ai_lore_kontekst import buduj_kontekst_lore
 #   buduj_kontekst_lore(dodatek="Midnight", fabula="Dawn of Reckoning")
 #   buduj_kontekst_lore(id_misji=1234)
 
-buduj_kontekst_lore(fabula="The Light's Summons")
+buduj_kontekst_lore(dodatek="Midnight")

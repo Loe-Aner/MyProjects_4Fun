@@ -22,6 +22,14 @@ def tekst_lub_placeholder(tekst: str, placeholder: str) -> str:
     return tekst if tekst else placeholder
 
 
+def kontekst_rag_lub_placeholder(tekst: str, placeholder: str, min_slowa: int = 15) -> str:
+    tekst = tekst_lub_placeholder(tekst, placeholder)
+    if tekst == placeholder:
+        return placeholder
+
+    return tekst if len(tekst.split()) >= min_slowa else placeholder
+
+
 CONST_RULES_TRANSLATOR = """
 ## ROLA
 Jesteś ekspertem lokalizacji World of Warcraft (EN→PL), produkcyjna jakość.
@@ -449,7 +457,7 @@ def zbuduj_prompt_redaktora(
         "tekst_oryginalny": tekst_lub_placeholder(tekst_oryginalny, "{}"),
         "tekst_przetlumaczony": tekst_lub_placeholder(tekst_przetlumaczony, "{}"),
         "tekst_pomocniczy": tekst_lub_placeholder(tekst_pomocniczy, "- brak wersji niemieckiej dla tej misji"),
-        "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
+        "kontekst_rag": kontekst_rag_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
         "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
         "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
         "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),
@@ -488,7 +496,7 @@ def translator(
     wejscie = {
         "tekst_oryginalny": tekst_oryginalny,
         "tekst_niemiecki": tekst_lub_placeholder(tekst_niemiecki, "- brak wersji niemieckiej dla tej misji"),
-        "kontekst_rag": tekst_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
+        "kontekst_rag": kontekst_rag_lub_placeholder(kontekst_rag, "- brak kontekstu dla tej misji"),
         "wytyczne_rasy": tekst_lub_placeholder(wytyczne_rasy, "- brak wytycznych dla tej/tych ras"),
         "tekst_npc": tekst_lub_placeholder(tekst_npc, "- brak mapowań NPC dla tej misji"),
         "tekst_slowa_kluczowe": tekst_lub_placeholder(tekst_slowa_kluczowe, "- brak mapowań słów kluczowych dla tej misji"),

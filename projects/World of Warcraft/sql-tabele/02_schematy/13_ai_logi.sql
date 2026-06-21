@@ -5,7 +5,15 @@ CREATE TABLE dbo.AI_LOGI (
     SERVICE_TIER NVARCHAR(100) NULL,
     STAGE NVARCHAR(50) NOT NULL
         CONSTRAINT CK_AI_LOGI_STAGE
-        CHECK (STAGE IN (N'translator', N'editor', N'rag_questions', N'rag_context', N'quest_summary')),
+        CHECK (STAGE IN (
+            N'translator',
+            N'translator_json_correction',
+            N'editor',
+            N'editor_json_correction',
+            N'rag_questions',
+            N'rag_context',
+            N'quest_summary'
+        )),
     STATUS NVARCHAR(50) NULL,
     DURATION_S DECIMAL(12,4) NULL,
     MISJA_ID_MOJE_FK BIGINT NULL,
