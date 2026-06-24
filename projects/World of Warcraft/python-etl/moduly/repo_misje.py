@@ -1,5 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
+from pathlib import Path
+import pandas as pd
 
 from moduly.db_core import _czy_duplikat
 
@@ -257,3 +259,29 @@ def ujednolic_tytuly_misji(silnik):
             
     except Exception as e:
         print(f"Wystąpił błąd podczas aktualizacji: {e}")
+
+
+def get_missing_quests_from_wowhead(
+        silnik,
+        dodatek,
+        stala_sciezka: Path = Path(r"C:\____Moje-MOJE\MyProjects_4Fun\projects\World of Warcraft\excel-mappingi\brakujace misje.xlsx"),
+        staly_prefix: str = "https://www.wowhead.com/quest="
+) -> set[str]:
+    
+    zbior_misji_wowhead = set(pd.read_excel(stala_sciezka, sheet_name="brakujace_misje")
+                                        .loc[:, "MISJE"])
+    with silnik.connect() as conn:
+        q_select_misje = text("""
+            SELECT MISJA_ID_Z_GRY
+            FROM WoW_PL.dbo.MISJE
+            WHERE 1=1
+              AND MISJA_ID_Z_GRY <> 123456789
+              AND DODATEK_EN = :dodatek
+        """)
+
+        zbior_misji_wiki = set(conn.execute(q_select_misje, {"dodatek": dodatek})
+                                .scalars()
+                                )
+    misje_do_wyscrapowania = zbior_misji_wowhead - zbior_misji_wiki
+    linki_do_wyscrapowania = {staly_prefix + str(misja) for misja in misje_do_wyscrapowania}
+    return linki_do_wyscrapowania
