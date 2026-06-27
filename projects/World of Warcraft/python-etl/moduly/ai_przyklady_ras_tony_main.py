@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Annotated, List, Literal
 
 
-EditTag = Literal["LEKSYKA", "NATURALNOŚĆ", "ZWIĘZŁOŚĆ", "SKŁADNIA"]
+EditTag = Literal["LEKSYKA", "NATURALNOŚĆ", "ZWIĘZŁOŚĆ", "SKŁADNIA", "REJESTR", "WIERNOŚĆ", "OBRAZOWANIE", "TERMIN"]
 
 
 @dataclass(frozen=True, slots=True)

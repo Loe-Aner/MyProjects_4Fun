@@ -12,7 +12,8 @@ CREATE TABLE dbo.AI_LOGI (
             N'editor_json_correction',
             N'rag_questions',
             N'rag_context',
-            N'quest_summary'
+            N'quest_summary',
+            N'rag_chunking'
         )),
     STATUS NVARCHAR(50) NULL,
     DURATION_S DECIMAL(12,4) NULL,

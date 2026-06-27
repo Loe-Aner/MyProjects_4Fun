@@ -15,6 +15,7 @@ from moduly.ai_modele import (
     TEMPERATURE_JSON_CORRECTOR,
     TEMPERATURE_LORE,
     TEMPERATURE_CONTEXT,
+    TEMPERATURE_CHUNKER,
 )
 
 from moduly.ai_pricing import MODEL_PRICING
@@ -26,7 +27,8 @@ TEMPERATURE_BY_STAGE = {
     "editor": TEMPERATURE_EDITOR,
     "rag_questions": TEMPERATURE_LORE,
     "rag_context": TEMPERATURE_CONTEXT,
-    "quest_summary": TEMPERATURE_SUMMARY_QUEST
+    "quest_summary": TEMPERATURE_SUMMARY_QUEST,
+    "rag_chunking": TEMPERATURE_CHUNKER
 }
 
 def format_created_at(created_at: Any) -> str | None:

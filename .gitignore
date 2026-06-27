@@ -16,6 +16,7 @@ projects/World of Warcraft/python-etl/scraper_wowhead_metadane.py
 projects/World of Warcraft/python-etl/scraper_wowhead_misje.py
 projects/World of Warcraft/python-etl/scraper_wowhead_kolejnosc.py
 projects/World of Warcraft/python-etl/moduly/ai_llm_judge_runner.py
+projects/World of Warcraft/CLAUDE.md
 tempCodeRunnerFile.lua
 *.cursor
 

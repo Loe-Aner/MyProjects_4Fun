@@ -18,6 +18,7 @@ TEMPERATURE_LORE = 0.0
 TEMPERATURE_CONTEXT = 0.05
 TEMPERATURE_SUMMARY_QUEST = 0.0
 TEMPERATURE_JSON_CORRECTOR = 0.0
+TEMPERATURE_CHUNKER = 0.0
 TEMPERATURE_TRANSLATOR = 0.60
 TEMPERATURE_EDITOR = 0.65
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -61,6 +62,15 @@ def llm_json_corrector():
         max_retries=2
     )
 
+def llm_chunker():
+    return ChatOpenAI(
+        model="gpt-5.4-nano",
+        temperature=TEMPERATURE_CHUNKER,
+        reasoning_effort="high",
+        use_responses_api=True,
+        max_retries=2
+    )
+
 def llm_translator() -> ChatQwen:
     return ChatQwen(
         model="qwen3.7-plus",
@@ -74,15 +84,15 @@ def llm_translator() -> ChatQwen:
         max_retries=2,
     )
 
-def llm_editor() -> ChatQwen:
-    return ChatQwen(
-        model="qwen3.7-max",
-        temperature=TEMPERATURE_EDITOR,
-        top_p=0.95,
-        enable_thinking=True,
-        extra_body={
-            "top_k": 20,
-            "min_p": 0
-        },
-        max_retries=2,
-    )
+# def llm_editor() -> ChatQwen:
+#     return ChatQwen(
+#         model="qwen3.7-max",
+#         temperature=TEMPERATURE_EDITOR,
+#         top_p=0.95,
+#         enable_thinking=True,
+#         extra_body={
+#             "top_k": 20,
+#             "min_p": 0
+#         },
+#         max_retries=2,
+#     )

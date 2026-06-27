@@ -1,5 +1,9 @@
 from pathlib import Path
+import asyncio
+import json
+import os
 import re
+import time
 import uuid
 
 from sqlalchemy import text
@@ -18,7 +22,11 @@ from qdrant_client.models import (
     VectorParams,
 )
 
-from moduly.ai_prompty_RAG import get_questions_lore
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+
+from moduly.ai_prompty_RAG import get_questions_lore, CONST_RULES_CHUNKER
+from moduly.ai_modele import llm_chunker
+from moduly.ai_logi import create_logs, save_ai_logs_to_db
 from moduly.db_core import utworz_engine_do_db
 
 
@@ -569,3 +577,189 @@ def get_filtered_candidates(llm, misje_tekst) -> str:
 #     final = get_candidates(query)
 #     for item in final:
 #         print(item["rerank_score"], item["chunk_title"])
+
+def _wyciagnij_tekst_z_ai_message(msg: AIMessage) -> str:
+    content = msg.content
+
+    if isinstance(content, str):
+        return content
+
+    fragmenty = []
+
+    for blok in content:
+        if isinstance(blok, str):
+            fragmenty.append(blok)
+        elif isinstance(blok, dict) and blok.get("type") in ("text", "output_text"):
+            fragmenty.append(blok.get("text", ""))
+
+    return "".join(fragmenty)
+
+
+def _zacytuj_skalary_yaml(front_matter: str) -> str:
+    # Fallback: docytuj niezacytowane wartosci skalarne (np. chunk_title z dwukropkiem),
+    # ktore lamia YAML. Pomija juz zacytowane oraz czyste liczby (chunk_index zostaje int).
+    naprawione = []
+
+    for linia in front_matter.splitlines():
+        m = re.match(r"^(\s*[A-Za-z_][\w-]*:)\s+(\S.*?)\s*$", linia)
+
+        if not m:
+            naprawione.append(linia)
+            continue
+
+        prefiks, wartosc = m.groups()
+
+        if (wartosc.startswith('"') and wartosc.endswith('"')) or re.fullmatch(r"-?\d+", wartosc):
+            naprawione.append(linia)
+            continue
+
+        wartosc = wartosc.replace("\\", "\\\\").replace('"', '\\"')
+        naprawione.append(f'{prefiks} "{wartosc}"')
+
+    wynik = "\n".join(naprawione)
+
+    if front_matter.endswith("\n"):
+        wynik += "\n"
+
+    return wynik
+
+
+def _slug(tekst: str) -> str:
+    tekst = tekst.lower().replace("'", "")
+    return re.sub(r"[^a-z0-9]+", "_", tekst).strip("_")
+
+
+def _zapewnij_chunk_id(front_matter: str, chunk_id: str) -> str:
+    # Wstrzykuje linie chunk_id do front mattera, jesli model ja pominal,
+    # tuz po linii document_id (albo na poczatek, gdy jej brak).
+    if re.search(r"(?m)^\s*chunk_id\s*:", front_matter):
+        return front_matter
+
+    nowa_linia = f'chunk_id: "{chunk_id}"\n'
+    linie = front_matter.splitlines(keepends=True)
+    wynik = []
+    wstawiono = False
+
+    for linia in linie:
+        wynik.append(linia)
+        if not wstawiono and re.match(r"^\s*document_id\s*:", linia):
+            wynik.append(nowa_linia)
+            wstawiono = True
+
+    if not wstawiono:
+        wynik.insert(0, nowa_linia)
+
+    return "".join(wynik)
+
+
+def _zapisz_chunki_z_json(raw: str, sciezka_dokumentu: str) -> int:
+    chunks = json.loads(raw)
+    folder_zapis = Path(sciezka_dokumentu.replace("01_dokumenty", "02_chunki"))
+
+    for nr_chunka, tresc_chunka in chunks.items():
+        _, front_matter, body = tresc_chunka.split("---", 2)
+
+        try:
+            yfm = yaml.safe_load(front_matter)
+        except yaml.YAMLError:
+            front_matter = _zacytuj_skalary_yaml(front_matter)
+            yfm = yaml.safe_load(front_matter)
+
+        document_id = yfm["document_id"]
+        chunk_idx = int(yfm.get("chunk_index", nr_chunka))
+        chunk_id = yfm.get("chunk_id")
+
+        if not chunk_id:
+            suffix = yfm.get("topic") or _slug(yfm.get("chunk_title", "")) or f"chunk_{chunk_idx}"
+            chunk_id = document_id.replace("doc_", "chk_", 1) + "_" + suffix
+            front_matter = _zapewnij_chunk_id(front_matter, chunk_id)
+
+        docnum = document_id.rsplit("_", 1)[1]
+        nazwa_chunka = chunk_id.replace(f"_{docnum}_", f"_{chunk_idx:03d}_", 1)
+
+        tresc_do_zapisu = f"---{front_matter}---{body}"
+        sciezka_zapis = folder_zapis / f"{nazwa_chunka}.md"
+        sciezka_zapis.parent.mkdir(parents=True, exist_ok=True)
+        sciezka_zapis.write_text(tresc_do_zapisu, encoding="utf-8")
+
+    return len(chunks)
+
+
+async def _przetworz_dokument(sciezka_dokumentu, llm, llm_bound, sem, bledy, logi):
+    async with sem:
+        plik_md = next(Path(sciezka_dokumentu).glob("*.md"), None)
+
+        if plik_md is None:
+            print(f"Chunker: brak .md w {sciezka_dokumentu}")
+            return
+
+        try:
+            tresc = plik_md.read_text(encoding="utf-8")
+            messages = [
+                SystemMessage(content=CONST_RULES_CHUNKER),
+                HumanMessage(content=tresc),
+            ]
+
+            start = time.perf_counter()
+            msg = await llm_bound.ainvoke(messages)
+            duration_ms = int((time.perf_counter() - start) * 1000)
+
+            raw = _wyciagnij_tekst_z_ai_message(msg)
+
+            parsing_error = None
+            try:
+                ile = _zapisz_chunki_z_json(raw, str(sciezka_dokumentu))
+                print(f"Chunker OK {plik_md.name}: {ile} chunków")
+            except Exception as exc:
+                parsing_error = f"{type(exc).__name__}: {exc}"
+                bledy.append((str(plik_md), parsing_error))
+                print(f"Chunker PARSE ERROR {plik_md}: {parsing_error}")
+
+            logi.append(create_logs(
+                raw_response=msg,
+                llm=llm,
+                misja_id_moje_fk=None,
+                input_chars=len(tresc),
+                output_chars=len(raw),
+                stage="rag_chunking",
+                duration_ms=duration_ms,
+                parsing_error=parsing_error,
+            ))
+
+        except Exception as exc:
+            blad = f"{type(exc).__name__}: {exc}"
+            bledy.append((str(plik_md), blad))
+            print(f"Chunker API ERROR {plik_md}: {blad}")
+
+
+async def wygeneruj_chunki_dla_pustych(max_concurrency: int = 5) -> list[tuple[str, str]]:
+    dokumenty = []
+
+    for root, dirs, files in os.walk(FOLDER):
+        if not dirs and not files:
+            dokumenty.append(root.replace("02_chunki", "01_dokumenty"))
+
+    if not dokumenty:
+        print("Chunker: brak pustych folderów do przetworzenia")
+        return []
+
+    print(f"Chunker: dokumentów do przetworzenia: {len(dokumenty)} (równolegle: {max_concurrency})")
+
+    silnik = utworz_engine_do_db()
+    llm = llm_chunker()
+    llm_bound = llm.bind(response_format={"type": "json_object"})
+    sem = asyncio.Semaphore(max_concurrency)
+
+    bledy: list[tuple[str, str]] = []
+    logi: list[dict] = []
+
+    await asyncio.gather(*[
+        _przetworz_dokument(sciezka, llm, llm_bound, sem, bledy, logi)
+        for sciezka in dokumenty
+    ])
+
+    for log in logi:
+        save_ai_logs_to_db(silnik, log)
+
+    print(f"Chunker: zakończono. Nieudane: {len(bledy)} / {len(dokumenty)}; logów: {len(logi)}")
+    return bledy

@@ -26,6 +26,7 @@ dependencies = [
     "qdrant-client>=1.18.0",
     "sqlalchemy>=2.0.50",
     "xlsxwriter>=3.2.9",
+    "tavily-python>=0.7.26",
 ]
 
 [dependency-groups]

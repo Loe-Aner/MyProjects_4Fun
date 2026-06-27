@@ -8,6 +8,6 @@ silnik = utworz_engine_do_db()
 # TUTAJ TLUMACZE NOWOSCI
 stworz_excele_do_zatwierdzenia_tlumaczen(
     silnik, 
-    fabula="The Light's Summons",
-    sciezka=sciezka_excel_zatwierdzenia("The Light's Summons.xlsx")
+    fabula="Of Caves and Cradles",
+    sciezka=sciezka_excel_zatwierdzenia("Of Caves and Cradles.xlsx")
 )
