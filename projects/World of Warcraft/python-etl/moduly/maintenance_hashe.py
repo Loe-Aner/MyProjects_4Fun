@@ -96,6 +96,7 @@ def roznice_hashe_usun_rekordy_z_db(
                     "dbo.MISJE_LORE_TRAFIENIA",
                     "dbo.MISJE_LORE_PYTANIA",
                     "dbo.MISJE_LORE_KONTEKST",
+                    "dbo.GEMINI_BATCH_REDAKTOR_POZYCJE",
                     "dbo.ZRODLO_MISJE",
                     "dbo.MISJE_PODSUMOWANIA",
                     "dbo.MISJE"

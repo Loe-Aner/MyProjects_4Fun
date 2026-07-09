@@ -11,6 +11,13 @@ from sqlalchemy import text
 import yaml
 from fastembed import TextEmbedding
 from fastembed.rerank.cross_encoder import TextCrossEncoder
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    def tqdm(iterable, **kwargs):
+        return iterable
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
@@ -33,15 +40,19 @@ from moduly.db_core import utworz_engine_do_db
 FOLDER = Path("C:/____Moje-MOJE/MyProjects_4Fun/projects/World of Warcraft/rag-pliki/02_chunki")
 COLLECTION_NAME = "wow_lore_chunks"
 MODEL_NAME = "BAAI/bge-large-en-v1.5"
-RERANK_MODEL = "Xenova/ms-marco-MiniLM-L-12-v2"
+RERANK_MODEL = "BAAI/bge-reranker-base"
 VECTOR_SIZE = 1024
 # BGE: dokumenty/passage bez prefiksu, instrukcja doklejana tylko do query
 QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
 QDRANT_URL = "http://localhost:6333"
-RETRIEVE_TOP = 50  # ilu kandydatów z dense retrievalu trafia do rerankera (etap 1)
-RERANK_TOP = 6     # ile zwracam po rerankingu (etap 2)
-EMBED_BATCH = 128
+RETRIEVE_TOP = 100  # ilu kandydatow z dense retrievalu trafia do rerankera (etap 1)
+                    # 100 zamiast 50: baza rosnie (50k->100k+), bi-encoder spycha trafne
+                    # chunki nizej. Reranker (mocne ogniwo) + prog >0 chronia przed szumem.
+RERANK_TOP = 8     # ile zwracam po rerankingu (etap 2)
+EMBED_BATCH = 100  # 200+ crashowalo sterownik
 UPSERT_BATCH = 128
+EMBED_PARALLEL = None
+EMBED_PROVIDERS = ["DmlExecutionProvider", "CPUExecutionProvider"]
 
 
 def repair_quoted_yaml_scalars(front_matter: str) -> str:
@@ -74,7 +85,7 @@ def get_records(folder: Path = FOLDER, document_ids: set[str] | None = None) -> 
     records = []
     skipped_invalid = 0
 
-    for path in sorted(folder.rglob("*.md")):
+    for path in sorted(folder.rglob("chk_*.md")):
         text = path.read_text(encoding="utf-8")
 
         if not text.startswith("---"):
@@ -119,6 +130,11 @@ def get_records(folder: Path = FOLDER, document_ids: set[str] | None = None) -> 
             continue
 
         if not chunk_title:
+            if document_ids is not None:
+                print(f"Qdrant RAG: pomijam (brak chunk_title, stary chunk): {path}")
+                skipped_invalid += 1
+                continue
+
             raise ValueError(f"Missing chunk_title in file: {path}")
 
         embedding_text = f"{chunk_title}\n{body}"
@@ -138,8 +154,26 @@ def get_records(folder: Path = FOLDER, document_ids: set[str] | None = None) -> 
     return records
 
 
+def _ostrzez_jesli_brak_dml() -> None:
+    # Cichy fallback na CPU to najgorszy scenariusz: mysli sie, ze leci GPU, a mieli CPU.
+    # Dlatego przy kazdym load_model sprawdzam i GLOSNO krzycze, jesli DML niedostepny.
+    import onnxruntime as ort
+
+    dostepne = ort.get_available_providers()
+
+    if "DmlExecutionProvider" not in dostepne:
+        print(
+            "UWAGA: DmlExecutionProvider NIEDOSTEPNY - embedding poleci na CPU (cichy fallback)!\n"
+            f"       Dostepne providery: {dostepne}\n"
+            "       Napraw: odinstaluj onnxruntime, zainstaluj onnxruntime-directml."
+        )
+    else:
+        print("Qdrant RAG: DmlExecutionProvider OK - embedding na iGPU (DirectML).")
+
+
 def load_model(model_name: str = MODEL_NAME) -> TextEmbedding:
-    return TextEmbedding(model_name=model_name)
+    _ostrzez_jesli_brak_dml()
+    return TextEmbedding(model_name=model_name, providers=EMBED_PROVIDERS)
 
 
 def get_embeddings(
@@ -382,7 +416,9 @@ def save_qdrant_log(
 
 
 def load_reranker(model_name: str = RERANK_MODEL) -> TextCrossEncoder:
-    return TextCrossEncoder(model_name=model_name)
+    # Reranker uzywany przy zapytaniach (query-time), nie przy indeksowaniu.
+    # Ten sam provider co embedding - iGPU tez przyspieszy reranking bge-reranker-base.
+    return TextCrossEncoder(model_name=model_name, providers=EMBED_PROVIDERS)
 
 
 def rerank(query: str, candidates: list[dict], reranker: TextCrossEncoder) -> list[dict]:
@@ -394,6 +430,69 @@ def rerank(query: str, candidates: list[dict], reranker: TextCrossEncoder) -> li
         candidate["rerank_score"] = float(score)
 
     return sorted(candidates, key=lambda candidate: candidate["rerank_score"], reverse=True)[:RERANK_TOP]
+
+
+def embed_and_upsert(
+    client: QdrantClient,
+    silnik,
+    records: list[dict],
+    todo_docs: list[dict],
+    model: TextEmbedding,
+    completed_docs: set[str],
+    batch_size: int = EMBED_BATCH,
+    upsert_batch: int = UPSERT_BATCH,
+) -> None:
+    body_hash_by_doc = {doc["DOC_ID"]: doc["BODY_HASH"] for doc in todo_docs}
+
+    remaining_by_doc: dict[str, int] = {}
+    for record in records:
+        doc_id = record["payload"]["document_id"]
+        remaining_by_doc[doc_id] = remaining_by_doc.get(doc_id, 0) + 1
+    total_by_doc = dict(remaining_by_doc)
+
+    texts = [record["embedding_text"] for record in records]
+    embed_iter = model.embed(texts, batch_size=batch_size, parallel=EMBED_PARALLEL)
+
+    buffer: list[tuple[dict, list]] = []
+
+    def flush() -> None:
+        if not buffer:
+            return
+
+        recs = [rec for rec, _ in buffer]
+        embs = [emb for _, emb in buffer]
+        client.upsert(
+            collection_name=COLLECTION_NAME,
+            points=build_points(recs, embs),
+        )
+
+        for rec in recs:
+            doc_id = rec["payload"]["document_id"]
+            remaining_by_doc[doc_id] -= 1
+
+            if remaining_by_doc[doc_id] == 0:
+                save_qdrant_log(
+                    silnik,
+                    doc_id=doc_id,
+                    body_hash=body_hash_by_doc[doc_id],
+                    status="upserted",
+                    chunk_count=total_by_doc[doc_id],
+                )
+                completed_docs.add(doc_id)
+                print(f"{doc_id}=upserted ({total_by_doc[doc_id]} chunks)")
+
+        buffer.clear()
+
+    for record, embedding in zip(
+        records,
+        tqdm(embed_iter, total=len(records), desc="Qdrant RAG embedding", unit="chunk"),
+    ):
+        buffer.append((record, embedding))
+
+        if len(buffer) >= upsert_batch:
+            flush()
+
+    flush()
 
 
 def insert_into_qdrant_collection(reset: bool = False):
@@ -469,14 +568,18 @@ def insert_into_qdrant_collection(reset: bool = False):
             )
 
     model = load_model()
+    completed_docs: set[str] = set()
 
     try:
         print(f"Qdrant RAG: embedding chunks: {len(records)}")
-        embeddings = get_embeddings(records, model)
-        upsert_points(client, build_points(records, embeddings))
+        embed_and_upsert(client, silnik, records, todo_docs, model, completed_docs)
     except Exception as exc:
         for doc in todo_docs:
             doc_id = doc["DOC_ID"]
+
+            if doc_id in completed_docs:
+                continue  # doc juz w Qdrancie i oznaczony 'upserted' — nie loguj bledu
+
             doc_records = records_by_doc_id[doc_id]
 
             if not doc_records:
@@ -493,22 +596,6 @@ def insert_into_qdrant_collection(reset: bool = False):
             print(f"{doc_id}=error")
 
         raise
-
-    for doc in todo_docs:
-        doc_id = doc["DOC_ID"]
-        doc_records = records_by_doc_id[doc_id]
-
-        if not doc_records:
-            continue
-
-        save_qdrant_log(
-            silnik,
-            doc_id=doc_id,
-            body_hash=doc["BODY_HASH"],
-            status="upserted",
-            chunk_count=len(doc_records),
-        )
-        print(f"{doc_id}=upserted ({len(doc_records)} chunks)")
 
 
 def load_rag_components():
@@ -595,26 +682,57 @@ def _wyciagnij_tekst_z_ai_message(msg: AIMessage) -> str:
     return "".join(fragmenty)
 
 
-def _zacytuj_skalary_yaml(front_matter: str) -> str:
-    # Fallback: docytuj niezacytowane wartosci skalarne (np. chunk_title z dwukropkiem),
-    # ktore lamia YAML. Pomija juz zacytowane oraz czyste liczby (chunk_index zostaje int).
+_ZNAKI_KONTROLNE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+_NIELEGALNE_W_NAZWIE = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
+
+def _usun_znaki_kontrolne(tekst: str) -> str:
+    # Usuwa znaki kontrolne (zostawia \t \n \r), ktore lamia parser YAML.
+    return _ZNAKI_KONTROLNE.sub("", tekst)
+
+
+def _odescapuj_jesli_literalne(tresc: str) -> str:
+    # Gdy model podwojnie zescapowal i nie ma ANI JEDNEJ prawdziwej nowej linii,
+    # a sa literalne "\n" - przywroc prawdziwe biale znaki. Konserwatywne: dziala
+    # tylko na calkowicie rozsypanym przypadku, nie psuje poprawnej tresci.
+    if "\n" not in tresc and "\\n" in tresc:
+        tresc = tresc.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "\t")
+    return tresc
+
+
+def _przecytuj_wartosc_yaml(wartosc: str) -> str:
+    # Zdejmuje zewnetrzne cudzyslowy (' lub "), normalizuje zle escapy i cytuje
+    # na nowo jako poprawny YAML double-quoted scalar.
+    if len(wartosc) >= 2 and wartosc[0] == wartosc[-1] and wartosc[0] in ("'", '"'):
+        wnetrze = wartosc[1:-1]
+        if wartosc[0] == "'":
+            wnetrze = wnetrze.replace("\\'", "'").replace("''", "'")
+    else:
+        wnetrze = wartosc
+
+    wnetrze = wnetrze.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{wnetrze}"'
+
+
+def _napraw_yaml(front_matter: str) -> str:
     naprawione = []
 
     for linia in front_matter.splitlines():
-        m = re.match(r"^(\s*[A-Za-z_][\w-]*:)\s+(\S.*?)\s*$", linia)
+        m_map = re.match(r'^(\s*)("?[A-Za-z_][\w-]*"?)\s*:\s+(\S.*?)\s*$', linia)
+        m_list = re.match(r"^(\s*)-\s+(\S.*?)\s*$", linia)
 
-        if not m:
+        if m_map:
+            wciecie, klucz, wartosc = m_map.groups()
+            klucz = klucz.strip('"')
+            if re.fullmatch(r"-?\d+", wartosc):
+                naprawione.append(f"{wciecie}{klucz}: {wartosc}")
+            else:
+                naprawione.append(f"{wciecie}{klucz}: {_przecytuj_wartosc_yaml(wartosc)}")
+        elif m_list:
+            wciecie, wartosc = m_list.groups()
+            naprawione.append(f"{wciecie}- {_przecytuj_wartosc_yaml(wartosc)}")
+        else:
             naprawione.append(linia)
-            continue
-
-        prefiks, wartosc = m.groups()
-
-        if (wartosc.startswith('"') and wartosc.endswith('"')) or re.fullmatch(r"-?\d+", wartosc):
-            naprawione.append(linia)
-            continue
-
-        wartosc = wartosc.replace("\\", "\\\\").replace('"', '\\"')
-        naprawione.append(f'{prefiks} "{wartosc}"')
 
     wynik = "\n".join(naprawione)
 
@@ -622,6 +740,12 @@ def _zacytuj_skalary_yaml(front_matter: str) -> str:
         wynik += "\n"
 
     return wynik
+
+
+def _bezpieczna_nazwa_pliku(chunk_id: str) -> str:
+    # Wycina znaki nielegalne w nazwach plikow Windows i przycina dlugosc.
+    nazwa = _NIELEGALNE_W_NAZWIE.sub("", chunk_id).strip()
+    return nazwa[:180]
 
 
 def _slug(tekst: str) -> str:
@@ -652,40 +776,78 @@ def _zapewnij_chunk_id(front_matter: str, chunk_id: str) -> str:
     return "".join(wynik)
 
 
-def _zapisz_chunki_z_json(raw: str, sciezka_dokumentu: str) -> int:
+def _zapisz_chunki_z_json(raw: str, sciezka_dokumentu: str) -> tuple[int, list[str]]:
     chunks = json.loads(raw)
     folder_zapis = Path(sciezka_dokumentu.replace("01_dokumenty", "02_chunki"))
 
+    if not chunks:
+        folder_zapis.mkdir(parents=True, exist_ok=True)
+        (folder_zapis / "_brak_lore.md").write_text(
+            "Model nie wygenerowal zadnego chunka - dokument bez tresci lore.\n",
+            encoding="utf-8",
+        )
+        return 0, []
+
+    zapisane = 0
+    bledy_chunkow: list[str] = []
+
     for nr_chunka, tresc_chunka in chunks.items():
-        _, front_matter, body = tresc_chunka.split("---", 2)
-
         try:
-            yfm = yaml.safe_load(front_matter)
-        except yaml.YAMLError:
-            front_matter = _zacytuj_skalary_yaml(front_matter)
-            yfm = yaml.safe_load(front_matter)
+            if not isinstance(tresc_chunka, str) or not tresc_chunka.strip():
+                raise ValueError("wartosc chunka nie jest niepustym stringiem")
 
-        document_id = yfm["document_id"]
-        chunk_idx = int(yfm.get("chunk_index", nr_chunka))
-        chunk_id = yfm.get("chunk_id")
+            tresc_chunka = _odescapuj_jesli_literalne(tresc_chunka)
+            tresc_chunka = _usun_znaki_kontrolne(tresc_chunka)
 
-        if not chunk_id:
-            suffix = yfm.get("topic") or _slug(yfm.get("chunk_title", "")) or f"chunk_{chunk_idx}"
-            chunk_id = document_id.replace("doc_", "chk_", 1) + "_" + suffix
-            front_matter = _zapewnij_chunk_id(front_matter, chunk_id)
+            czesci = tresc_chunka.split("---", 2)
+            if len(czesci) < 3:
+                raise ValueError("brak struktury ---frontmatter---body")
+            _, front_matter, body = czesci
 
-        docnum = document_id.rsplit("_", 1)[1]
-        nazwa_chunka = chunk_id.replace(f"_{docnum}_", f"_{chunk_idx:03d}_", 1)
+            try:
+                yfm = yaml.safe_load(front_matter)
+            except yaml.YAMLError:
+                if "\\n" in front_matter:
+                    front_matter = (
+                        front_matter.replace("\\r\\n", "\n")
+                        .replace("\\n", "\n")
+                        .replace("\\t", "\t")
+                    )
+                front_matter = _napraw_yaml(front_matter)
+                yfm = yaml.safe_load(front_matter)
 
-        tresc_do_zapisu = f"---{front_matter}---{body}"
-        sciezka_zapis = folder_zapis / f"{nazwa_chunka}.md"
-        sciezka_zapis.parent.mkdir(parents=True, exist_ok=True)
-        sciezka_zapis.write_text(tresc_do_zapisu, encoding="utf-8")
+            if not isinstance(yfm, dict):
+                raise ValueError("frontmatter nie sparsowal sie do slownika")
 
-    return len(chunks)
+            document_id = yfm["document_id"]
+            chunk_idx = int(yfm.get("chunk_index", nr_chunka))
+            chunk_id = yfm.get("chunk_id")
+
+            if not chunk_id or "\n" in str(chunk_id):
+                suffix = yfm.get("topic") or _slug(str(yfm.get("chunk_title", ""))) or f"chunk_{chunk_idx}"
+                chunk_id = document_id.replace("doc_", "chk_", 1) + "_" + suffix
+                front_matter = _zapewnij_chunk_id(front_matter, chunk_id)
+
+            docnum = document_id.rsplit("_", 1)[1]
+            nazwa_chunka = _bezpieczna_nazwa_pliku(
+                chunk_id.replace(f"_{docnum}_", f"_{chunk_idx:03d}_", 1)
+            )
+            if not nazwa_chunka:
+                raise ValueError("pusta nazwa pliku po sanityzacji")
+
+            tresc_do_zapisu = f"---{front_matter}---{body}"
+            sciezka_zapis = folder_zapis / f"{nazwa_chunka}.md"
+            sciezka_zapis.parent.mkdir(parents=True, exist_ok=True)
+            sciezka_zapis.write_text(tresc_do_zapisu, encoding="utf-8")
+            zapisane += 1
+
+        except Exception as exc:
+            bledy_chunkow.append(f"chunk {nr_chunka}: {type(exc).__name__}: {exc}")
+
+    return zapisane, bledy_chunkow
 
 
-async def _przetworz_dokument(sciezka_dokumentu, llm, llm_bound, sem, bledy, logi):
+async def _przetworz_dokument(sciezka_dokumentu, llm, llm_bound, sem, silnik, db_lock, bledy):
     async with sem:
         plik_md = next(Path(sciezka_dokumentu).glob("*.md"), None)
 
@@ -708,14 +870,24 @@ async def _przetworz_dokument(sciezka_dokumentu, llm, llm_bound, sem, bledy, log
 
             parsing_error = None
             try:
-                ile = _zapisz_chunki_z_json(raw, str(sciezka_dokumentu))
-                print(f"Chunker OK {plik_md.name}: {ile} chunków")
+                zapisane, bledy_chunkow = _zapisz_chunki_z_json(raw, str(sciezka_dokumentu))
+
+                if zapisane == 0 and not bledy_chunkow:
+                    print(f"Chunker OK {plik_md.name}: 0 chunków (brak lore — zapisano _brak_lore.md)")
+                else:
+                    print(f"Chunker OK {plik_md.name}: {zapisane} chunków")
+
+                if bledy_chunkow:
+                    parsing_error = f"{len(bledy_chunkow)} bledow chunkow: " + " | ".join(bledy_chunkow)
+                    for blad_chunka in bledy_chunkow:
+                        bledy.append((str(plik_md), blad_chunka))
+                    print(f"Chunker CHUNK ERRORS {plik_md.name}: {len(bledy_chunkow)} bledow, zapisane {zapisane}")
             except Exception as exc:
                 parsing_error = f"{type(exc).__name__}: {exc}"
                 bledy.append((str(plik_md), parsing_error))
                 print(f"Chunker PARSE ERROR {plik_md}: {parsing_error}")
 
-            logi.append(create_logs(
+            log = create_logs(
                 raw_response=msg,
                 llm=llm,
                 misja_id_moje_fk=None,
@@ -724,7 +896,15 @@ async def _przetworz_dokument(sciezka_dokumentu, llm, llm_bound, sem, bledy, log
                 stage="rag_chunking",
                 duration_ms=duration_ms,
                 parsing_error=parsing_error,
-            ))
+            )
+
+            # Log od razu po skonczonym dokumencie. Blokujacy zapis do DB w watku
+            # (zeby nie blokowac petli), serializowany lockiem - insert jest tani.
+            try:
+                async with db_lock:
+                    await asyncio.to_thread(save_ai_logs_to_db, silnik, log)
+            except Exception as exc:
+                print(f"Chunker LOG ERROR {plik_md.name}: {type(exc).__name__}: {exc}")
 
         except Exception as exc:
             blad = f"{type(exc).__name__}: {exc}"
@@ -749,17 +929,14 @@ async def wygeneruj_chunki_dla_pustych(max_concurrency: int = 5) -> list[tuple[s
     llm = llm_chunker()
     llm_bound = llm.bind(response_format={"type": "json_object"})
     sem = asyncio.Semaphore(max_concurrency)
+    db_lock = asyncio.Lock()
 
     bledy: list[tuple[str, str]] = []
-    logi: list[dict] = []
 
     await asyncio.gather(*[
-        _przetworz_dokument(sciezka, llm, llm_bound, sem, bledy, logi)
+        _przetworz_dokument(sciezka, llm, llm_bound, sem, silnik, db_lock, bledy)
         for sciezka in dokumenty
     ])
 
-    for log in logi:
-        save_ai_logs_to_db(silnik, log)
-
-    print(f"Chunker: zakończono. Nieudane: {len(bledy)} / {len(dokumenty)}; logów: {len(logi)}")
+    print(f"Chunker: zakończono. Nieudane: {len(bledy)} / {len(dokumenty)}")
     return bledy

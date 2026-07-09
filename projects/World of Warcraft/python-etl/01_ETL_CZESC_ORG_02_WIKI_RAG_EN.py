@@ -11,8 +11,11 @@ arch_update_dir = Path(r"C:\____Moje-MOJE\MyProjects_4Fun\projects\World of Warc
 chunks_output_dir = Path(r"C:\____Moje-MOJE\MyProjects_4Fun\projects\World of Warcraft\rag-pliki\02_chunki")
 
 rag_categories = [
-    {"category": "Category:Horde_characters", "subtype": "characters", "excluded": ["Anniversary", "Discovery", "tactics", "Classic", "whelp", "alternate"], "included": [], "min_body_words": 100},
+    {"category": "Category:Wild_Gods", "subtype": "gods", "excluded": ["alternate", "Classic"], "included": [], "min_body_words": 20},
 ]
+
+WIKI_MAX_WORKERS = 2
+WIKI_MIN_INTERVAL = 0.50
 
 
 # TWORZĘ DOKUMENTY POD RAG - W FOLDERZE 01_dokumenty
@@ -32,5 +35,7 @@ for item in rag_categories:
             excluded=item.get("excluded"),
             included=item.get("included"),
             min_body_words=item.get("min_body_words"),
+            max_workers=WIKI_MAX_WORKERS,
+            min_interval=WIKI_MIN_INTERVAL,
         )
     )

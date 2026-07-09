@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -19,7 +20,10 @@ from moduly.AI_RAG import (
 
 PLACEHOLDER_BRAK_KONTEKSTU = "Brak kontekstu dla tej misji - pomiń tę sekcję"
 
-MAKS_ROWNOLEGLE_MISJE = 5
+MAKS_ROWNOLEGLE_MISJE = 10
+# Tylko JEDEN watek naraz dotyka iGPU (DirectML nie znosi wspolbieznych Run())
+# LLM-y (wolne, I/O-bound) leca rownolegle; GPU (szybkie ~2.5s) czeka na ten lock
+_GPU_LOCK = threading.Lock()
 
 
 _Q_INS_PYTANIE = text("""
@@ -106,6 +110,7 @@ def _zbuduj_kontekst_dla_misji(
     # --- 1) PYTANIA ---
     t0 = time.perf_counter()
     questions, raw_questions = get_questions_lore_raw(lore_llm, wsad_rag)
+    print(f"    misja {misja_id}: pytania={len(questions)} ({time.perf_counter() - t0:.1f}s)", flush=True)
     save_ai_logs_to_db(silnik, create_logs(
         raw_response=raw_questions,
         llm=lore_llm,
@@ -117,6 +122,7 @@ def _zbuduj_kontekst_dla_misji(
     ))
 
     # --- 2) RETRIEVAL + RERANK -> ślad + chunki do kontekstu ---
+    _t_ret = time.perf_counter()
     pytania_rows = []
     trafienia_rows = []
     rag_context_chunks = []
@@ -128,7 +134,8 @@ def _zbuduj_kontekst_dla_misji(
             "model": getattr(lore_llm, "model_name", None),
         })
 
-        kandydaci = get_candidates(q.question, client, embed_model, reranker)
+        with _GPU_LOCK:
+            kandydaci = get_candidates(q.question, client, embed_model, reranker)
         odsiani = [c for c in kandydaci if c.get("rerank_score", 0) > 0]
 
         for pozycja, c in enumerate(odsiani, start=1):
@@ -149,11 +156,13 @@ def _zbuduj_kontekst_dla_misji(
             })
 
     rag_context = _formatuj_chunki(rag_context_chunks)
+    print(f"    misja {misja_id}: retrieval+rerank ({time.perf_counter() - _t_ret:.1f}s, chunkow={len(rag_context_chunks)})", flush=True)
 
     # --- 3) PODSUMOWANIE LORE ---
     t1 = time.perf_counter()
     context_lore = get_context_lore(context_llm, wsad_rag, rag_context)
     podsumowanie = _wytnij_tekst(context_lore.content)
+    print(f"    misja {misja_id}: podsumowanie ({time.perf_counter() - t1:.1f}s)", flush=True)
     save_ai_logs_to_db(silnik, create_logs(
         raw_response=context_lore,
         llm=context_llm,

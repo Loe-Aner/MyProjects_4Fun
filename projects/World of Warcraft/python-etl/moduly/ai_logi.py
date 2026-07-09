@@ -163,7 +163,7 @@ def create_logs(
             if stage.endswith("_json_correction")
             else TEMPERATURE_BY_STAGE.get(stage)
         ),
-        "PARSING_ERROR": parsing_error,
+        "PARSING_ERROR": parsing_error[:1000] if parsing_error else parsing_error,
         "INPUT_SKOMPRESOWANY": skompresuj_tekst(input_txt) if zapisz_tresc else None,
         "OUTPUT_SKOMPRESOWANY": skompresuj_tekst(output_txt) if zapisz_tresc else None
     }

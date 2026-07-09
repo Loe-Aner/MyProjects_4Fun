@@ -197,6 +197,9 @@ CORE RAG RULES:
 
 8. Do not generate a question merely because a proper noun appears in the text.
 
+9. Do not repeat questions.
+   Every question in the output must be distinct. If two anchors would yield the same or a near-identical question, keep only the single best one and drop the duplicate. Never output the same question in more than one slot.
+
 ANCHOR SCORING:
 Use this only after applying the hard gates.
 
@@ -491,6 +494,23 @@ on its own — but do NOT shape content toward any question, answer, or definiti
 format. Keep the lore as written; your job is to preserve and organize it, not
 to reframe it.
 
+## PURPOSE — who consumes these chunks
+The retrieved chunks are handed to a human translator and editor localizing
+World of Warcraft from English into Polish. They rely on this lore to get TONE,
+VOICE, character intent, relationships, emotional stakes, register, and
+cultural/racial flavor right — not merely dry facts. Therefore:
+- Treat atmospheric, emotional, characterizing, and voice-revealing prose as
+  HIGH value and preserve it faithfully; that flavor is exactly what helps the
+  translator choose tone and style. Never flatten such prose into bare facts.
+- Equally HIGH value: history or background that explains a relationship,
+  rivalry, allegiance, or motivation, or that identifies what an ambiguous name
+  is (who a character is; what a faction, place, or artifact is). This is the
+  "flashlight" that lets the reader grasp the scene and not misread it.
+- You MAY drop pure redundancy (the exact same fact restated) and empty filler
+  that carries no lore, tone, or voice (hollow hedging, padding). This is NOT a
+  license to summarize: never compress narrative, emotional, or voice-bearing
+  text. When in doubt, keep it.
+
 ## INPUT
 The user message contains the full text of ONE source document in Markdown.
 It begins with a YAML frontmatter block (document-level fields) followed by the
@@ -510,6 +530,21 @@ artifacts, history, relationships, motivations.
 - Navigation artifacts: lines like "Main article: ...", "See also", references
 - Ability / spell / skill descriptions, achievements, patch notes, quest reward
   tables, stat blocks, in-game mechanics
+- Combat / encounter mechanics and tactics of ANY kind: ability damage and effect
+  numbers, boss/dungeon/raid ENCOUNTER FLOW (which cell, wave, add, or mob spawns
+  or is released, phase order — e.g. "Warden Mellichar opens the cell, releasing
+  X"), and strategy / how-to advice. DROP all of it EVEN when written as narrative
+  prose under section headings (## First Prison Cell, ## Strategy, etc.). It is
+  gameplay, not lore.
+- Quest lists, quest-giver lists, and "Quests"/"Notable characters" sections that
+  are just enumerations or pointers (e.g. "There are three quest givers...")
+- Out-of-universe / real-world META: cross-game cameos and appearances (Hearthstone,
+  Diablo, Heroes of the Storm, the TCG/RPG card or item text), developer comments,
+  naming and publication history, patch-number trivia, and real-world design
+  comparisons between game items. In a "Notes and trivia", "In Hearthstone",
+  "In the TCG/RPG", or similar section, keep ONLY genuine in-universe lore (e.g. an
+  in-world origin retcon, a location or character detail) and DROP everything that
+  is about the real world, other games, developers, or game design.
 - Pure list scaffolding with no narrative content
 
 ### CHUNKING RULES
@@ -548,13 +583,31 @@ artifacts, history, relationships, motivations.
    with real lore and cannot be cleanly removed, reduce it to AT MOST ONE short
    sentence — never expand it, give it its own chunk, or split it into several
    chunks.
-9. Chunk size — HARD upper bound: each chunk's body should be roughly 120-350
-   words and must NEVER exceed ~400 words. The embedding model truncates at 512
-   tokens (~380 words), so anything beyond that is silently lost for retrieval.
+9. Chunk size — HARD upper bound ONLY: each chunk's body must NOT exceed ~350
+   words. There is NO minimum length, and size is a CEILING, not a target —
+   never pad, summarize, or compress lore to hit a size. A shorter faithful
+   chunk is always better than a shortened one. Both the embedding model and the
+   reranker truncate at 512 tokens (~350 words for lore dense with proper nouns),
+   so anything beyond that is silently lost for retrieval and ranking.
    If a section is longer than this, SPLIT it in this same pass into several
    coherent, self-contained chunks along its natural sub-topics or sub-events
    (each named and standalone) — never emit one oversized chunk. This upper bound
    takes precedence over rule 5's preference for fuller chunks.
+
+   HOW to split without losing meaning:
+   - Split only at sentence boundaries and at shifts in sub-topic; never split
+     mid-sentence. Each resulting chunk should answer a different question while
+     belonging to the same larger story (e.g. several chunks all from the Second
+     War, each about a distinct event).
+   - Do NOT summarize or compress to make text fit — that destroys meaning. Keep
+     the source sentences and instead make each piece stand alone: give it a
+     chunk_title that situates it, and lightly re-anchor its opening (resolve
+     pronouns, name the subject, e.g. "During the Second War, Doomhammer...").
+     The title plus this re-anchoring replaces the context lost at the cut.
+   - Rare edge case: if a single dense passage genuinely cannot be divided
+     without losing its sense AND only modestly exceeds the limit, keep it whole
+     rather than butcher it. Coherence beats the word cap in that one case — but
+     this is an exception, not an excuse to emit oversized chunks.
 
 ## OUTPUT FORMAT
 Return ONLY a single JSON object. No prose, no markdown fences, no commentary.
@@ -581,11 +634,25 @@ Generate these per chunk (ALL of these are REQUIRED — never omit any field):
                  MUST be byte-identical to topic — no typos, no extra letters, no
                  reordering.
   chunk_index <- the integer key of this chunk (1, 2, 3, ...)
-  chunk_title <- concise human-readable title naming the chunk's subject
+  chunk_title <- concise human-readable title naming the chunk's subject.
+                 MANDATORY and NEVER empty: a chunk without a non-empty
+                 chunk_title is INVALID and must not be emitted. This value is
+                 prepended to the body and embedded for retrieval, so make it
+                 specific and descriptive (natural-language counterpart of
+                 `topic`). If you are unsure, DERIVE it from the chunk's `#`
+                 heading or its primary entity — but never omit it or leave it
+                 blank.
   chunk_role  <- one of: overview, background, event, entity_profile,
                  location_profile, faction_profile, aftermath, relationship
-  entities    <- list of proper nouns central to this chunk, spelled exactly as
-                 in the source; put the primary subject first
+  entities    <- list of PROPER NOUNS ONLY that are central to this chunk: named
+                 characters, places, factions/organizations, artifacts, and named
+                 events. Spell each exactly as in the source and put the primary
+                 subject first. STRICT rules: no common nouns (e.g. "ogre",
+                 "council", "scepter", "titan machinery"), no adjective phrases
+                 (e.g. "merciless qiraji"), no sentence fragments (e.g. "Med'an
+                 would be tormented"). Deduplicate, and use the canonical name
+                 ("C'Thun", not "Old God C'Thun"; "Twin Emperors", not "qiraji
+                 led by the Twin Emperors")
 
 Include ONLY when clearly determinable from the source (omit otherwise — the
 frontmatter is dynamic):
@@ -598,6 +665,11 @@ This is mandatory because titles and values often contain a colon
 (e.g. chunk_title: "Cataclysm aftermath: Kargath, New Kargath, and Dragonmaw"),
 and an unquoted colon breaks YAML parsing. The ONLY unquoted value is the integer
 chunk_index. List items under entities are each individually double-quoted.
+If a value itself contains a double quote, you MUST escape every inner double
+quote with a backslash (\") so the YAML stays valid — e.g.
+chunk_title: "Alexandros' title: \"Scarlet Highlord\" vs \"Highlord\"". Even
+better, avoid double quotes inside titles: rephrase or use single quotes. Never
+leave a raw, unescaped double quote inside a double-quoted value.
 
 ## SELF-CHECK BEFORE OUTPUT (verify every chunk)
 - chunk_id == document_id with leading "doc_" replaced by "chk_", then "_" + topic,
@@ -607,8 +679,10 @@ chunk_index. List items under entities are each individually double-quoted.
 - Every scalar frontmatter value is double-quoted (except integer chunk_index);
   titles containing a colon MUST be quoted.
 - Every chunk includes ALL required fields — never omit chunk_id, chunk_index,
-  chunk_title, topic, entities, or the propagated document fields.
-- entities use the exact source spelling.
+  chunk_title, topic, entities, or the propagated document fields. In particular
+  chunk_title MUST be present and non-empty (not blank, not a placeholder).
+- entities are proper nouns only (no common nouns, phrases, or sentence
+  fragments), deduplicated, in canonical form, with the exact source spelling.
 - No lore-bearing content was dropped; only DROP-listed junk is missing.
 
 ### SHAPE EXAMPLE (illustrative; body truncated)

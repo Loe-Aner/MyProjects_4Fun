@@ -972,7 +972,6 @@ def pobierz_metadane_npc_do_csv(
           AND KLASA IS NULL
           AND TYTUL IS NULL
           AND NAZWA NOT IN ('Brak Danych', '...', 'Automatic', '???')
-          --AND RASA IN ('Unknown')
         ORDER BY NPC_ID_MOJE_PK
     """)
 
