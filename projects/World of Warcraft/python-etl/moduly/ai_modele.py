@@ -25,7 +25,7 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 def llm_lore():
     llm = ChatOpenAI(
-        model="gpt-5.4",
+        model="gpt-5.6-terra",
         temperature=TEMPERATURE_LORE,
         reasoning_effort="medium",
         use_responses_api=True,
@@ -35,7 +35,7 @@ def llm_lore():
 
 def llm_quest_summary():
     llm = ChatOpenAI(
-        model="gpt-5.4-mini",
+        model="gpt-5.6-luna",
         temperature=TEMPERATURE_SUMMARY_QUEST,
         reasoning_effort="medium",
         use_responses_api=True,
@@ -45,7 +45,7 @@ def llm_quest_summary():
 
 def llm_context():
     llm = ChatOpenAI(
-        model="gpt-5.4-mini",
+        model="gpt-5.6-luna",
         temperature=TEMPERATURE_CONTEXT,
         reasoning_effort="high",
         use_responses_api=True,
@@ -84,6 +84,7 @@ def llm_translator() -> ChatQwen:
         max_retries=2,
     )
 
+# ================ zastapiony gemini 3.1 pro ================
 # def llm_editor() -> ChatQwen:
 #     return ChatQwen(
 #         model="qwen3.7-max",

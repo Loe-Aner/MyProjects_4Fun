@@ -21,8 +21,6 @@ from moduly.AI_RAG import (
 PLACEHOLDER_BRAK_KONTEKSTU = "Brak kontekstu dla tej misji - pomiń tę sekcję"
 
 MAKS_ROWNOLEGLE_MISJE = 10
-# Tylko JEDEN watek naraz dotyka iGPU (DirectML nie znosi wspolbieznych Run())
-# LLM-y (wolne, I/O-bound) leca rownolegle; GPU (szybkie ~2.5s) czeka na ten lock
 _GPU_LOCK = threading.Lock()
 
 
@@ -159,19 +157,23 @@ def _zbuduj_kontekst_dla_misji(
     print(f"    misja {misja_id}: retrieval+rerank ({time.perf_counter() - _t_ret:.1f}s, chunkow={len(rag_context_chunks)})", flush=True)
 
     # --- 3) PODSUMOWANIE LORE ---
-    t1 = time.perf_counter()
-    context_lore = get_context_lore(context_llm, wsad_rag, rag_context)
-    podsumowanie = _wytnij_tekst(context_lore.content)
-    print(f"    misja {misja_id}: podsumowanie ({time.perf_counter() - t1:.1f}s)", flush=True)
-    save_ai_logs_to_db(silnik, create_logs(
-        raw_response=context_lore,
-        llm=context_llm,
-        misja_id_moje_fk=misja_id,
-        input_chars=len(wsad_rag) + len(rag_context),
-        output_chars=len(podsumowanie),
-        stage="rag_context",
-        duration_ms=round((time.perf_counter() - t1) * 1000),
-    ))
+    if not rag_context_chunks:
+        podsumowanie = ""
+        print(f"    misja {misja_id}: podsumowanie POMINIETE (0 chunkow RAG) -> pusty kontekst", flush=True)
+    else:
+        t1 = time.perf_counter()
+        context_lore = get_context_lore(context_llm, wsad_rag, rag_context)
+        podsumowanie = _wytnij_tekst(context_lore.content)
+        print(f"    misja {misja_id}: podsumowanie ({time.perf_counter() - t1:.1f}s)", flush=True)
+        save_ai_logs_to_db(silnik, create_logs(
+            raw_response=context_lore,
+            llm=context_llm,
+            misja_id_moje_fk=misja_id,
+            input_chars=len(wsad_rag) + len(rag_context),
+            output_chars=len(podsumowanie),
+            stage="rag_context",
+            duration_ms=round((time.perf_counter() - t1) * 1000),
+        ))
 
     # --- 4) ZAPIS (jedna transakcja na misję) ---
     with silnik.begin() as conn:

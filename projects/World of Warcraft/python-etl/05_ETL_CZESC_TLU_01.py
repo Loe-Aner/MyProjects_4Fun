@@ -10,7 +10,7 @@ silnik = utworz_engine_do_db()
 misje_dialogi_przetlumacz_zapisz(
     silnik, 
     dodatek="Midnight",
-    liczba_watkow=20,
+    liczba_watkow=5,
     printing=False
     )
 

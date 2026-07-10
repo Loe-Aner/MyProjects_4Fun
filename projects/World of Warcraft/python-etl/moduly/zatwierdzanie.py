@@ -145,6 +145,7 @@ def stworz_excele_do_zatwierdzenia_tlumaczen(silnik, kraina = None, fabula = Non
             m.MISJA_TYTUL_PL, 
             m.NAZWA_LINII_FABULARNEJ_EN, 
             m.NAZWA_LINII_FABULARNEJ_PL,
+            m.KOLEJNOSC_LINII_FABULARNEJ,
             ns1.NAZWA AS NAZWA_NPC_START,
             ns2.NAZWA AS NAZWA_NPC_KONIEC
         FROM dbo.MISJE AS m
@@ -198,6 +199,8 @@ def stworz_excele_do_zatwierdzenia_tlumaczen(silnik, kraina = None, fabula = Non
 
     mapa_npc_start = df_tytuly.set_index("MISJA_ID_MOJE_PK")["NAZWA_NPC_START"].to_dict()
     mapa_npc_koniec = df_tytuly.set_index("MISJA_ID_MOJE_PK")["NAZWA_NPC_KONIEC"].to_dict()
+    mapa_linii_fabularnej = df_tytuly.set_index("MISJA_ID_MOJE_PK")["NAZWA_LINII_FABULARNEJ_EN"].to_dict()
+    mapa_kolejnosci_fabularnej = df_tytuly.set_index("MISJA_ID_MOJE_PK")["KOLEJNOSC_LINII_FABULARNEJ"].to_dict()
 
     nowe_naglowki = {
         "MISJA_ID_MOJE_PK": "MISJA_ID",
@@ -269,9 +272,17 @@ def stworz_excele_do_zatwierdzenia_tlumaczen(silnik, kraina = None, fabula = Non
                 df_misje_tresci, df_misje_tresci_zatwierdzone
             ])
             .assign(
-                ID_SEGMENTU = lambda x: x["SEGMENT"].map(mapping_segmentow)
+                ID_SEGMENTU = lambda x: x["SEGMENT"].map(mapping_segmentow),
+                NAZWA_LINII_FABULARNEJ_EN = lambda x: x["MISJA_ID"].map(mapa_linii_fabularnej),
+                KOLEJNOSC_LINII_FABULARNEJ = lambda x: x["MISJA_ID"].map(mapa_kolejnosci_fabularnej),
+                BRAK_LINII_FABULARNEJ = lambda x: x["NAZWA_LINII_FABULARNEJ_EN"].isna(),
+                BRAK_KOLEJNOSCI_FABULARNEJ = lambda x: x["KOLEJNOSC_LINII_FABULARNEJ"].isna()
             )
-            .sort_values(by=["MISJA_ID", "ID_SEGMENTU", "SEGMENT", "PODSEGMENT", "NR_BLOKU", "NR_WYP", "STATUS"])
+            .sort_values(by=[
+                "BRAK_LINII_FABULARNEJ", "NAZWA_LINII_FABULARNEJ_EN",
+                "BRAK_KOLEJNOSCI_FABULARNEJ", "KOLEJNOSC_LINII_FABULARNEJ", "MISJA_ID",
+                "ID_SEGMENTU", "SEGMENT", "PODSEGMENT", "NR_BLOKU", "NR_WYP", "STATUS"
+            ], na_position="last")
             .reset_index(drop=True)
             [kolejnosc_kolumn_koniec]
         )
@@ -362,6 +373,7 @@ def stworz_excele_do_recznych_tlumaczen(silnik, kraina = None, fabula = None, do
             m.MISJA_TYTUL_PL,
             m.NAZWA_LINII_FABULARNEJ_EN,
             m.NAZWA_LINII_FABULARNEJ_PL,
+            m.KOLEJNOSC_LINII_FABULARNEJ,
             ns1.NAZWA AS NAZWA_NPC_START,
             ns2.NAZWA AS NAZWA_NPC_KONIEC
         FROM dbo.MISJE AS m
@@ -416,6 +428,8 @@ def stworz_excele_do_recznych_tlumaczen(silnik, kraina = None, fabula = None, do
 
     mapa_npc_start = df_tytuly.set_index("MISJA_ID_MOJE_PK")["NAZWA_NPC_START"].to_dict()
     mapa_npc_koniec = df_tytuly.set_index("MISJA_ID_MOJE_PK")["NAZWA_NPC_KONIEC"].to_dict()
+    mapa_linii_fabularnej = df_tytuly.set_index("MISJA_ID_MOJE_PK")["NAZWA_LINII_FABULARNEJ_EN"].to_dict()
+    mapa_kolejnosci_fabularnej = df_tytuly.set_index("MISJA_ID_MOJE_PK")["KOLEJNOSC_LINII_FABULARNEJ"].to_dict()
 
     nowe_naglowki = {
         "MISJA_ID_MOJE_PK": "MISJA_ID",
@@ -509,9 +523,17 @@ def stworz_excele_do_recznych_tlumaczen(silnik, kraina = None, fabula = None, do
                 df_misje_tresci, df_misje_tresci_zatwierdzone, df_misje_tresci_archiwum
             ])
             .assign(
-                ID_SEGMENTU = lambda x: x["SEGMENT"].map(mapping_segmentow)
+                ID_SEGMENTU = lambda x: x["SEGMENT"].map(mapping_segmentow),
+                NAZWA_LINII_FABULARNEJ_EN = lambda x: x["MISJA_ID"].map(mapa_linii_fabularnej),
+                KOLEJNOSC_LINII_FABULARNEJ = lambda x: x["MISJA_ID"].map(mapa_kolejnosci_fabularnej),
+                BRAK_LINII_FABULARNEJ = lambda x: x["NAZWA_LINII_FABULARNEJ_EN"].isna(),
+                BRAK_KOLEJNOSCI_FABULARNEJ = lambda x: x["KOLEJNOSC_LINII_FABULARNEJ"].isna()
             )
-            .sort_values(by=["MISJA_ID", "ID_SEGMENTU", "SEGMENT", "PODSEGMENT", "NR_BLOKU", "NR_WYP", "STATUS"])
+            .sort_values(by=[
+                "BRAK_LINII_FABULARNEJ", "NAZWA_LINII_FABULARNEJ_EN",
+                "BRAK_KOLEJNOSCI_FABULARNEJ", "KOLEJNOSC_LINII_FABULARNEJ", "MISJA_ID",
+                "ID_SEGMENTU", "SEGMENT", "PODSEGMENT", "NR_BLOKU", "NR_WYP", "STATUS"
+            ], na_position="last")
             .reset_index(drop=True)
             [kolejnosc_kolumn_koniec]
         )

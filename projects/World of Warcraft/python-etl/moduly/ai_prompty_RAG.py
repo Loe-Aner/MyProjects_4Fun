@@ -1,3 +1,5 @@
+import re
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import AIMessage
 
@@ -379,6 +381,7 @@ Najważniejsze pytanie:
 "Jakiej brakującej wiedzy potrzebowałby redaktor, żeby nie spłaszczyć, nie pomylić ani nie przesterować tej sceny?"
 
 Zwróć pusty tekst, jeśli fragmenty RAG nie wnoszą realnie przydatnego kontekstu.
+NIE twórz podsumowania wyłącznie z tekstu misji. Jeśli to fragmenty RAG nie dają realnej wartości, zwróć pusty tekst — tłumacz już ma tekst misji, więc jego streszczenie samo w sobie nic nie wnosi.
 
 TWARDE ZASADY:
 
@@ -691,6 +694,24 @@ leave a raw, unescaped double quote inside a double-quoted value.
 }
 """
 
+def _normalizuj_pytanie(tekst: str) -> str:
+    return re.sub(r"\s+", " ", (tekst or "").strip().lower()).rstrip("?.!")
+
+
+def _odsiej_duplikaty_pytan(questions: list[LoreQuestion]) -> list[LoreQuestion]:
+    widziane: set[str] = set()
+    wynik: list[LoreQuestion] = []
+    for q in questions:
+        klucz = _normalizuj_pytanie(getattr(q, "question", ""))
+        if not klucz:
+            continue
+        if klucz in widziane:
+            continue
+        widziane.add(klucz)
+        wynik.append(q)
+    return wynik
+
+
 def get_questions_lore(llm, mission: str) -> list[LoreQuestion]:
 
     prompt_questions_lore = ChatPromptTemplate.from_messages(
@@ -714,7 +735,7 @@ def get_questions_lore(llm, mission: str) -> list[LoreQuestion]:
         }
     )
 
-    return list(result["parsed"].questions)
+    return _odsiej_duplikaty_pytan(list(result["parsed"].questions))
 
 
 def get_questions_lore_raw(llm, mission: str):
@@ -739,7 +760,7 @@ def get_questions_lore_raw(llm, mission: str):
 
     result = structured_model.invoke({"misje_tekst": mission})
 
-    return list(result["parsed"].questions), result["raw"]
+    return _odsiej_duplikaty_pytan(list(result["parsed"].questions)), result["raw"]
 
 def get_context_lore(llm, mission: str, rag_context: str) -> AIMessage:
     prompt_context_lore = ChatPromptTemplate.from_messages(
