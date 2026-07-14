@@ -36,9 +36,12 @@ def llm_lore():
 def llm_quest_summary():
     llm = ChatOpenAI(
         model="gpt-5.6-luna",
-        temperature=TEMPERATURE_SUMMARY_QUEST,
         reasoning_effort="medium",
+        verbosity="low",
+        max_completion_tokens=1024,
         use_responses_api=True,
+        store=False,
+        timeout=30,
         max_retries=2
     )
     return llm

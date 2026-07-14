@@ -8,6 +8,24 @@ MODEL_PRICING = {
         "output_per_1m": 30.00,
         "cache_prc": 0.1
     },
+    "gpt-5.6-luna": {
+        "provider": "openai",
+        "langchain_package": "langchain-openai",
+        "langchain_class": "ChatOpenAI",
+        "currency": "USD",
+        "input_per_1m": 1.00,
+        "output_per_1m": 6.00,
+        "cache_prc": 0.1
+    },
+    "gpt-5.6-terra": {
+        "provider": "openai",
+        "langchain_package": "langchain-openai",
+        "langchain_class": "ChatOpenAI",
+        "currency": "USD",
+        "input_per_1m": 2.50,
+        "output_per_1m": 15.00,
+        "cache_prc": 0.1
+    },
     "gpt-5.4": {
         "provider": "openai",
         "langchain_package": "langchain-openai",

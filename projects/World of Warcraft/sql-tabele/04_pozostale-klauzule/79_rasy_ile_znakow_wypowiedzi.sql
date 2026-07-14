@@ -1,3 +1,5 @@
+DECLARE @dodatek NVARCHAR(55) = N'The War Within';
+
 WITH teksty_npc AS (
     SELECT
         m.NPC_START_ID AS NPC_ID,
@@ -5,7 +7,7 @@ WITH teksty_npc AS (
     FROM dbo.MISJE_STATUSY AS ms
     INNER JOIN dbo.MISJE AS m
         ON ms.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
-    WHERE ms.MISJA_ID_MOJE_FK = 798
+    WHERE m.DODATEK_EN = @dodatek
       AND ms.STATUS = N'0_ORYGINAŁ'
       AND ms.SEGMENT <> N'ZAKOŃCZENIE'
       AND m.NPC_START_ID IS NOT NULL
@@ -20,7 +22,7 @@ WITH teksty_npc AS (
     FROM dbo.MISJE_STATUSY AS ms
     INNER JOIN dbo.MISJE AS m
         ON ms.MISJA_ID_MOJE_FK = m.MISJA_ID_MOJE_PK
-    WHERE ms.MISJA_ID_MOJE_FK = 798
+    WHERE m.DODATEK_EN = @dodatek
       AND ms.STATUS = N'0_ORYGINAŁ'
       AND ms.SEGMENT = N'ZAKOŃCZENIE'
       AND m.NPC_KONIEC_ID IS NOT NULL
@@ -33,7 +35,9 @@ WITH teksty_npc AS (
         ds.NPC_ID_FK AS NPC_ID,
         SUM(LEN(ISNULL(ds.TRESC, N''))) AS ILE_ZNAKOW
     FROM dbo.DIALOGI_STATUSY AS ds
-    WHERE ds.MISJA_ID_MOJE_FK = 798
+    INNER JOIN dbo.MISJE AS m
+        ON m.MISJA_ID_MOJE_PK = ds.MISJA_ID_MOJE_FK
+    WHERE m.DODATEK_EN = @dodatek
       AND ds.STATUS = N'0_ORYGINAŁ'
     GROUP BY ds.NPC_ID_FK
 ),

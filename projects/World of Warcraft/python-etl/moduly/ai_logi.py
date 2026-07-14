@@ -117,20 +117,25 @@ def create_logs(
     if reasoning_effort is None and getattr(llm, "enable_thinking", None) is not None:
         reasoning_effort = "thinking" if llm.enable_thinking else "disabled"
 
-    currency = MODEL_PRICING[model_name]["currency"]
-    input_per_1m = MODEL_PRICING[model_name]["input_per_1m"]
-    output_per_1m = MODEL_PRICING[model_name]["output_per_1m"]
-    cache_hit_price_factor = MODEL_PRICING[model_name]["cache_prc"]
-    input_uncached_tokens = max(input_tokens - input_cached_tokens, 0)
+    pricing = MODEL_PRICING.get(model_name)
+    if pricing is None:
+        print(f"--- [OSTRZEZENIE] Brak cennika dla modelu {model_name!r} - koszty zapisane jako None")
+        currency = None
+        input_tokens_price = None
+        output_tokens_price = None
+    else:
+        currency = pricing["currency"]
+        input_per_1m = pricing["input_per_1m"]
+        output_per_1m = pricing["output_per_1m"]
+        cache_hit_price_factor = pricing.get("cache_prc", 0)
+        input_uncached_tokens = max(input_tokens - input_cached_tokens, 0)
 
-    input_tokens_price_value = (
-        (input_uncached_tokens / 1_000_000) * input_per_1m
-        + (input_cached_tokens / 1_000_000) * input_per_1m * cache_hit_price_factor
-    )
-    output_tokens_price_value = (output_tokens / 1_000_000) * output_per_1m
-
-    input_tokens_price = round(input_tokens_price_value, 8)
-    output_tokens_price = round(output_tokens_price_value, 8)
+        input_tokens_price = round(
+            (input_uncached_tokens / 1_000_000) * input_per_1m
+            + (input_cached_tokens / 1_000_000) * input_per_1m * cache_hit_price_factor,
+            8,
+        )
+        output_tokens_price = round((output_tokens / 1_000_000) * output_per_1m, 8)
 
     return {
         "ANSWER_ID": raw_response.id or response_metadata.get("id"),
