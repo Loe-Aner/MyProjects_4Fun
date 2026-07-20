@@ -155,8 +155,6 @@ def get_records(folder: Path = FOLDER, document_ids: set[str] | None = None) -> 
 
 
 def _ostrzez_jesli_brak_dml() -> None:
-    # Cichy fallback na CPU to najgorszy scenariusz: mysli sie, ze leci GPU, a mieli CPU.
-    # Dlatego przy kazdym load_model sprawdzam i GLOSNO krzycze, jesli DML niedostepny.
     import onnxruntime as ort
 
     dostepne = ort.get_available_providers()
@@ -416,13 +414,10 @@ def save_qdrant_log(
 
 
 def load_reranker(model_name: str = RERANK_MODEL) -> TextCrossEncoder:
-    # Reranker uzywany przy zapytaniach (query-time), nie przy indeksowaniu.
-    # Ten sam provider co embedding - iGPU tez przyspieszy reranking bge-reranker-base.
     return TextCrossEncoder(model_name=model_name, providers=EMBED_PROVIDERS)
 
 
 def rerank(query: str, candidates: list[dict], reranker: TextCrossEncoder) -> list[dict]:
-    # Reranker dostaje surowy query — BEZ instrukcji BGE (ms-marco jej nie zna).
     documents = [candidate["embedding_text"] for candidate in candidates]
     scores = reranker.rerank(query, documents)
 
@@ -658,13 +653,6 @@ def get_filtered_candidates(llm, misje_tekst) -> str:
     ) # type: ignore
 
 
-# if __name__ == "__main__":
-#     query = "who restored the Sunwell"
-
-#     final = get_candidates(query)
-#     for item in final:
-#         print(item["rerank_score"], item["chunk_title"])
-
 def _wyciagnij_tekst_z_ai_message(msg: AIMessage) -> str:
     content = msg.content
 
@@ -687,22 +675,16 @@ _NIELEGALNE_W_NAZWIE = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 
 def _usun_znaki_kontrolne(tekst: str) -> str:
-    # Usuwa znaki kontrolne (zostawia \t \n \r), ktore lamia parser YAML.
     return _ZNAKI_KONTROLNE.sub("", tekst)
 
 
 def _odescapuj_jesli_literalne(tresc: str) -> str:
-    # Gdy model podwojnie zescapowal i nie ma ANI JEDNEJ prawdziwej nowej linii,
-    # a sa literalne "\n" - przywroc prawdziwe biale znaki. Konserwatywne: dziala
-    # tylko na calkowicie rozsypanym przypadku, nie psuje poprawnej tresci.
     if "\n" not in tresc and "\\n" in tresc:
         tresc = tresc.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "\t")
     return tresc
 
 
 def _przecytuj_wartosc_yaml(wartosc: str) -> str:
-    # Zdejmuje zewnetrzne cudzyslowy (' lub "), normalizuje zle escapy i cytuje
-    # na nowo jako poprawny YAML double-quoted scalar.
     if len(wartosc) >= 2 and wartosc[0] == wartosc[-1] and wartosc[0] in ("'", '"'):
         wnetrze = wartosc[1:-1]
         if wartosc[0] == "'":
@@ -743,7 +725,6 @@ def _napraw_yaml(front_matter: str) -> str:
 
 
 def _bezpieczna_nazwa_pliku(chunk_id: str) -> str:
-    # Wycina znaki nielegalne w nazwach plikow Windows i przycina dlugosc.
     nazwa = _NIELEGALNE_W_NAZWIE.sub("", chunk_id).strip()
     return nazwa[:180]
 
@@ -754,8 +735,6 @@ def _slug(tekst: str) -> str:
 
 
 def _zapewnij_chunk_id(front_matter: str, chunk_id: str) -> str:
-    # Wstrzykuje linie chunk_id do front mattera, jesli model ja pominal,
-    # tuz po linii document_id (albo na poczatek, gdy jej brak).
     if re.search(r"(?m)^\s*chunk_id\s*:", front_matter):
         return front_matter
 

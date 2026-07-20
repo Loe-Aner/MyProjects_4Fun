@@ -6,5 +6,5 @@ silnik = utworz_engine_do_db()
 
 zatwierdz_tlumaczenia(
     silnik,
-    sciezka_excel_zatwierdzenia("Call of the Goddess_ZATW.xlsx")
+    sciezka_excel_zatwierdzenia("Legacy of the Amani_ZATW.xlsx")
 )

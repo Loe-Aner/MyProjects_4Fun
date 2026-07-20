@@ -8,6 +8,6 @@ silnik = utworz_engine_do_db()
 # TUTAJ TLUMACZE NOWOSCI
 stworz_excele_do_zatwierdzenia_tlumaczen(
     silnik, 
-    fabula="Legacy of the Amani",
-    sciezka=sciezka_excel_zatwierdzenia("Legacy of the Amani.xlsx")
+    fabula="The Light's Summons",
+    sciezka=sciezka_excel_zatwierdzenia("The Light's Summons.xlsx")
 )

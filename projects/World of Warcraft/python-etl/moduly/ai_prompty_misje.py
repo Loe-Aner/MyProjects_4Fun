@@ -118,6 +118,11 @@ Polski tekst, który:
   ogonki, wielką literę.
 - REJESTR: pisz jak współczesny, klimatyczny gracz, nie jak XIX-wieczna proza.
   Unikaj: „uczynić, przesiadują, przecinać się siłą". Lakoniczne EN → lakoniczne PL.
+- KALKI SKŁADNIOWE: jeśli zdanie brzmi jak dosłowny przekład z EN
+  (angielski szyk, strona bierna tam, gdzie naturalna jest czynna,
+  konstrukcje typu „jest to...", „wydaje się być", nadmiar zaimków
+  dzierżawczych: „podnieś swoją broń") — przebuduj je po polsku.
+  Wierność z zasady nr 1 dotyczy SENSU, nie szyku zdania.
 - CELE: krótkie, funkcjonalne, grywalne — nie literackie zdania.
 
 ═══════════════════════════════════════════════

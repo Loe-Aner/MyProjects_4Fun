@@ -11,7 +11,7 @@ arch_update_dir = Path(r"C:\____Moje-MOJE\MyProjects_4Fun\projects\World of Warc
 chunks_output_dir = Path(r"C:\____Moje-MOJE\MyProjects_4Fun\projects\World of Warcraft\rag-pliki\02_chunki")
 
 rag_categories = [
-    {"category": "Category:Wild_Gods", "subtype": "gods", "excluded": ["alternate", "Classic"], "included": [], "min_body_words": 20},
+    {"category": "Category:Family_trees", "subtype": "family_trees", "excluded": ["alternate", "Classic"], "included": [], "min_body_words": 10},
 ]
 
 WIKI_MAX_WORKERS = 2

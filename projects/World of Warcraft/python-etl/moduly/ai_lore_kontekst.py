@@ -20,6 +20,21 @@ from moduly.AI_RAG import (
 
 PLACEHOLDER_BRAK_KONTEKSTU = "Brak kontekstu dla tej misji - pomiń tę sekcję"
 
+# Sentinel, ktory model zwraca zamiast pustego tekstu (LLM-y niepewnie zwracaja pusty string).
+# Normalizujemy go do "" przed zapisem do bazy — dalej dziala istniejaca logika czytaj_kontekst_lore.
+SENTINEL_BRAK_KONTEKSTU = "BRAK_KONTEKSTU"
+
+
+def _normalizuj_sentinel(podsumowanie: str) -> str:
+    """
+    Jesli odpowiedz modelu to sentinel BRAK_KONTEKSTU (takze z drobnymi smieciami typu
+    cudzyslowy, kropka, biale znaki), zwraca pusty string. W przeciwnym razie tekst bez zmian.
+    """
+    oczyszczone = podsumowanie.strip().strip("\"'`.").strip()
+    if oczyszczone.upper() == SENTINEL_BRAK_KONTEKSTU:
+        return ""
+    return podsumowanie
+
 MAKS_ROWNOLEGLE_MISJE = 10
 _GPU_LOCK = threading.Lock()
 
@@ -163,7 +178,7 @@ def _zbuduj_kontekst_dla_misji(
     else:
         t1 = time.perf_counter()
         context_lore = get_context_lore(context_llm, wsad_rag, rag_context)
-        podsumowanie = _wytnij_tekst(context_lore.content)
+        podsumowanie = _normalizuj_sentinel(_wytnij_tekst(context_lore.content))
         print(f"    misja {misja_id}: podsumowanie ({time.perf_counter() - t1:.1f}s)", flush=True)
         save_ai_logs_to_db(silnik, create_logs(
             raw_response=context_lore,
