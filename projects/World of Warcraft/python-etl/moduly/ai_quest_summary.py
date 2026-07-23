@@ -110,7 +110,6 @@ def generate_and_save_quest_summary(
 
 
     summary = {}
-    misje_id_z_gry = {}
     total = len(lista_krotek)
     print(f"--- Rownolegle przetwarzanie: max_workers={max_workers}")
 
@@ -133,7 +132,11 @@ def generate_and_save_quest_summary(
                 input_chars=len(tresc_misji),
                 output_chars=len(podsumowanie)
             )
-            save_ai_logs_to_db(silnik=silnik, logs=logs)
+            try:
+                save_ai_logs_to_db(silnik=silnik, logs=logs)
+            except Exception as log_error:
+                # Awaria logowania nie może zgubić już wygenerowanego podsumowania.
+                print(f"--- [{numer}/{total}] Misja {misja_id}: OSTRZEZENIE zapisu AI_LOGI - {log_error}")
             print(f"--- [{numer}/{total}] Misja {misja_id}: OK, znaki={len(podsumowanie)}")
             return misja_id, misja_id_z_gry, podsumowanie
         except Exception as e:
@@ -152,29 +155,30 @@ def generate_and_save_quest_summary(
                 continue
 
             misja_id, misja_id_z_gry, podsumowanie = wynik
-            summary[misja_id] = podsumowanie
-            misje_id_z_gry[misja_id] = misja_id_z_gry
+            try:
+                with silnik.begin() as conn:
+                    zapisano = conn.execute(
+                        q_insert_summary,
+                        {
+                            "misja_id_moje_fk": misja_id,
+                            "misja_id_z_gry": misja_id_z_gry,
+                            "podsumowanie": podsumowanie,
+                        },
+                    ).rowcount
+            except Exception as e:
+                print(f"--- Misja {misja_id}: BLAD zapisu podsumowania - {e}")
+                continue
 
-    parametry_insert = [
-            {
-                "misja_id_moje_fk": misja_id,
-                "misja_id_z_gry": misje_id_z_gry[misja_id],
-                "podsumowanie": podsumowanie
-            }
-            for misja_id, podsumowanie in summary.items()
-    ]
+            if zapisano:
+                summary[misja_id] = podsumowanie
+                print(f"--- Misja {misja_id}: zapisano podsumowanie (COMMIT)")
+            else:
+                print(f"--- Misja {misja_id}: podsumowanie juz istnieje, pominieto zapis")
 
-    if not parametry_insert:
-        print("--- Brak podsumowan do zapisania.")
-        return summary
-
-    try:
-        with silnik.begin() as conn:
-            conn.execute(q_insert_summary, parametry_insert)
-        print(f"--- Zapisano nowe podsumowania, prob zapisu: {len(parametry_insert)}")
-    except Exception as e:
-        print(f"--- Blad zapisu podsumowan do bazy: {e}")
-        raise
+    if not summary:
+        print("--- Brak nowych podsumowan do zapisania.")
+    else:
+        print(f"--- Zapisano nowe podsumowania: {len(summary)}")
 
     print("--- Koniec generowania podsumowan misji.")
     return summary

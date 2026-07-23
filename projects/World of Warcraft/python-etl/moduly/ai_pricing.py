@@ -89,6 +89,15 @@ MODEL_PRICING = {
         "output_per_1m": 12.00,
         "cache_prc": 0.1
     },
+    "gemini-3.6-flash": {
+        "provider": "google",
+        "langchain_package": "langchain-google-genai",
+        "langchain_class": "ChatGoogleGenerativeAI",
+        "currency": "USD",
+        "input_per_1m": 1.50,
+        "output_per_1m": 7.50,
+        "cache_prc": 0.1
+    },
     "gemini-3.5-flash": {
         "provider": "google",
         "langchain_package": "langchain-google-genai",
@@ -105,6 +114,15 @@ MODEL_PRICING = {
         "currency": "USD",
         "input_per_1m": 0.50,
         "output_per_1m": 3.00,
+        "cache_prc": 0.1
+    },
+    "gemini-3.5-flash-lite": {
+        "provider": "google",
+        "langchain_package": "langchain-google-genai",
+        "langchain_class": "ChatGoogleGenerativeAI",
+        "currency": "USD",
+        "input_per_1m": 0.30,
+        "output_per_1m": 2.50,
         "cache_prc": 0.1
     },
     "gemini-3.1-flash-lite-preview": {
@@ -165,6 +183,21 @@ MODEL_PRICING = {
         "currency": "USD",
         "input_per_1m": 3.00,
         "output_per_1m": 15.00
+    },
+    "claude-sonnet-5": {
+        "provider": "anthropic",
+        "langchain_package": "langchain-anthropic",
+        "langchain_class": "ChatAnthropic",
+        "currency": "USD",
+        "input_per_1m": 2.00,
+        "output_per_1m": 10.00,
+        "standard_input_per_1m_after": 3.00,
+        "standard_output_per_1m_after": 15.00,
+        "batch_input_per_1m": 1.00,
+        "batch_output_per_1m": 5.00,
+        "batch_price_valid_until": "2026-08-31",
+        "batch_input_per_1m_after": 1.50,
+        "batch_output_per_1m_after": 7.50
     },
     "claude-haiku-4-5": {
         "provider": "anthropic",

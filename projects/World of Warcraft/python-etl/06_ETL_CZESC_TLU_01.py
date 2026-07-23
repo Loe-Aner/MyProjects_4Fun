@@ -1,18 +1,11 @@
-from moduly.ai import misje_dialogi_przetlumacz_zapisz
-from moduly.db_core import utworz_engine_do_db
-from moduly.repo_misje import ujednolic_tytuly_misji
+from moduly.ai_batch_tlumacz_anthropic import main
 
-silnik = utworz_engine_do_db()
+# ==== PRZYKŁADY WYWOŁANIA ====
+# .\.venv\Scripts\python.exe python-etl\06_ETL_CZESC_TLU_01_SONNET_BATCH.py submit --ids 12345
+# .\.venv\Scripts\python.exe python-etl\06_ETL_CZESC_TLU_01_SONNET_BATCH.py submit --dodatek "Midnight" --limit 75
+# .\.venv\Scripts\python.exe python-etl\06_ETL_CZESC_TLU_01_SONNET_BATCH.py retrieve
+# .\.venv\Scripts\python.exe python-etl\06_ETL_CZESC_TLU_01_SONNET_BATCH.py retrieve --job-name msgbatch_... --validate-only
+# .\.venv\Scripts\python.exe python-etl\06_ETL_CZESC_TLU_01_SONNET_BATCH.py submit --ids 12345 --retry-failed
 
-# TŁUMACZY ZAPISUJĄC DO BAZY DANYCH Z ODPOWIEDNIMI STATUSAMI
-# MOŻNA PODAĆ DOWOLNIE KTORY PARAMETR
-# BIERZE POD UWAGE TYLKO MISJE Z TRESCIA
-misje_dialogi_przetlumacz_zapisz(
-    silnik, 
-    dodatek="Midnight",
-    liczba_watkow=5,
-    printing=False
-    )
-
-# KOREKTA MISJI - JEŻELI NP. DWIE MISJE O ID 37, 38 MAJĄ TEN SAM TYTUŁ PO ENG, ALE INNY PO PL, TO WYBIERAM PIERWSZY TYTUŁ
-ujednolic_tytuly_misji(silnik)
+if __name__ == "__main__":
+    main()

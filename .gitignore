@@ -12,6 +12,7 @@ projects/World of Warcraft/python-etl/scraper_wiki_main.py
 projects/World of Warcraft/python-etl/scraper_wiki_rag.py
 projects/World of Warcraft/python-etl/moduly/ai_json_output.py
 projects/World of Warcraft/python-etl/moduly/ai_batch_redaktor_gemini.py
+projects/World of Warcraft/python-etl/moduly/ai_batch_tlumacz_anthropic.py
 projects/World of Warcraft/python-etl/scraper_wowhead_metadane.py
 projects/World of Warcraft/python-etl/scraper_wowhead_misje.py
 projects/World of Warcraft/python-etl/scraper_wowhead_kolejnosc.py
@@ -33,6 +34,7 @@ projects/World of Warcraft/_testy_redaktor
 projects/World of Warcraft/python-etl/testy
 projects/World of Warcraft/python-etl/_arch
 projects/World of Warcraft/python-etl/_batch_gemini_redaktor
+projects/World of Warcraft/python-etl/_batch_anthropic_tlumacz
 
 
 
@@ -283,3 +285,4 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+projects/World of Warcraft/SERWER-runbook.md

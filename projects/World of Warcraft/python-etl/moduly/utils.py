@@ -136,6 +136,44 @@ def formatuj_referencje_de(wiersze) -> str:
     return "\n\n".join(bloki)
 
 
+def wybierz_referencje_de_do_promptu(wiersze_statusow):
+    """
+    Zwraca wiersze 4_REFERENCJA gotowe do formatowania oraz informację, czy
+    referencję odrzucono jako angielski redirect. Porównujemy wyłącznie kompletny
+    segment TREŚĆ, według NR, ignorując różnice w odstępach, wielkości liter
+    i interpunkcji (np. przecinek w EN versus `--` w kopii z Wowhead DE).
+    """
+
+    def normalizuj(tekst_wiersza) -> str:
+        tekst_wiersza = str(tekst_wiersza or "").casefold()
+        return re.sub(r"[\W_]+", " ", tekst_wiersza, flags=re.UNICODE).strip()
+
+    referencje = []
+    tresc_en = []
+    tresc_referencji = []
+
+    for status, segment, nr, tresc in wiersze_statusow or []:
+        if status == "4_REFERENCJA":
+            referencje.append((segment, nr, tresc))
+
+        if segment != "TREŚĆ":
+            continue
+
+        wpis = (int(nr or 1), normalizuj(tresc))
+        if status == "0_ORYGINAŁ":
+            tresc_en.append(wpis)
+        elif status == "4_REFERENCJA":
+            tresc_referencji.append(wpis)
+
+    tresc_en.sort()
+    tresc_referencji.sort()
+    jest_angielskim_redirectem = bool(tresc_referencji) and tresc_referencji == tresc_en
+
+    if jest_angielskim_redirectem:
+        return [], True
+    return referencje, False
+
+
 def formatuj_obsada(wiersze) -> str:
     if not wiersze:
         return ""

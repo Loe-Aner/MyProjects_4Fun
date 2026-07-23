@@ -14,6 +14,6 @@ generate_and_save_quest_summary(
     # ZMIENIC NONE NA KONKRETNA NAZWE W PRZYPADKU POTRZEB
     kraina=None,
     fabula=None,
-    dodatek='The War Within',
+    dodatek='Midnight',
     id_misji=None
 )

@@ -74,18 +74,19 @@ def llm_chunker():
         max_retries=2
     )
 
-def llm_translator() -> ChatQwen:
-    return ChatQwen(
-        model="qwen3.7-plus",
-        temperature=TEMPERATURE_TRANSLATOR,
-        top_p=0.95,
-        enable_thinking=True,
-        extra_body={
-            "top_k": 20,
-            "min_p": 0
-        },
-        max_retries=2,
-    )
+# ================ zastapiony sonnet 5 ================
+# def llm_translator() -> ChatQwen:
+#     return ChatQwen(
+#         model="qwen3.7-plus",
+#         temperature=TEMPERATURE_TRANSLATOR,
+#         top_p=0.95,
+#         enable_thinking=True,
+#         extra_body={
+#             "top_k": 20,
+#             "min_p": 0
+#         },
+#         max_retries=2,
+#     )
 
 # ================ zastapiony gemini 3.1 pro ================
 # def llm_editor() -> ChatQwen:

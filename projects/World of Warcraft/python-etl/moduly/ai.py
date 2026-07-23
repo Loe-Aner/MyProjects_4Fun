@@ -63,6 +63,7 @@ from moduly.utils import (
     hash_do_wsad_json,
     sklej_warunki_w_WHERE,
     parse_json_with_repair,
+    wybierz_referencje_de_do_promptu,
 )
 
 from moduly.a_STALE_STEROWANIE import (
@@ -480,10 +481,10 @@ def przetworz_pojedyncza_misje(
                 ORDER BY NUMER_MISJI_W_CHAINIE ASC
             """)
             q_select_referencja_de = text("""
-            SELECT SEGMENT, NR, TRESC
+            SELECT STATUS, SEGMENT, NR, TRESC
             FROM MISJE_STATUSY
             WHERE MISJA_ID_MOJE_FK = :misja_id
-              AND STATUS = '4_REFERENCJA'
+              AND STATUS IN (N'0_ORYGINAŁ', N'4_REFERENCJA')
               AND SEGMENT IN ('TREŚĆ', 'POSTĘP', 'ZAKOŃCZENIE')
             ORDER BY
               CASE SEGMENT
@@ -535,7 +536,15 @@ def przetworz_pojedyncza_misje(
             ORDER BY rn.KOLEJNOSC, nz.CZYSTA_NAZWA;
             """)
 
-            misja_referencja_de_wiersze = conn.execute(q_select_referencja_de, {"misja_id": misja_id}).fetchall()
+            wiersze_porownania_de_en = conn.execute(
+                q_select_referencja_de,
+                {"misja_id": misja_id},
+            ).fetchall()
+            misja_referencja_de_wiersze, referencja_de_jest_redirectem = wybierz_referencje_de_do_promptu(
+                wiersze_porownania_de_en
+            )
+            if referencja_de_jest_redirectem:
+                print(f"--- [ID: {misja_id}] Referencja DE jest kopią EN w segmencie TREŚĆ — pomijam.")
             misja_referencja_de = formatuj_referencje_de(misja_referencja_de_wiersze)
             fabula_z_bazy = conn.execute(q_select_fabula, {"misja_id": misja_id}).first()
             fabula_en = fabula_z_bazy[0] if fabula_z_bazy else None
@@ -791,6 +800,7 @@ def tych_npcow_nie_tlumacz(klient):
     print(f"3. Liczba NPC do sprawdzenia (puste NAZWA_PL_FINAL): {liczba_wierszy}")
 
     co_ile = 100
+    maks_liczba_prob = 2
     licznik_batchy = 1
     total_batchy = (liczba_wierszy + co_ile - 1) // co_ile
 
@@ -805,22 +815,54 @@ def tych_npcow_nie_tlumacz(klient):
 
         print(f"   -> Wysyłam zapytanie do API (rozmiar JSON: {len(dfj)} znaków)...")
         start_czas = time.time()
-        
-        odpowiedz = klient.models.generate_content(
-            model=MODEL_GEMINI_POMOCNICZY,
-            contents=dfj,
-            config={
-                "system_instruction": instrukcja_tych_npc_nie(), 
-                "response_mime_type": "application/json",
-                "thinking_config": pobierz_thinking_config_gemini_high(),
-            }
-        )
+
+        odpowiedz = None
+        for nr_proby in range(1, maks_liczba_prob + 1):
+            try:
+                odpowiedz = klient.models.generate_content(
+                    model=MODEL_GEMINI_POMOCNICZY,
+                    contents=dfj,
+                    config={
+                        "system_instruction": instrukcja_tych_npc_nie(),
+                        "response_mime_type": "application/json",
+                        "thinking_config": pobierz_thinking_config_gemini_high(),
+                    }
+                )
+                break
+            except Exception as blad:
+                opis_bledu = " ".join(str(blad).split())
+                if len(opis_bledu) > 300:
+                    opis_bledu = f"{opis_bledu[:297]}..."
+
+                if nr_proby < maks_liczba_prob:
+                    opoznienie = 3 * (2 ** (nr_proby - 1))
+                    print(
+                        f"   !! Problem z połączeniem (próba {nr_proby}/{maks_liczba_prob}): "
+                        f"{type(blad).__name__}: {opis_bledu}"
+                    )
+                    print(f"   -> Ponawiam za {opoznienie} s...")
+                    time.sleep(opoznienie)
+                else:
+                    print(
+                        f"   !! Nie udało się uzyskać odpowiedzi po {maks_liczba_prob} próbach: "
+                        f"{type(blad).__name__}: {opis_bledu}"
+                    )
+                    print("   -> Proces przerwany bez zapisywania niepełnego wyniku. Uruchom skrypt ponownie później.")
+                    print("\n--- KONIEC PROCESU (BŁĄD API) ---")
+                    return
+
         zaloguj_uzycie_gemini(odpowiedz, "npc_nie_tlumacz")
         
         czas_trwania = time.time() - start_czas
         print(f"   <- Otrzymano odpowiedź w {czas_trwania:.2f} sek.")
         
-        zaladowane = json.loads(odpowiedz.text)
+        try:
+            zaladowane = json.loads(odpowiedz.text)
+        except (json.JSONDecodeError, TypeError, AttributeError) as blad:
+            print(f"   !! Gemini zwróciło nieprawidłowy JSON: {type(blad).__name__}: {blad}")
+            print("   -> Proces przerwany bez zapisywania niepełnego wyniku. Uruchom skrypt ponownie.")
+            print("\n--- KONIEC PROCESU (BŁĘDNA ODPOWIEDŹ API) ---")
+            return
         liczba_znalezionych = len(zaladowane)
 
         if zaladowane:

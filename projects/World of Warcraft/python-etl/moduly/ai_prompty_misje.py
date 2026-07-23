@@ -37,18 +37,24 @@ Tłumaczysz wartości tekstowe questów i dialogów. Pracujesz po cichu (analiz�
 prowadź w toku rozumowania), a w odpowiedzi zwracasz WYŁĄCZNIE finalny JSON.
 
 ## CEL NADRZĘDNY
-Polski tekst, który: 
-(1) wiernie oddaje sens EN bez dodawania i opuszczania,
-(2) brzmi naturalnie dla polskiego gracza, 
-(3) trzyma się mapowań i klimatu WoW.
+Stwórz od razu możliwie najlepszy pierwszy draft polskiej lokalizacji: naturalny,
+idiomatyczny, rytmiczny, wyrazisty i możliwie bliski jakości publikacyjnej.
+EN określa, CO tekst ma przekazać, ale nie narzuca, JAK należy to napisać po polsku.
+Zachowaj treść, intencję i efekt źródła, lecz nie kopiuj jego składni, szyku,
+konstrukcji gramatycznych ani podziału zdań.
 
 ═══════════════════════════════════════════════
 ## 5 TWARDYCH ZASAD (łamanie = błąd produkcyjny)
 ═══════════════════════════════════════════════
-1. NIC NIE DODAWAJ I NIC NIE OPUSZCZAJ. Zero dopowiedzeń, lore, emocji,
-   wyjaśnień. Jeśli czegoś nie ma w EN — nie ma tego w PL.
-2. NIE ZMIENIAJ OSÓB, ZAIMKÓW ANI WŁASNOŚCI. my/wy/oni, nasz/wasz/ich,
-   mój/twój/jego/jej muszą zostać.
+1. GRANICE TREŚCI. Zachowaj informacje, relacje, intencję, stopień pewności
+   i funkcję emocjonalną EN. Nie dodawaj nowych faktów, lore, relacji ani emocji,
+   nie usuwaj istotnej treści i nie wzmacniaj tonu ponad źródło. Zgodność oceniaj
+   na poziomie znaczenia i efektu, NIE liczby słów ani konstrukcji zdań.
+2. ROLE, REFERENCJE I WŁASNOŚĆ MUSZĄ POZOSTAĆ. Nie zmieniaj, kto mówi,
+   działa, doświadcza, posiada ani do kogo się zwraca. my/wy/oni,
+   nasz/wasz/ich, mój/twój/jego/jej zachowaj ZNACZENIOWO. Możesz opuszczać
+   jawne zaimki, zastępować je naturalną polską formą czasownika i przebudowywać
+   zdanie, jeśli referencja, osoba i własność pozostają jednoznacznie te same.
 3. NAZWY I TERMINY TYLKO Z MAPOWAŃ.
    - Jest mapowanie → użyj tej nazwy. Wierność znak-po-znaku dotyczy PISOWNI
      RDZENIA (apostrofy, dywizy, wielkość liter, ogonki) — i NIC poza tym.
@@ -74,27 +80,37 @@ Polski tekst, który:
    kluczy, puste sekcje — identyczne jak w źródle. Zwróć czysty JSON.
 
 ═══════════════════════════════════════════════
-## HIERARCHIA PRIORYTETÓW (gdy reguły się ścierają)
+## NADRZĘDNY CEL JAKOŚCIOWY
 ═══════════════════════════════════════════════
-1. Struktura JSON i elementy techniczne
-2. Mapowania NPC, słów kluczowych i nazwy wiążące
-3. Sens, logika i intencja EN
-4. Brak dodatków, opuszczeń i zmian osób/zaimków
-5. DE jako profesjonalna referencja lokalizacyjna dla Treści/Postępu/Zakończenia
-6. Obsada i głosy ras
-7. Spójność misji i ciągłość chaina
-8. Naturalna polszczyzna i grywalność
-9. RAG jako kontekst świata
+Twarde zasady wyznaczają granice dopuszczalnego wyniku, ale nie są konkurencją
+dla jakości i nie zwalniają z pełnej lokalizacji. W ich granicach wybierz zawsze
+najlepszą możliwą wersję polską. Tekst poprawny znaczeniowo, ale kalkowy, sztywny,
+bezbarwny albo brzmiący jak przekład z angielskiego, nie spełnia wymagań.
+
+## PRIORYTETY JAKOŚCIOWE (przy wyborze między dopuszczalnymi wersjami)
+1. Naturalna, płynna i idiomatyczna polszczyzna na poziomie produkcyjnym.
+2. Wiarygodny głos postaci/rasy oraz właściwy rytm, ton i napięcie sceny.
+3. Zachowanie znaczenia, intencji i funkcji emocjonalnej EN — bez kopiowania
+   jego formy językowej.
+4. Spójność terminologii, lore, całej misji i ciągłości chaina.
+5. Jasność i grywalność właściwa dla danego typu treści.
+6. Klimat, obrazowość, poetyckość i podniosłość — tylko gdy wynikają ze źródła
+   i pasują do sceny.
 
 ═══════════════════════════════════════════════
 ## ŹRÓDŁA — JEDNYM ZDANIEM KAŻDE
 ═══════════════════════════════════════════════
-- JSON_ŹRÓDŁOWY_EN → ŹRÓDŁO PRAWDY. Tłumaczysz jego wartości.
+- JSON_ŹRÓDŁOWY_EN → ŹRÓDŁO PRAWDY dla treści i struktury, ale NIE wzorzec
+  polskiej formy językowej. Rozstrzyga, co tekst znaczy, jakie zawiera fakty,
+  relacje, intencje i emocje; nie rozstrzyga polskiej składni, szyku, idiomu,
+  rytmu ani podziału zdań.
 - MAPOWANIA_NPC / MAPOWANIA_SŁÓW_KLUCZOWYCH → WIĄŻĄCE, ponad wszystko poza techniką.
 - TEKST_DE_POMOCNICZY → DE to profesjonalna lokalizacja referencyjna. 
   Używaj jej jako silnej wskazówki dla tonu, rejestru, rytmu, dramaturgii, skrótowości, 
   naturalnego kierunku lokalizacji i realizacji głosu postaci, 
   ale nie pozwól jej zmienić sensu EN, mapowań, nazw, relacji, placeholderów ani struktury.
+  DE podpowiada efekt sceny; ostateczną formę zawsze wybieraj według naturalności
+  i jakości polszczyzny, nigdy według niemieckiej składni lub szyku.
 - KONTEKST_RAG → latarka do zrozumienia sceny. NIE wnoś z niego treści ani nazw.
 - PODSUMOWANIA_CHAINA → ciągłość. NIE są źródłem nazw ani treści do przeniesienia.
 - UŻYCIE REFERENCJI DE → TEKST_DE_POMOCNICZY nie jest drugim źródłem faktów, ale jest silną wskazówką lokalizacyjną. 
@@ -112,8 +128,11 @@ Polski tekst, który:
 ## ZNANE PUŁAPKI — SPRAWDŹ KAŻDĄ ŚWIADOMIE
 ═══════════════════════════════════════════════
 - OSOBY/ZAIMKI: czytaj, czyje to wojska/ziemia/wina. Twój ≠ nasz. cię ≠ mnie.
-- DODAWANIE: skreśl każde słowo, którego nie ma w EN (typowo: „na naszej ziemi",
-  „nieustępliwa", przymiotniki-ozdobniki).
+- DOPISYWANIE TREŚCI: usuń każdy nowy fakt, relację, motywację, emocję lub
+  wzmocnienie tonu, których EN nie uzasadnia (typowo: „na naszej ziemi",
+  „nieustępliwa", przymiotniki-ozdobniki). Nie rozliczaj słów jeden do jednego:
+  naturalne spójniki, partykuły, zmiany konstrukcji i idiomatyczne przeformułowania
+  są dozwolone, jeśli nie zmieniają treści ani efektu.
 - WIERNOŚĆ NAZW: przepisz mapowaną nazwę znak po znaku. Sprawdź apostrof,
   ogonki, wielką literę.
 - REJESTR: pisz jak współczesny, klimatyczny gracz, nie jak XIX-wieczna proza.
@@ -122,7 +141,9 @@ Polski tekst, który:
   (angielski szyk, strona bierna tam, gdzie naturalna jest czynna,
   konstrukcje typu „jest to...", „wydaje się być", nadmiar zaimków
   dzierżawczych: „podnieś swoją broń") — przebuduj je po polsku.
-  Wierność z zasady nr 1 dotyczy SENSU, nie szyku zdania.
+  Swobodnie zmieniaj szyk, składnię, części mowy, stronę, liczbę i granice zdań,
+  jeśli zachowujesz treść, relacje i efekt EN. Wierność dotyczy znaczenia,
+  nie powierzchniowej formy oryginału.
 - CELE: krótkie, funkcjonalne, grywalne — nie literackie zdania.
 
 ═══════════════════════════════════════════════
@@ -210,15 +231,23 @@ Zwróć wyłącznie surowy JSON: bez ogrodzeń, komentarzy i tekstu przed/po.
 ═══════════════════════════════════════════════
 ## KONTROLA PRZED ZWROTEM (cicho)
 ═══════════════════════════════════════════════
-1. Sens EN bez dodatków/opuszczeń/przesunięć
-2. Osoby i zaimki niezmienione (twój≠nasz, cię≠mnie)
-3. Każda mapowana nazwa przepisana znak po znaku
-4. Rodzaj loa/NPC zgodny z metadanymi i spójny w misji
-5. Nazwy bez mapowania zostały po angielsku
-6. Cele krótkie i funkcjonalne; dialogi brzmią jak postać
-7. Brak książkowości/patosu ponad EN
-8. Placeholdery, ID, liczba i kolejność kluczy, puste sekcje — nietknięte
-9. Wynik to czysty, poprawny JSON (bez ```), UTF-8 z polskimi znakami
+1. JAKOŚĆ JĘZYKOWA: każda linia brzmi jak tekst napisany po polsku przez
+   profesjonalnego lokalizatora gry; jest naturalna, idiomatyczna, rytmiczna
+   i wolna od kalk, angielskiego szyku, sztywności oraz bezbarwności.
+2. GŁOS I SCENA: dialogi brzmią jak właściwa postać/rasa i zachowują ton,
+   tempo, napięcie oraz funkcję emocjonalną sceny.
+3. SENS: zachowano informacje, relacje, intencję i stopień pewności EN;
+   niczego istotnego nie dodano ani nie pominięto; zgodność sprawdzona na
+   poziomie znaczenia, nie składni, szyku ani liczby słów.
+4. ROLE I REFERENCJE: nie zmieniono wykonawcy, adresata, osoby ani własności
+   (twój≠nasz, cię≠mnie), choć jawne zaimki mogły zostać naturalnie opuszczone.
+5. Każda mapowana nazwa przepisana znak po znaku.
+6. Rodzaj loa/NPC zgodny z metadanymi i spójny w misji.
+7. Nazwy bez mapowania zostały po angielsku.
+8. Cele są krótkie, jasne i funkcjonalne; rejestr oraz styl odpowiadają typowi pola.
+9. Brak książkowości, archaizmów i patosu ponad EN.
+10. Placeholdery, ID, liczba i kolejność kluczy, puste sekcje — nietknięte.
+11. Wynik to czysty, poprawny JSON (bez ```), UTF-8 z polskimi znakami.
 """
 
 CONST_RULES_EDITOR = """
@@ -231,7 +260,7 @@ Te reguły mają absolutny priorytet. Łam je tylko, jeśli się wzajemnie wyklu
 2. PLACEHOLDERY: {{PLAYER_NAME}}, <name>, <race>, <class>, %s, %d, $n, $g, |c...|r, \\n, \\t, \\\", tagi XML/HTML są nietykalne — zachowaj je dokładnie tak, jak w źródle.
 3. MAPOWANIA: użyj dokładnej formy nazwy z MAPOWANIA_NPC (apostrofy, dywizy, wielkość liter, ogonki). Nie twórz nowych nazw.
 4. RODZAJ GRAMATYCZNY: ustal płeć każdej postaci z MAPOWANIA_NPC (F=kobieta, M=mężczyzna, U=przyjmij męski) i zastosuj zgodne formy. Kwestia gracza → forma męska, rejestr neutralny.
-5. WIERNOŚĆ: oddaj sens, intencję i funkcję emocjonalną EN. Nic nie dodawaj spoza EN, niczego nie usuwaj, nie wzmacniaj tonu ponad źródło.
+5. GRANICE TREŚCI: zachowaj informacje, relacje, intencję, stopień pewności i funkcję emocjonalną EN. Nie dodawaj nowych faktów, nie usuwaj istotnej treści i nie wzmacniaj tonu ponad źródło. EN określa, CO tekst ma przekazać, ale nie narzuca polskiej składni, szyku, konstrukcji gramatycznych ani podziału zdań.
 6. OUTPUT: tylko JSON. Bez komentarzy, bez markdowna, bez ogrodzeń ```, bez tekstu poza JSON. Myśl po cichu.
 
 ═══════════════════════════════════════════════
@@ -248,24 +277,28 @@ Twoje zadanie to PRAWDZIWA REDAKCJA, nie wierne przepisanie draftu:
 
 Granice tej swobody:
 - Swoboda dotyczy brzmienia, nie treści: rzeźbisz to, co JEST w EN — nic nie dopisujesz i nie podnosisz rejestru ponad źródło.
+- EN jest briefem znaczeniowym, nie szablonem językowym. Nie odwzorowuj go zdanie po zdaniu ani element po elemencie. Swobodnie zmieniaj składnię, szyk, konstrukcje gramatyczne i podział zdań, jeśli dzięki temu tekst brzmi lepiej po polsku i zachowuje ten sam sens oraz efekt.
 - Zdanie zostaw bez zmian tylko wtedy, gdy jest jednocześnie wierne EN, naturalne po polsku, rytmiczne, zgodne z głosem postaci i gotowe do publikacji.
 - Przepisz zdanie, jeśli jest kalkowe, sztywne, zbyt dosłowne, płaskie emocjonalnie wobec EN/DE, ma angielski szyk, nienaturalny rytm dialogu, nieidiomatyczny układ albo jest słabsze od możliwej wersji produkcyjnej.
 - Nie przepisuj dla samego przepisania: każda zmiana ma służyć wierności, naturalności, płynności, klimatowi, głosowi postaci, spójności lub poprawności.
 
 ═══════════════════════════════════════════════
-## PRIORYTET REDAKCJI (przy konflikcie wygrywa niższy numer)
+## NADRZĘDNY CEL JAKOŚCIOWY
 ═══════════════════════════════════════════════
-1. Struktura, placeholdery, ID, liczba linii.
-2. Wierność sensowi EN i obowiązkowym mapowaniom.
-3. Spójność terminologii i lore.
-4. Naturalna, płynna polszczyzna na poziomie produkcyjnym.
-5. Głos postaci/rasy i klimat WoW/fantasy.
-6. Poetyckość i podniosłość — tylko gdy wynikają ze źródła.
+Twarde ograniczenia wyznaczają granice dopuszczalnego wyniku, ale nie są konkurencją dla jakości i nie zwalniają z pełnej redakcji. W ich granicach wybierz zawsze najlepszą możliwą wersję polską: naturalną, idiomatyczną, rytmiczną, wyrazistą i gotową do publikacji. Tekst jedynie poprawny znaczeniowo, ale kalkowy, sztywny, bezbarwny albo brzmiący jak tłumaczenie, nie spełnia wymagań.
+
+## PRIORYTETY JAKOŚCIOWE (przy wyborze między dopuszczalnymi wersjami)
+1. Naturalna, płynna i idiomatyczna polszczyzna na poziomie produkcyjnym.
+2. Wiarygodny głos postaci/rasy oraz właściwy rytm, ton i napięcie sceny.
+3. Zachowanie znaczenia, intencji i funkcji emocjonalnej EN — bez kopiowania jego formy językowej.
+4. Spójność terminologii, lore i całego chaina.
+5. Klimat WoW/fantasy bez sztucznego podnoszenia rejestru.
+6. Poetyckość i podniosłość — tylko gdy wynikają ze źródła i pasują do sceny.
 
 ═══════════════════════════════════════════════
 ## ŹRÓDŁA — JAK ICH UŻYWAĆ
 ═══════════════════════════════════════════════
-- EN: źródło prawdy dla sensu I struktury. Każdy konflikt → wygrywa EN.
+- EN: źródło prawdy dla treści i struktury, ale NIE wzorzec polskiej formy językowej. EN rozstrzyga, co tekst znaczy, jakie fakty i relacje zawiera oraz jaki efekt ma wywołać; nie rozstrzyga polskiej składni, szyku, idiomu, rytmu ani podziału zdań.
 - Draft PL: baza do redakcji.
 - DE: profesjonalna referencja TONU, rytmu, napięcia, podziału zdań i tego, jak scena „ma grać" (sucha, ceremonialna, groźna, żartobliwa, gniewna, wojskowa, mistyczna, potoczna, szorstka). Jeśli draft PL jest poprawny, ale brzmi słabiej lub sztywniej niż rozwiązanie sugerowane przez DE — podciągnij PL do tej jakości. DE nigdy nie nadpisuje sensu EN, mapowań, nazw ani struktury; nie kopiuj niemieckiej składni, szyku ani interpunkcji. Jeśli ton DE i głos rasy się rozjeżdżają — wygrywa głos rasy, ale zachowaj funkcję sceny widoczną w DE.
 - RAG: kontekst sceny, relacji, stawki i tonu. Pomaga dobrać brzmienie; nie wnoś z niego żadnych faktów ani nazw do tekstu.
@@ -325,13 +358,13 @@ Liczba i numeracja kluczy oraz puste sekcje muszą odpowiadać JSON_ŹRÓDŁOWY_
 ## KONTROLA KOŃCOWA — wykonaj po cichu, NIE wypisuj jej
 ═══════════════════════════════════════════════
 Zanim zwrócisz JSON, sprawdź po kolei i napraw, co trzeba:
-1. SENS: żadne znaczenie nie odpłynęło względem EN; nic nie dodano, nic nie pominięto; ton nie podniesiony ponad źródło.
-2. MAPOWANIA I ODMIANA: nazwy zgodne z mapowaniem; fleksja zgodna z płcią; żeńskie imię na spółgłoskę nieodmienione; termin wielowyrazowy nieodmieniony w środku.
-3. SPÓJNOŚĆ: ta sama nazwa/fraza brzmi identycznie we WSZYSTKICH polach (cele vs dymki vs treść). Tytuły postaci, nazwy miejsc i terminy lore — bez rozjazdów.
-4. PŁEĆ W GOSSIPACH: w każdej linii z pustym `npc_pl` mówca rozpoznany, formy rodzajowe zgodne; kwestie gracza w formie męskiej.
-5. TERMINY: brak angielskiej pisowni tam, gdzie jest polski odpowiednik; brak archaizmów ponad poziom EN.
-6. TYTUŁ: oddaje obraz/grę słów EN.
-7. JĘZYK: brak literówek, kalk i angielskiego szyku; tekst brzmi jak naturalna kwestia z gry, nie jak draft trzymany kurczowo.
+1. JAKOŚĆ JĘZYKOWA: każda linia brzmi jak tekst napisany po polsku przez profesjonalnego redaktora gry; jest naturalna, idiomatyczna, rytmiczna i wolna od kalk, angielskiego szyku, sztywności oraz bezbarwności. Jeśli istnieje wyraźnie lepsza polska wersja zachowująca treść EN — zastosuj ją.
+2. GŁOS I SCENA: wypowiedzi mają wiarygodny głos postaci/rasy oraz właściwy ton, tempo, napięcie i funkcję emocjonalną.
+3. SENS: zachowano informacje, relacje, intencję i stopień pewności EN; niczego istotnego nie dodano ani nie pominięto; ton nie został podniesiony ponad źródło. Zgodność sprawdzaj na poziomie znaczenia, nie składni ani szyku.
+4. MAPOWANIA I ODMIANA: nazwy zgodne z mapowaniem; fleksja zgodna z płcią; żeńskie imię na spółgłoskę nieodmienione; termin wielowyrazowy nieodmieniony w środku.
+5. SPÓJNOŚĆ: ta sama nazwa/fraza brzmi identycznie we WSZYSTKICH polach (cele vs dymki vs treść). Tytuły postaci, nazwy miejsc i terminy lore — bez rozjazdów.
+6. PŁEĆ W GOSSIPACH: w każdej linii z pustym `npc_pl` mówca rozpoznany, formy rodzajowe zgodne; kwestie gracza w formie męskiej.
+7. TERMINY I TYTUŁ: brak angielskiej pisowni tam, gdzie jest polski odpowiednik; brak archaizmów ponad poziom EN; tytuł oddaje obraz lub grę słów EN.
 8. TECHNICZNE: placeholdery, tagi, escape, ID, wartości techniczne nietknięte; `npc_pl` puste tam, gdzie było puste.
 9. STRUKTURA: wszystkie sekcje obecne (Misje_PL, Dialogi_PL, Podsumowanie_PL, Cele_PL, Treść_PL, Postęp_PL, Zakończenie_PL, Nagrody_PL, Gossipy_Dymki_PL); Dialogi_PL NIE wewnątrz Misje_PL; liczba/kolejność/liczba linii zgodne z EN.
 10. Zwróć wyłącznie czysty JSON wg schematu. Bez tej kontroli, komentarzy i markdowna.
@@ -484,8 +517,8 @@ def zbuduj_prompt_redaktora(
         "prompt_value": prompt_value,
     }
 
-def translator(
-        llm,
+
+def zbuduj_prompt_tlumacza(
         tekst_oryginalny,
         tekst_niemiecki,
         kontekst_rag,
@@ -494,11 +527,8 @@ def translator(
         tekst_npc,
         tekst_slowa_kluczowe,
         obsada_i_glosy=None
-    ) -> QuestContentResult:
-    """
-    Tłumaczy misję na bazie podanych parametrów.
-    """
-
+    ) -> dict[str, Any]:
+    """Składa prompt tłumacza bez wywoływania LLM. Używane przez sync i batch."""
     wejscie = {
         "tekst_oryginalny": tekst_oryginalny,
         "tekst_niemiecki": tekst_lub_placeholder(tekst_niemiecki, "- brak wersji niemieckiej dla tej misji"),
@@ -514,13 +544,47 @@ def translator(
     }
 
     prompt_value = prompt_translator.invoke(wejscie)
+    messages = prompt_value.to_messages()
+    return {
+        "system": messages[0].content,
+        "user": messages[1].content,
+        "prompt_txt": prompt_value.to_string(),
+        "prompt_value": prompt_value,
+    }
+
+def translator(
+        llm,
+        tekst_oryginalny,
+        tekst_niemiecki,
+        kontekst_rag,
+        podsumowania_poprzednich_misji_w_chainie,
+        wytyczne_rasy,
+        tekst_npc,
+        tekst_slowa_kluczowe,
+        obsada_i_glosy=None
+    ) -> QuestContentResult:
+    """
+    Tłumaczy misję na bazie podanych parametrów.
+    """
+
+    prompt = zbuduj_prompt_tlumacza(
+        tekst_oryginalny=tekst_oryginalny,
+        tekst_niemiecki=tekst_niemiecki,
+        kontekst_rag=kontekst_rag,
+        podsumowania_poprzednich_misji_w_chainie=podsumowania_poprzednich_misji_w_chainie,
+        wytyczne_rasy=wytyczne_rasy,
+        tekst_npc=tekst_npc,
+        tekst_slowa_kluczowe=tekst_slowa_kluczowe,
+        obsada_i_glosy=obsada_i_glosy,
+    )
+    prompt_value = prompt["prompt_value"]
     raw_response = llm.invoke(prompt_value)
 
     return {
         "raw": raw_response,
         "parsed": None,
         "parsing_error": None,
-        "prompt_txt": prompt_value.to_string(),
+        "prompt_txt": prompt["prompt_txt"],
     }
 
 

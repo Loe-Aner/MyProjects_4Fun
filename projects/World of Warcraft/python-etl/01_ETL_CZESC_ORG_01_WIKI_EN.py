@@ -28,19 +28,19 @@ kategorie = [
     # "https://warcraft.wiki.gg/wiki/Category:Quests_at_40-80",
     # "https://warcraft.wiki.gg/wiki/Category:Quests_at_50-80"
 
-    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_90",
-    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_80",
-    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_80-83",
-    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_80-90",
-    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_83-88",
-    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_88-90"
+    "https://warcraft.wiki.gg/wiki/Category:Quests_at_90",
+    "https://warcraft.wiki.gg/wiki/Category:Quests_at_80",
+    "https://warcraft.wiki.gg/wiki/Category:Quests_at_80-83",
+    "https://warcraft.wiki.gg/wiki/Category:Quests_at_80-90",
+    "https://warcraft.wiki.gg/wiki/Category:Quests_at_83-88",
+    "https://warcraft.wiki.gg/wiki/Category:Quests_at_88-90"
 
-    "https://warcraft.wiki.gg/wiki/Category:Quests_at_70",
-    "https://warcraft.wiki.gg/wiki/Category:Quests_at_70-73",
-    "https://warcraft.wiki.gg/wiki/Category:Quests_at_70-80",
-    "https://warcraft.wiki.gg/wiki/Category:Quests_at_73-75",
-    "https://warcraft.wiki.gg/wiki/Category:Quests_at_75-78",
-    "https://warcraft.wiki.gg/wiki/Category:Quests_at_78-80",
+    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_70",
+    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_70-73",
+    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_70-80",
+    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_73-75",
+    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_75-78",
+    # "https://warcraft.wiki.gg/wiki/Category:Quests_at_78-80",
     #"https://warcraft.wiki.gg/wiki/Category:Quests_at_60",
     #"https://warcraft.wiki.gg/wiki/Category:Quests_at_68-70",
     #"https://warcraft.wiki.gg/wiki/Category:Quests_at_68-80"
@@ -56,7 +56,7 @@ hashuj_kategorie_i_zapisz_zrodlo(
     )
 
 
-# USUWA MISJE I POWIAZANE REKORDY Z NIA W PRZYPADKU GDY NA WIKI ZOSTANIE WYKRYTA NOWA TRESC DLA TEJ MISJI
+# ARCHIWIZUJE MISJE I POWIAZANE REKORDY Z NIA W PRZYPADKU GDY NA WIKI ZOSTANIE WYKRYTA NOWA TRESC DLA TEJ MISJI
 # USUNIETA MISJA (DOKLADNIEJ JEJ URL) JEST WRZUCANY NA DBO.LINKI_DO_SCRAPOWANIA, BY POBRANO TA TRESC PONOWNIE PRZEZ KODY PONIZEJ
 # NIE SCRAPUJE OD NOWA TYLKO ODCZYTUJE ZAHASHOWANY BODY ZE STRONY
 roznice_hashe_usun_rekordy_z_db(
