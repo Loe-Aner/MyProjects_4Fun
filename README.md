@@ -91,13 +91,5 @@ Tekst źródłowy → Kontekst (NPC/quest/świat) → Słowniki i reguły
 
 **Masz uwagi do kodu, interesujesz się Data/AI albo masz pomysł na projekt związany z grami? Pisz na LinkedIn ☝️**
 
-<sub>
-
-This repository is **not open source** - published for portfolio and educational purposes only.
-Code and materials may not be copied, redistributed or reused without written permission.
-Third-party game content and trademarks belong to their respective owners.
-See [LICENSE.md](./LICENSE.md) and [NOTICE.md](./NOTICE.md).
-
-</sub>
 
 </div>
