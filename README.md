@@ -25,6 +25,7 @@ A ponieważ najlepsze projekty powstają wtedy, kiedy technologia spotyka się z
 ### 🛡️ Specjalizacja
 
 **Imię:** Piotr
+
 **Praca:** Ekspert ds. Raportowania (BI & CRM)
 
 **Główne obszary:**
