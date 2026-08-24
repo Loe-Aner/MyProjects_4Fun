@@ -1,153 +1,283 @@
 <div align="center">
+
 <a href="https://git.io/typing-svg">
-<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=45&duration=3000&pause=1000&color=2196F3&center=true&vCenter=true&width=750&height=70&lines=MÓJ+MAŁY+ŚWIAT;FANTASY+DATA+FORGE" alt="Typing SVG" />
+<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=45&duration=3000&pause=1000&color=2196F3&center=true&vCenter=true&width=850&height=70&lines=MÓJ+MAŁY+ŚWIAT;FANTASY+DATA+FORGE;DATA+%7C+AI+%7C+ENGINEERING" alt="Typing SVG" />
 </a>
+
 </div>
 
-Buduję tutaj rozwiązania **end-to-end**:  
-od architektury bazy danych i zaawansowanego ETL w Pythonie, przez modelowanie, aż po wizualizację.
+Buduję rozwiązania **end-to-end** - od danych i backendu, przez automatyzację oraz logikę biznesową, aż po warstwę analityczną i rozwiązania wykorzystujące **LLM-y i AI**.
 
-Uważam, że najlepsze projekty powstają z pasji. Jako fanatyk RPG i osoba zafascynowana danymi, postanowiłem połączyć te dwa światy. Poniżej znajdziesz nieco więcej info.
+Najbardziej interesuje mnie to, co dzieje się **pod maską**: architektura systemu, przepływ danych, integracje, wydajność, automatyzacja oraz sposób, w jaki poszczególne komponenty współpracują ze sobą jako jedna całość.
+
+A ponieważ najlepsze projekty powstają wtedy, kiedy technologia spotyka się z czymś, co naprawdę nas interesuje - sporą część mojego portfolio stanowią projekty związane z **World of Warcraft i fantasy**.
 
 ---
 
 ## 📜 Karta Postaci: Piotr "Loe'Aner"
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/piotr-postek-616436140/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge\&logo=linkedin)](https://www.linkedin.com/in/piotr-postek-616436140/)
+
 <table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>🛡️ Specjalizacja</h3>
-      <p><b>Imię:</b> Piotr</p>
-      <p><b>Praca:</b> Ekspert ds. Raportowania (BI & CRM)</p>
-      <p><b>Umiejętność Pasywna:</b> <i>"Pod Maską"</i> - naturalna potrzeba zrozumienia technicznej natury danych, a nie tylko ich fasady.</p>
-    </td>
-    <td width="50%" valign="top">
-      <h3>📚 Fascynacja Lore</h3>
-      <p>UWIELBIAM Fantasy:</p>
-      <ul>
-        <li>⚔️ <i>World of Warcraft</i> (Główne Uniwersum)</li>
-        <li>🔨 <i>Warhammer Fantasy</i></li>
-        <li>⚡ <i>Harry Potter</i></li>
-        <li>🐺 <i>Wiedźmin</i></li>
-        <li>🐉 <i>Dragon Age</i></li>
-        <li>💍 <i>Śródziemie</i></li>
-      </ul>
-    </td>
-  </tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🛡️ Specjalizacja
+
+**Imię:** Piotr
+**Praca:** Ekspert ds. Raportowania (BI & CRM)
+
+**Główne obszary:**
+
+* Data & BI Engineering
+* Python / SQL
+* Power BI & modelowanie danych
+* AI Engineering
+* automatyzacja procesów
+* backend i integracje
+
+**Umiejętność pasywna:** *„Pod Maską”*
+Naturalna potrzeba zrozumienia, **dlaczego coś działa**, a nie tylko nauczenia się, jak tego używać.
+
+</td>
+<td width="50%" valign="top">
+
+### 📚 Fascynacja Lore
+
+Fantasy zajmuje zdecydowanie za dużą część mojego mózgu:
+
+* ⚔️ *World of Warcraft*
+* 🔨 *Warhammer Fantasy / 40K*
+* ⚡ *Harry Potter*
+* 🐺 *Wiedźmin*
+* 🐉 *Dragon Age*
+* 💍 *Śródziemie*
+
+</td>
+</tr>
 </table>
 
+---
+
+## 🎯 Aktualny kierunek
+
+Chcę rozwijać się na styku:
+
+**Data Engineering + AI Engineering + Backend + Business Intelligence**
+
+Interesują mnie szczególnie systemy, w których dane nie kończą jako tabela lub dashboard, ale stają się podstawą do dalszego działania:
+
+```text
+Źródła danych
+     ↓
+ETL / ELT
+     ↓
+Model danych / baza
+     ↓
+Backend / API
+     ↓
+Reguły biznesowe
+     ↓
+AI / LLM / automatyzacja
+     ↓
+Aplikacja / BI / użytkownik
+     ↓
+Feedback & dalsze usprawnianie
+```
+
+Nie interesuje mnie budowanie rozwiązań typu *„wrzuć prompt i zobaczmy, co wyjdzie”*.
+Znacznie ciekawsze są dla mnie **kontrolowane, mierzalne i produkcyjne systemy AI**.
+
+---
+
+# 🛠️ Stack Technologiczny
+
+## 💻 Languages & Core
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
+![SQL](https://img.shields.io/badge/SQL-CC2927?style=for-the-badge\&logo=microsoftsqlserver\&logoColor=white)
+![Lua](https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge\&logo=lua\&logoColor=white)
+
+---
+
+## 🛢️ Data Engineering & Databases
+
+![Microsoft SQL Server](https://img.shields.io/badge/Microsoft%20SQL%20Server-CC2927?style=for-the-badge\&logo=microsoftsqlserver\&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge\&logo=mysql\&logoColor=white)
+![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?style=for-the-badge\&logo=duckdb\&logoColor=black)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge\&logo=pandas\&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge\&logo=sqlalchemy\&logoColor=white)
+![REST API](https://img.shields.io/badge/REST_API-FF6C37?style=for-the-badge\&logo=postman\&logoColor=white)
+
+**Praktyka m.in. w:**
+
+* projektowaniu modeli danych,
+* ETL / ELT,
+* przetwarzaniu większych zbiorów danych,
+* integracji wielu źródeł,
+* transformacjach i walidacji danych,
+* budowie pipeline'ów,
+* automatyzacji procesów,
+* pracy z API.
+
+---
+
+## 🤖 AI Engineering & LLM Systems
+
+![AI](https://img.shields.io/badge/AI_Engineering-111111?style=for-the-badge\&logo=openai\&logoColor=white)
+![LLM](https://img.shields.io/badge/LLM-412991?style=for-the-badge\&logo=openai\&logoColor=white)
+
+Rozwijam i wykorzystuję rozwiązania związane z:
+
+* **LLM APIs** i integracją modeli z aplikacjami,
+* wieloetapowymi pipeline'ami AI,
+* **Structured Outputs** i wymuszaniem określonej struktury odpowiedzi,
+* prompt engineeringiem i projektowaniem kontekstu,
+* automatyczną oceną jakości generowanych wyników,
+* podejściem **LLM-as-a-Judge**,
+* systemami typu **Translator → Editor → Judge**,
+* agentami AI i workflowami narzędziowymi,
+* RAG i pracą z zewnętrzną wiedzą,
+* MCP (*Model Context Protocol*),
+* projektowaniem systemów **human-in-the-loop**,
+* kontrolą jakości, kosztu i deterministyczności systemów opartych o modele generatywne.
+
+Szczególnie interesuje mnie granica pomiędzy klasycznym software engineeringiem a AI:
+
+> **co powinien policzyć kod, co powinien zrobić model, a czego modelowi w ogóle nie wolno zgadywać.**
+
+---
+
+## 📊 Business Intelligence & Analytics
+
+![Power BI](https://img.shields.io/badge/Power_BI-F2C811?style=for-the-badge\&logo=powerbi\&logoColor=black)
+![DAX](https://img.shields.io/badge/DAX-F2C811?style=for-the-badge\&logo=powerbi\&logoColor=black)
+![Microsoft Excel](https://img.shields.io/badge/Microsoft_Excel-217346?style=for-the-badge\&logo=microsoftexcel\&logoColor=white)
+
+Obszary, z którymi pracuję:
+
+* modelowanie danych,
+* DAX,
+* projektowanie KPI,
+* dashboardy zarządcze,
+* storytelling danych,
+* analiza biznesowa,
+* wizualizacja danych,
+* projektowanie raportów end-to-end.
+
+---
+
+## ⚙️ Tools
+
+![VS Code](https://img.shields.io/badge/Visual_Studio_Code-007ACC?style=for-the-badge\&logo=visualstudiocode\&logoColor=white)
+![SSMS](https://img.shields.io/badge/SSMS-1135A5?style=for-the-badge\&logo=microsoftsqlserver\&logoColor=white)
+![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge\&logo=jupyter\&logoColor=white)
+![Git](https://img.shields.io/badge/GIT-F05032?style=for-the-badge\&logo=git\&logoColor=white)
+
+---
+
+# ⚔️ WoWPoPolsku 2.0
+
+Największy z moich prywatnych projektów, gdzie na discordzie mamy setki ludzi, a sam addon pobieraja tysiące graczy.
+
+Celem jest stworzenie nowoczesnego ekosystemu umożliwiającego przygotowanie wysokiej jakości **polskiej wersji językowej World of Warcraft**.
+
+Projekt rozpoczął się znacznie skromniej - od bazy danych, skryptów ETL i eksperymentów z tłumaczeniem (znajdziesz to właśnie w tym repo). Z czasem został przebudowany praktycznie od podstaw i rozrósł się do większego systemu obejmującego **dane, backend, aplikację webową, AI, automatyzację oraz integrację z grą**.
+
+> **Uwaga:** kod znajdujący się w tym publicznym repozytorium przedstawia wcześniejsze etapy projektu oraz wybrane eksperymenty.
+> Aktualna wersja WoWPoPolsku 2.0 jest rozwijana w prywatnym repozytorium.
 <div align="center">
-  <p>
-    <b>⚔️ Aktualna Misja:</b><br>
-    Dostarczenie polskiej społeczności funkcjonalnych rozwiązań (Addony, Bazy Danych, może WikiPL).
-  </p>
-  
-  <p>
-    🎯 <b>Cel Priorytetowy:</b> Addon tłumaczący World of Warcraft.<br>
-    <i><b>Warunek sukcesu</b>: Zburzenie bariery językowej i otwarcie bram tego uniwersum dla graczy, których wcześniej odstraszał brak polskiej wersji. Tłumaczenie MUSI być jakościowe. Technicznie powinno to wyglądać efektywnie i nowocześnie.</i>
-  </p>
 
-  <p>
-    🤫 <b>Misja Poboczna:</b><br>
-    <b>Cel</b>: Wypuszczenie na rynek autorskiego świata w formacie wykraczającym poza standardową książkę.<br>
-    <b>Kiedy:</b> Nie chciałbym stworzyć prostego gniota. Od ponad roku zbieram sukcesywnie pomysły na historie i świat, ale jeszcze daleka droga. Myślę, że za pisanie wziąłbym się za kilka lat, na razie mocno mnie ciągnie do projektów jw.
-  </p>
-</div>
+### 🌐 WoWPoPolsku 2.0 - platforma projektu
 
----
+<a href="https://pl.wowtranslateproject.org/">
+  <img src="https://img.shields.io/badge/⚔️_ODWIEDŹ_PLATFORMĘ_WoWPoPolsku_2.0-7B2CBF?style=for-the-badge" alt="WoWPoPolsku 2.0" />
+</a>
 
-## 🛠️ Stack Technologiczny
-
-### 💻 Języki & Core
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![SQL](https://img.shields.io/badge/SQL-CC2927?style=for-the-badge&logo=sql&logoColor=white)
-![Lua](https://img.shields.io/badge/Lua-2C2D72?style=for-the-badge&logo=lua&logoColor=white)
-
-### 🛢️ Data Engineering & Bazy Danych
-![Microsoft SQL Server](https://img.shields.io/badge/Microsoft%20SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)
-![DuckDB](https://img.shields.io/badge/DuckDB-FFF000?style=for-the-badge&logo=duckdb&logoColor=black)
-![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
-![BeautifulSoup](https://img.shields.io/badge/BeautifulSoup-4E757E?style=for-the-badge&logo=python&logoColor=white)
-![REST API](https://img.shields.io/badge/REST%20API-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
-
-### 📊 Business Intelligence & Analytics
-![Power BI](https://img.shields.io/badge/Power_BI-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
-![DAX](https://img.shields.io/badge/DAX-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)
-![Microsoft Excel](https://img.shields.io/badge/Microsoft_Excel-217346?style=for-the-badge&logo=microsoft-excel&logoColor=white)
-
-### ⚙️ Narzędzia & IDE
-![VS Code](https://img.shields.io/badge/Visual_Studio_Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)
-![SSMS](https://img.shields.io/badge/SSMS-1135A5?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)
-![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
-![Git](https://img.shields.io/badge/GIT-F05032?style=for-the-badge&logo=git&logoColor=white)
-
----
-
-## 🏗️ Projekty Data Engineering i Automatyzacja
-
-> *Tutaj dzieje się magia "pod maską". Skrypty, automatyzacja, bazy danych.*
-
-### ⚔️ World of Warcraft `Work in Progress`
-Zaawansowany projekt mający na celu stworzenie polskiego ekosystemu dla graczy WoW'a.
-
-- ⚙️ **Technologia:** `Python` `SQL Server` `Lua`
-- 📂 **Lokalizacja:** `projects/World of Warcraft/`
-
-#### 🔄 Workflow i architektura rozwiązania:
-1. ![Done](https://img.shields.io/badge/DONE-2ea44f?style=flat-square) **Baza danych:** Projekt relacyjnej struktury danych.
-2. ![Done](https://img.shields.io/badge/DONE-2ea44f?style=flat-square) **ETL:** Zeskrapowanie danych (różne źródła), czyszczenie, transformacja i zapis do Azure SQL Database.
-3. ![Done](https://img.shields.io/badge/DONE-2ea44f?style=flat-square) **Mapowania:** Słowniki i mapowanie nazw własnych w celu zachowania pełnej spójności ze światem gry. Plików roboczych nie publikuję.
-4. ![Done](https://img.shields.io/badge/DONE-2ea44f?style=flat-square) **Wstępny przegląd procesu:** Przeszedłem przez procesy, usprawniłem to co mi się mocno rzuciło w oczy. Final review będzie na końcu.
-5. ![In progress](https://img.shields.io/badge/IN%20PROGRESS-007ec6?style=flat-square) **Tłumaczenie i redakcja:** Trwa proces generowania tłumaczeń oraz redagowania tekstów.
-6. ![In progress](https://img.shields.io/badge/IN%20PROGRESS-007ec6?style=flat-square) **Implementacja logiki i zatwierdzanie:** Ręczna weryfikacja (nadawanie statusu `3_ZATWIERDZONO` po mojej stronie, czytam dosłownie każdy tekst) oraz implementacja składni dla Lua. Obsługa zmiennych dynamicznych, aby tekst reagował na kontekst w grze.
-7. ![In progress](https://img.shields.io/badge/IN%20PROGRESS-007ec6?style=flat-square) **Integracja z grą (Addon):** Rozwój addonu w Lua, który "w locie" podmienia angielskie teksty na polskie w interfejsie gry.
-8. ![Up Next](https://img.shields.io/badge/UP%20NEXT-efefef?style=flat-square) **Wstępny przegląd rozwiązania addonowego:** Przejście przez kod i logikę addonu oraz ewentualne korekty pod kątem wydajności i zgodności z dobrymi praktykami.
-9. ![Up Next](https://img.shields.io/badge/UP%20NEXT-efefef?style=flat-square) **Raportowanie BI:** Przygotowanie raportów pokazujących status tłumaczeń oraz kondycję bazy danych w Power BI.
-10. ![Up Next](https://img.shields.io/badge/UP%20NEXT-efefef?style=flat-square) **Przegląd końcowy:** Planowane przejście przez wszystkie procesy po przetłumaczeniu kilku dodatków, tak aby ocenić całość na większej próbce materiału.
-11. ![Planned](https://img.shields.io/badge/PLANNED-lightgrey?style=flat-square) **Automatyzacja chmurowa (Fabric/Azure):** Migracja lokalnych skryptów do chmury (aktualnie jest tam tylko baza danych). **Cel:** pełna automatyzacja procesu tłumaczenia (nowy patch -> uruchamianie kolejnych skryptów) oraz udostępnienie raportów Power BI ze statusami.
-
-### 🔮 Przyszłe R&D: Lord of the Rings Online (LOTRO)
-- **Status:** `NIE ZACZĘTO`
-- **Wyzwanie:** Rozgryzienie API, formatów danych i stworzenie własnego potoku ETL dla klasycznego MMO w świecie Tolkiena.
-
----
-
-## 📊 Dashboards & Business Intelligence
-
-> *Rozwiązania analityczne nastawione na odpowiedź na konkretne pytania.*
-
-| Projekt | Opis | Tech |
-| :--- | :--- | :--- |
-| **💰 Fundusze Inwestycyjne** | Analiza rentowności i ryzyka. | `Power BI` `Python` |
-| **⚽ Premier League** | Analiza statystyczna Top 6 klubów. | `Power BI` |
-| **📈 Sales OnePager** | Syntetyczny raport sprzedaży typu "Executive Summary". | `Power BI` `KPI` |
-
----
-
-## 🧩 Code Challenges & Nauka
-
-Tutaj eksperymentuję na platformach e-learningowych np. DataLemur, HackerRank, Codewars.
-- **Python:** Algorytmy, struktury danych.
-- **SQL:** Rozwiązania zadań.
-- **LUA:** Nauka pod projekty.
 <br>
 
-### 📫 Kontakt
-Masz uwagi do kodu lub pomysł na wspólny projekt z gier?  
-Śmiało uderzaj na LinkedIn (link na górze) lub na discordzie (link w moim profilu). 😊
+<sub>Platforma redakcyjna projektu polskiej wersji World of Warcraft</sub>
 
+</div>
+
+## 🏗️ Obecna architektura projektu
+
+System obejmuje m.in.:
+
+### 🗄️ Warstwa danych
+
+* relacyjną bazę danych,
+* dane pochodzące z wielu źródeł związanych z World of Warcraft,
+* procesy ETL i transformacji,
+* słowniki terminologiczne,
+* mapowania nazw własnych,
+* metadane NPC, questów, dialogów i świata gry,
+* mechanizmy kontroli spójności danych.
+
+### 🤖 Pipeline AI
+
+Modele językowe wspierają proces przygotowania polskiej wersji tekstów.
+
+Pipeline nie opiera się na pojedynczym zapytaniu do LLM.
+
+Przykładowy przepływ:
+
+```text
+Tekst źródłowy
+      ↓
+Kontekst świata / NPC / quest
+      ↓
+Słowniki i reguły terminologiczne
+      ↓
+Translator LLM
+      ↓
+Editor LLM
+      ↓
+Walidacja
+      ↓
+Ocena jakości / Judge
+      ↓
+Redakcja człowieka
+      ↓
+Akceptacja
+      ↓
+Publikacja
+```
+
+AI pełni tutaj rolę **narzędzia wspierającego proces**, a nie autonomicznego źródła prawdy.
+
+Ostateczna jakość tekstów jest kontrolowana przez człowieka.
 
 ---
 
-## License and Usage
+# 📊 Dashboards & Business Intelligence
+
+Wybrane projekty analityczne nastawione na odpowiedź na konkretne pytania biznesowe.
+
+| Projekt                      | Opis                                                      | Tech                   |
+| :--------------------------- | :-------------------------------------------------------- | :--------------------- |
+| **💰 Fundusze Inwestycyjne** | Analiza rentowności i ryzyka.                             | `Power BI` `Python`    |
+| **⚽ Premier League**         | Analiza statystyczna klubów Premier League.               | `Power BI`             |
+| **📈 Sales OnePager**        | Syntetyczny dashboard sprzedażowy typu Executive Summary. | `Power BI` `DAX` `KPI` |
+
+---
+
+## 📫 Kontakt
+
+Jeżeli masz uwagi do kodu, interesujesz się Data / AI albo masz pomysł na projekt związany z grami:
+
+**LinkedIn:** link znajduje się na górze profilu.
+
+---
+
+# License and Usage
 
 This repository is **not open source**.
 
-It is published publicly for **portfolio and presentation purposes only**.
-Unless explicitly stated otherwise, all contents are proprietary and protected.
+It is published publicly for **portfolio, educational and presentation purposes only**.
 
-You may view the repository and reference it by link, but you may not reuse, copy, adapt, redistribute, monetize, or incorporate any part of it into another project, addon, service, subscription, or product without prior written permission.
+Unless explicitly stated otherwise, the original code, architecture, documentation and other original materials contained in this repository may not be copied, adapted, redistributed, monetized or incorporated into another project, addon, service or product without prior written permission.
+
+Some projects contained in this repository interact with third-party games, APIs, datasets or intellectual property. All trademarks, game content and other third-party intellectual property remain the property of their respective owners.
 
 Please see [LICENSE.md](./LICENSE.md) and [NOTICE.md](./NOTICE.md) for full terms.
